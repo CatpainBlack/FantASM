@@ -7,7 +7,7 @@
 ## Commandline options
 
 * `--verbose` enable verbose output
-* `--help display` command line help
+* `--help` display command line help
 
 ## Overview
 
@@ -17,7 +17,7 @@ The assembler supports all Z80 opcodes and most undocumented ones, except for un
 
 ## Building
 
-`curgo build` should be sufficient, currently builds with rust 1.35.0 - 1.37.0
+`curgo build --release` currently builds with rust >= 1.35.0
 
 ## ToDo
 
