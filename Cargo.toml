@@ -1,0 +1,12 @@
+[package]
+name = "fantasm"
+version = "0.7.0"
+authors = ["Guy Black <captainblack@zx-spectrum.org.uk>"]
+edition = "2018"
+
+[dependencies]
+argparse = "0.2.2"
+colour = "0.3.0"
+strum = "0.15.0"
+strum_macros = "0.15.0"
+regex = "1"
