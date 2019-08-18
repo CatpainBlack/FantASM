@@ -1,3 +1,4 @@
+cargo build --release
 rm -f fantasm.bin sjasmplus.bin
 for i in *.asm ; do
   printf "%s\t ... " "$i"
