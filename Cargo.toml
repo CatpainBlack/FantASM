@@ -10,3 +10,9 @@ colour = "0.3.0"
 strum = "0.15.0"
 strum_macros = "0.15.0"
 regex = "1"
+
+[profile.release]
+opt-level = 3       # Optimize for speed.
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations.
+panic = 'abort'     # Abort on panic
