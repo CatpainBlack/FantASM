@@ -13,9 +13,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e89e9c37-016b-4126-afa2-22b29b9596c7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/include.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/include/include.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
