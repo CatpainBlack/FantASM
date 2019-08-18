@@ -1,4 +1,8 @@
-rm -f test.bin sjasm.bin
-cargo run --release -- all_opcodes.asm test.bin
-sjasmplus all_opcodes.asm --raw=sjasm.bin
-diff test.bin sjasm.bin
+rm -f fantasm.bin sjasmplus.bin
+for i in *.asm ; do
+  printf "%s\t ... " "$i"
+  cargo run --quiet --release -- "$i" fantasm.bin &&
+  sjasmplus --nologo --msg=none "$i" --raw=sjasmplus.bin &&
+  diff fantasm.bin sjasmplus.bin || printf "Failed :(" && printf "Passed :)\n"
+done
+rm -f fantasm.bin sjasmplus.bin

@@ -2,5 +2,5 @@
 **/*.rs.bk
 /Cargo.lock
 /*.bin
-/tests/test.bin
-/tests/sjasm.bin
+/tests/*.bin
+
