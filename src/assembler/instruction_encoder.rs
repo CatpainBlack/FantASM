@@ -84,7 +84,7 @@ impl InstructionEncoder for Assembler {
         let rhs = self.next_token()?;
 
 
-        match (lhs.clone(), rhs.clone()) {
+        match (&lhs, &rhs) {
             (RegisterPair(Hl), RegisterPair(reg)) => match a {
                 AluOp::Add => return Ok(vec![Self::xpqz(0, reg.rp1()?, 1, 1)]),
                 AluOp::Adc => return Ok(vec![0xED, Self::xpqz(1, reg.rp1()?, 1, 2)]),
@@ -118,13 +118,14 @@ impl InstructionEncoder for Assembler {
     }
 
     fn call_jp(&mut self, q: u8, z: u8) -> Result<Vec<u8>, Error> {
-        if let Condition(c) = self.tokens.last().unwrap_or(&Token::None).clone()
+        if let Condition(c) = *self.tokens.last().unwrap_or(&Token::None)
         {
             self.tokens.pop();
             self.expect_token(Delimiter(Comma))?;
             if let Some(addr) = self.get_address(1)? {
                 self.tokens.pop();
-                return Ok(vec![Self::xyz(3, c as u8, z - 1), addr.lo(), addr.hi()]);
+                let y = c as u8;
+                return Ok(vec![Self::xyz(3, y, z - 1), addr.lo(), addr.hi()]);
             }
         }
         if let Some(addr) = self.get_address(1)? {
@@ -137,7 +138,8 @@ impl InstructionEncoder for Assembler {
     fn jp(&mut self) -> Result<Vec<u8>, Error> {
         if let Some(bytes) = match self.tokens.last() {
             Some(IndexIndirect(i, _)) => {
-                Some(vec![0xDD | (i.clone() as u8 - 4) << 5, Self::xpqz(3, 2, 1, 1)])
+                let ixy = (*i as u8) - 4 << 5;
+                Some(vec![0xDD | ixy, Self::xpqz(3, 2, 1, 1)])
             }
             Some(Register(_HL_)) => {
                 Some(vec![Self::xpqz(3, 2, 1, 1)])
@@ -195,9 +197,9 @@ impl InstructionEncoder for Assembler {
     }
 
     fn io_op(&mut self, y: u8) -> Result<Vec<u8>, Error> {
-        let lhs = self.next_token()?.clone();
+        let lhs = &self.next_token()?;
 
-        if !self.next_token_is(&Delimiter(Comma)) && lhs == RegisterIndirect(RegPairInd::C) {
+        if !self.next_token_is(&Delimiter(Comma)) && lhs == &RegisterIndirect(RegPairInd::C) {
             if y == 3 {
                 return Ok(vec![0xED, 0x70]);
             } else {
@@ -205,21 +207,24 @@ impl InstructionEncoder for Assembler {
             }
         }
         self.expect_token(Delimiter(Comma))?;
-        let rhs = self.next_token()?;
+        let rhs = &self.next_token()?;
 
-        match (lhs.clone(), rhs.clone(), y) {
+        match (&lhs, &rhs, &y) {
             //In
             (Register(Reg::A), AddressIndirect(_), 3) => if let Some(addr) = rhs.number_to_u8() {
                 return Ok(vec![Self::xyz(3, y, 3), addr]);
             }
-            (Register(r), RegisterIndirect(RegPairInd::C), 3) => return Ok(vec![0xED, Self::xyz(1, r as u8, 0)]),
+            (Register(r), RegisterIndirect(RegPairInd::C), 3) => {
+                let yy = r.clone() as u8;
+                return Ok(vec![0xED, Self::xyz(1, yy, 0)]);
+            }
 
             //Out
             (AddressIndirect(_), Register(Reg::A), 2) => if let Some(addr) = lhs.number_to_u8() {
                 return Ok(vec![Self::xyz(3, y, 3), addr]);
             }
             (RegisterIndirect(RegPairInd::C), Number(0), 2) => return Ok(vec![0xED, 0x71]),
-            (RegisterIndirect(RegPairInd::C), Register(r), 2) => return Ok(vec![0xED, Self::xyz(1, r as u8, 1)]),
+            (RegisterIndirect(RegPairInd::C), Register(r), 2) => return Ok(vec![0xED, Self::xyz(1, r.clone() as u8, 1)]),
             _ => {}
         }
 
@@ -227,10 +232,10 @@ impl InstructionEncoder for Assembler {
     }
 
     fn jr(&mut self) -> Result<Vec<u8>, Error> {
-        let token = if let Some(t) = self.tokens.last() { t.clone() } else { Token::EndOfFile };
+        let token = self.tokens.last().unwrap_or(&Token::EndOfFile).clone();
         match token {
             Number(_) | Label(_) => Ok(vec![Self::xyz(0, 3, 0), self.relative()?]),
-            Condition(c) => match c {
+            Condition(c) => match &c {
                 Cnd::Z | Cnd::C | Cnd::Nz | Cnd::NC => {
                     self.next_token()?;
                     self.expect_token(Delimiter(Comma))?;
@@ -350,10 +355,8 @@ impl InstructionEncoder for Assembler {
 
     fn load_r(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
         let mut encoded: Vec<u8> = vec![];
-        //let mut instr_size = 1;
         if let Some(p) = dst.is_index_prefix().or_else(|| src.is_index_prefix()).or(None) {
             encoded.push(p);
-//            instr_size += 1;
         }
 
         match (dst, src) {

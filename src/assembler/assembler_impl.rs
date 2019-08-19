@@ -57,7 +57,7 @@ impl Assembler {
         reader.delimiters(",").operators("()*/+-<>=^&|");
         self.tokens.clear();
         loop {
-            let tokens = reader.read_line()?;
+            let tokens = &mut reader.read_line()?;
             self.total_lines += 1;
             match tokens.first() {
                 Some(Token::EndOfFile) => break,
@@ -95,11 +95,11 @@ impl Assembler {
     }
 
     fn get_label_or_constant_value(&mut self, name: &str) -> Result<isize, Error> {
-        if let Some(address) = self.labels.get(name) {
-            return Ok(address.clone());
+        if let Some(&address) = self.labels.get(name) {
+            return Ok(address);
         }
-        if let Some(address) = self.constants.get(name) {
-            return Ok(address.clone());
+        if let Some(&address) = self.constants.get(name) {
+            return Ok(address);
         }
         Err(self.error(ErrorType::LabelNotFound))
     }
@@ -110,7 +110,7 @@ impl Assembler {
     }
 
     fn cur_line(&self) -> isize {
-        self.line_number.last().unwrap_or(&0isize).clone()
+        *self.line_number.last().unwrap_or(&0isize)
     }
 
     pub fn warn(&mut self, t: ErrorType) {
@@ -127,7 +127,7 @@ impl Assembler {
 
     pub fn error(&mut self, t: ErrorType) -> Error {
         let mut e = Error {
-            line_no: self.line_number.last().unwrap().clone(),
+            line_no: *self.line_number.last().unwrap(),
             message: t.to_string(),
             level: ErrorLevel::Fatal,
             file_name: "".to_string(),
@@ -153,26 +153,27 @@ impl Assembler {
 
     pub(crate) fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
         let mut addr = 0;
-        let label_name = name.replace(":", "").to_string();
+        let label_name = &*name.replace(":", "");
 
-        if let Some(a) = self.constants.get(label_name.as_str()) {
-            addr = a.clone() as u16;
-        } else if let Some(a) = self.labels.get(label_name.as_str()) {
-            addr = a.clone() as u16;
+        if let Some(a) = self.constants.get(label_name) {
+            addr = *a as u16;
+        } else if let Some(a) = self.labels.get(label_name) {
+            addr = *a as u16;
         } else {
-            self.forward_references.push(((self.current_pc + pc_offset) as u16, label_name, relative));
+            self.forward_references.push(((self.current_pc + pc_offset) as u16, label_name.to_string(), relative));
         }
         return addr;
     }
 
     pub fn get_address(&mut self, pc_offset: isize) -> Result<Option<u16>, Error> {
-        let addr = match self.tokens.clone().last() {
-            Some(Label(s)) => self.try_resolve_label(s.as_str(), pc_offset, false),
-            Some(Number(n)) => if (0isize..65536).contains(&n) {
-                n.clone() as u16
+        let t = self.tokens.last().unwrap_or(&Token::None).clone();
+        let addr = match t {
+            Label(s) => self.try_resolve_label(&s, pc_offset, false),
+            Number(n) => if (0isize..65536).contains(&n) {
+                n as u16
             } else {
                 self.warn(ErrorType::AddressTruncated);
-                n.clone() as u16
+                n as u16
             }
             _ => 0
         };
@@ -323,10 +324,10 @@ impl Assembler {
         Ok(())
     }
 
-    pub fn translate(&mut self, tokens: Vec<Token>) -> Result<(), Error> {
+    pub fn translate(&mut self, tokens: &mut Vec<Token>) -> Result<(), Error> {
         let len = self.line_number.len() - 1;
         self.line_number[len] += 1;
-        self.tokens = tokens.clone();
+        self.tokens = tokens.to_owned();
         self.tokens.reverse();
         while !self.tokens.is_empty() {
             if let Some(tok) = self.tokens.pop() {
