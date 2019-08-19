@@ -12,7 +12,11 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e89e9c37-016b-4126-afa2-22b29b9596c7" name="Default Changelist" comment="" />
+    <list default="true" id="e89e9c37-016b-4126-afa2-22b29b9596c7" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/load_sp.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/load_sp.asm" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +62,7 @@
   <component name="RunManager" selected="Cargo Command.Run (Debug)">
     <configuration name="Run (Debug)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- tests/all_opcodes.asm test.bin --verbose" />
+      <option name="command" value="run -- tests/load_sp.asm test.bin --verbose" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -78,13 +82,34 @@
       <envs />
       <method v="2" />
     </configuration>
+    <configuration name="Unittests in tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="fantasm" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Cargo Command.Run (Release)" />
       <item itemvalue="Cargo Command.Run (Debug)" />
+      <item itemvalue="Python tests.Unittests in tests" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Unittests in tests" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
-    <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+    <option name="explicitPathToStdlib" value="C:\Users\guy.black\msys64\mingw64\lib\rustlib\src\rust\src" />
+    <option name="toolchainHomeDirectory" value="$PROJECT_DIR$/../../../../mingw64/bin" />
     <option name="version" value="2" />
   </component>
   <component name="SvnConfiguration">
@@ -100,6 +125,7 @@
       <workItem from="1566124070121" duration="1742000" />
       <workItem from="1566125948463" duration="124000" />
       <workItem from="1566128074683" duration="727000" />
+      <workItem from="1566201602533" duration="4201000" />
     </task>
     <task id="LOCAL-00001" summary="Fixed call/jp cc,label issue">
       <created>1566125511858</created>
@@ -122,7 +148,14 @@
       <option name="project" value="LOCAL" />
       <updated>1566129050323</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Fixed instructions targeting SP">
+      <created>1566205785418</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1566205785419</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -142,10 +175,13 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="Fixed call/jp cc,label issue" />
     <MESSAGE value="CLion workspace settings" />
     <MESSAGE value="Fixed test script" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed test script" />
+    <MESSAGE value="Fixed instructions targeting SP" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed instructions targeting SP" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -154,6 +190,21 @@
           <url>file://$PROJECT_DIR$/src/assembler/instruction_encoder.rs</url>
           <line>120</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/assembler/instruction_encoder.rs</url>
+          <line>413</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/assembler/assembler_impl.rs</url>
+          <line>72</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/assembler/assembler_impl.rs</url>
+          <line>66</line>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -151,7 +151,7 @@ impl Assembler {
         }
     }
 
-    fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
+    pub(crate) fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
         let mut addr = 0;
         let label_name = name.replace(":", "").to_string();
 
@@ -310,9 +310,6 @@ impl Assembler {
     }
 
     fn handle_label(&mut self, l: &str) -> Result<(), Error> {
-        if self.tokens.is_empty() {
-            self.add_label(l.to_string())?;
-        }
         if self.next_token_is(&Operator(Equals)) {
             self.tokens.pop();
             match self.expr.parse(&mut self.tokens, &mut self.constants, &mut self.labels) {
@@ -320,6 +317,8 @@ impl Assembler {
                 Ok(None) => return Err(self.error(ErrorType::SyntaxError)),
                 Err(e) => return Err(self.error(e))
             };
+        } else {
+            self.add_label(l.to_string())?
         }
         Ok(())
     }
