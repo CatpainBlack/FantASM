@@ -5,6 +5,7 @@ use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Cnd, Op, Reg, RegPair, RegPairInd, Token};
 use crate::assembler::tokens::Op::{LParens, RParens};
 use crate::assembler::tokens::Token::{AddressIndirect, Condition, IndexIndirect, Label, LabelIndirect, Number, Operator, Register, RegisterIndirect, RegisterPair};
+use crate::assembler::error_impl::ErrorType;
 
 impl<R> TokenReader<R> where R: BufRead {
     pub fn new(reader: R) -> TokenReader<R> {
@@ -158,7 +159,7 @@ impl<R> TokenReader<R> where R: BufRead {
                         self.handle_parentheses(s, pos + 1)?;
                         continue;
                     } else {
-                        return Err(Error::fatal("Closing parentheses without opening", self.line_number));
+                        return Err(Error::fatal(&ErrorType::UnexpectedClose.to_string(), self.line_number));
                     }
                 }
                 _ => {}
@@ -167,8 +168,8 @@ impl<R> TokenReader<R> where R: BufRead {
             pos += 1;
         }
         if !parens.is_empty() {
-            return Err(Error::fatal("Missing closing parentheses", self.line_number));
+            return Err(Error::fatal(&ErrorType::UnclosedParentheses.to_string(), self.line_number));
         }
-        Ok(self.tokens.clone())
+        Ok(self.tokens.to_owned())
     }
 }

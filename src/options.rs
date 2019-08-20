@@ -9,6 +9,8 @@ pub struct Options {
     pub output: String,
     pub z80n: bool,
     pub verbose: bool,
+    pub debug: bool,
+    pub nologo: bool,
 }
 
 impl Options {
@@ -28,6 +30,12 @@ impl Options {
 
             parser.refer(&mut options.z80n)
                 .add_option(&["--z80n"], StoreTrue, "Enable Z80n (ZX Next) cpu extensions");
+
+            parser.refer(&mut options.nologo)
+                .add_option(&["-n", "--nologo"], StoreTrue, "Do no display the program name and version");
+
+            parser.refer(&mut options.debug)
+                .add_option(&["--debug"], StoreTrue, "Enable assembler information dump");
 
             parser.refer(&mut options.verbose)
                 .add_option(&["-v", "--verbose"], StoreTrue, "Enable verbose output");

@@ -1,8 +1,8 @@
 cargo build --release
 rm -f fantasm.bin sjasmplus.bin
-for i in z80*.asm ; do
+for i in *.asm ; do
   printf "%s\t ... " "$i"
-  cargo run --quiet --release -- "$i" --z80n fantasm.bin &&
+  cargo run --quiet --release -- "$i" --z80n --nologo fantasm.bin &&
   sjasmplus --zxnext --nologo --msg=none "$i" --raw=sjasmplus.bin &&
   diff fantasm.bin sjasmplus.bin && printf "Passed :)\n"
 done

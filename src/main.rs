@@ -12,11 +12,10 @@ mod assembler;
 fn main() -> Result<(), Error> {
     let options = Options::parse()?;
 
-    if options.verbose {
-        white_ln!("FantASM 0.7.0 - (C)2019 Captain Black");
+    if !options.nologo {
+        white_ln!("FantASM 0.7.1 - (C)2019 Captain Black");
     }
 
-    let now = Instant::now();
 
     let mut assembler = Assembler::new();
     if options.verbose {
@@ -27,6 +26,7 @@ fn main() -> Result<(), Error> {
         assembler.enable_z80n();
     }
 
+    let now = Instant::now();
     match assembler.assemble(options.source.as_str()) {
         Ok(_) => assembler.save_raw(options.output.as_str())?,
         Err(e) => {
@@ -36,7 +36,11 @@ fn main() -> Result<(), Error> {
 
     if options.verbose {
         dark_yellow_ln!("Assembly complete [{}s]", (now.elapsed().as_millis() as f64)/1000f64);
+    }
+
+    if options.debug {
         assembler.dump();
     }
+
     Ok(())
 }

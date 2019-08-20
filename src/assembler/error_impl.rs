@@ -25,6 +25,8 @@ pub enum ErrorType {
     BadOperator,
     DivideByZero,
     Z80NDisabled,
+    UnexpectedClose,
+    UnclosedParentheses,
 }
 
 impl ToString for ErrorType {
@@ -46,7 +48,9 @@ impl ToString for ErrorType {
             ErrorType::BadOperator => String::from("Bad operator in expression"),
             ErrorType::DivideByZero => String::from("Expression resulted in a divide by zero"),
             ErrorType::Z80NDisabled => String::from("Z80n extended instructions are not enables"),
-            ErrorType::ByteTrunctated => String::from("Integer has been truncated to 8 bits")
+            ErrorType::ByteTrunctated => String::from("Integer has been truncated to 8 bits"),
+            ErrorType::UnexpectedClose => String::from("Unexpected closing parentheses"),
+            ErrorType::UnclosedParentheses => String::from("Unclosed parentheses"),
         }
     }
 }
