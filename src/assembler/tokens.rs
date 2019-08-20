@@ -226,6 +226,24 @@ pub enum OpCode {
     Srl,
     Sub,
     Xor,
+
+    // Z80n
+    Ldix,
+    Ldws,
+    Ldirx,
+    Lddx,
+    Lddrx,
+    Ldpirx,
+    Outinb,
+    Mul,
+    Swapnib,
+    Mirror,
+    Nextreg,
+    Pixeldn,
+    Pixelad,
+    Setae,
+    Test
+
 }
 
 #[derive(Debug, Clone, PartialEq)]

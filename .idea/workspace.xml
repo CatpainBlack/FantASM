@@ -13,11 +13,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e89e9c37-016b-4126-afa2-22b29b9596c7" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Docs/index.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Docs/z80n.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/z80n.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/directive_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/directive_impl.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/error_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/error_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/load_sp.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/load_sp.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/reg_pair.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/reg_pair.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/token_traits.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_traits.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/tokens.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/tokens.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/options.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/options.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -41,11 +50,13 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
     <property name="settings.editor.selected.configurable" value="language.rust" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\guy.black\msys64\home\Guy.Black\projects\fantasm\tests" />
       <recent name="$PROJECT_DIR$/tests/include" />
     </key>
   </component>
@@ -64,7 +75,7 @@
   <component name="RunManager" selected="Cargo Command.Run (Debug)">
     <configuration name="Run (Debug)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- tests/load_sp.asm test.bin --verbose" />
+      <option name="command" value="run -- tests/z80n.asm test.bin --verbose --z80n" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -128,7 +139,9 @@
       <workItem from="1566125948463" duration="124000" />
       <workItem from="1566128074683" duration="727000" />
       <workItem from="1566201602533" duration="5053000" />
-      <workItem from="1566208979883" duration="3526000" />
+      <workItem from="1566208979883" duration="3648000" />
+      <workItem from="1566287646878" duration="192000" />
+      <workItem from="1566288808132" duration="13610000" />
     </task>
     <task id="LOCAL-00001" summary="Fixed call/jp cc,label issue">
       <created>1566125511858</created>
@@ -198,7 +211,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/assembler/instruction_encoder.rs</url>
-          <line>416</line>
+          <line>447</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

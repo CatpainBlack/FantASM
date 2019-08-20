@@ -8,6 +8,7 @@ use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Reg::_HL_;
 use crate::assembler::tokens::RegPair::{_Af, Af, De, Hl, Ix, Iy, Sp};
 use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, Label, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, LabelIndirect};
+use crate::assembler::error_impl::ErrorType::{InvalidInstruction, ByteTrunctated};
 
 pub(crate) trait InstructionEncoder {
     fn xyz(x: u8, y: u8, z: u8) -> u8;
@@ -37,6 +38,8 @@ pub(crate) trait InstructionEncoder {
     fn load_r(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error>;
     fn load_rp(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error>;
     fn load_special(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error>;
+    fn mul(&mut self) -> Result<Vec<u8>, Error>;
+    fn next_reg(&mut self) -> Result<Vec<u8>, Error>;
 }
 
 impl InstructionEncoder for Assembler {
@@ -84,18 +87,35 @@ impl InstructionEncoder for Assembler {
         let rhs = self.next_token()?;
 
 
-        match (&lhs, &rhs) {
-            (RegisterPair(Hl), RegisterPair(reg)) => match a {
+        match (&lhs, &rhs, self.z80n_enabled) {
+            (RegisterPair(Hl), RegisterPair(reg), _) => match a {
                 AluOp::Add => return Ok(vec![Self::xpqz(0, reg.rp1()?, 1, 1)]),
                 AluOp::Adc => return Ok(vec![0xED, Self::xpqz(1, reg.rp1()?, 1, 2)]),
                 AluOp::Sbc => return Ok(vec![0xED, Self::xpqz(1, reg.rp1()?, 0, 2)]),
                 _ => {}
             }
-            (RegisterPair(Ix), RegisterPair(rp)) => return Ok(vec![0xDD, Self::xpqz(x, rp.rp1()?, q, 1)]),
-            (RegisterPair(Iy), RegisterPair(rp)) => return Ok(vec![0xFD, Self::xpqz(x, rp.rp1()?, q, 1)]),
-            (Register(Reg::A), _) => {
+
+            (RegisterPair(Ix), RegisterPair(rp), _) => return Ok(vec![0xDD, Self::xpqz(x, rp.rp1()?, q, 1)]),
+            (RegisterPair(Iy), RegisterPair(rp), _) => return Ok(vec![0xFD, Self::xpqz(x, rp.rp1()?, q, 1)]),
+            (Register(Reg::A), _, _) => {
                 self.tokens.push(rhs);
                 return self.alu_op(a);
+            }
+
+            (RegisterPair(_), Register(Reg::A), false) => return Err(self.error(ErrorType::Z80NDisabled)),
+            (RegisterPair(_), Number(_), false) => return Err(self.error(ErrorType::Z80NDisabled)),
+            (RegisterPair(_), Label(_), false) => return Err(self.error(ErrorType::Z80NDisabled)),
+
+            (RegisterPair(rp), Register(Reg::A), true) => return Ok(vec![0xED, 0x31 + rp.nrp()?]),
+            (RegisterPair(rp), Number(addr), true) => {
+                if *addr < 0 || *addr > 65536 {
+                    self.warn(ErrorType::AddressTruncated);
+                }
+                return Ok(vec![0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
+            }
+            (RegisterPair(rp), Label(l), true) => {
+                let addr = self.try_resolve_label(l, 2, false, false);
+                return Ok(vec![0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
             }
             _ => {}
         }
@@ -248,13 +268,24 @@ impl InstructionEncoder for Assembler {
     }
 
     fn push_pop(&mut self, z: u8) -> Result<Vec<u8>, Error> {
-        match self.next_token()? {
-            RegisterPair(Ix) => Ok(vec![0xDD, Self::xpqz(3, 2, 0, z)]),
-            RegisterPair(Iy) => Ok(vec![0xFD, Self::xpqz(3, 2, 0, z)]),
-            RegisterPair(r) => Ok(vec![Self::xpqz(3, r.rp2()?, 0, z)]),
-            _ => Err(self.error(ErrorType::InvalidRegisterPair))
+        match (self.next_token()?, self.z80n_enabled) {
+            (RegisterPair(Ix), _) => Ok(vec![0xDD, Self::xpqz(3, 2, 0, z)]),
+            (RegisterPair(Iy), _) => Ok(vec![0xFD, Self::xpqz(3, 2, 0, z)]),
+            (RegisterPair(r), _) => Ok(vec![Self::xpqz(3, r.rp2()?, 0, z)]),
+            (Number(_), false) => Err(self.error(ErrorType::Z80NDisabled)),
+            (Label(_), false) => Err(self.error(ErrorType::Z80NDisabled)),
+            (Number(n), true) => {
+                if n < 0 || n > 65535 {
+                    self.warn(ErrorType::AddressTruncated)
+                }
+                Ok(vec![0xED, 0x8A, n.hi(), n.lo()])
+            }
+            (Label(l), true) => {
+                let addr = self.try_resolve_label(&l, 2, false, true);
+                Ok(vec![0xED, 0x8A, addr.hi(), addr.lo()])
+            }
+            _ => Err(self.error(ErrorType::InvalidInstruction))
         }
-        //Err(Error::syntax_error(self.line_number))
     }
 
     fn ret(&mut self) -> Result<Vec<u8>, Error> {
@@ -409,11 +440,11 @@ impl InstructionEncoder for Assembler {
                 return Err(self.error(ErrorType::IntegerOutOfRange));
             }
             (LabelIndirect(l), RegisterPair(Sp)) => {
-                let addr = self.try_resolve_label(l, 2, false);
+                let addr = self.try_resolve_label(l, 2, false, false);
                 return Ok(vec![0xED, 0x73, addr.lo(), addr.hi()]);
             }
             (RegisterPair(Sp), LabelIndirect(l)) => {
-                let addr = self.try_resolve_label(l, 2, false);
+                let addr = self.try_resolve_label(l, 2, false, false);
                 return Ok(vec![0xED, 0x7B, addr.lo(), addr.hi()]);
             }
             (RegisterPair(Sp), RegisterPair(Hl)) => return Ok(vec![Self::xpqz(3, 3, 1, 1)]),
@@ -439,5 +470,33 @@ impl InstructionEncoder for Assembler {
         }
 
         Ok(vec![0xED, Self::xyz(1, y.unwrap(), 7)])
+    }
+
+    fn mul(&mut self) -> Result<Vec<u8>, Error> {
+        if !self.z80n_enabled {
+            return Err(self.error(ErrorType::Z80NDisabled));
+        }
+        self.expect_token(Register(Reg::D))?;
+        self.expect_token(Delimiter(Comma))?;
+        self.expect_token(Register(Reg::E))?;
+        Ok(vec![0xED, 0x30])
+    }
+
+    fn next_reg(&mut self) -> Result<Vec<u8>, Error> {
+        if !self.z80n_enabled {
+            return Err(self.error(ErrorType::Z80NDisabled));
+        }
+        let reg = self.get_byte()?;
+        self.expect_token(Delimiter(Comma))?;
+        match self.next_token()? {
+            Register(Reg::A) => Ok(vec![0xED, 0x92, reg]),
+            Number(n) => {
+                if n > 256 || n < 0 {
+                    self.warn(ByteTrunctated);
+                }
+                Ok(vec![0xED, 0x91, reg, n as u8])
+            }
+            _ => Err(self.error(InvalidInstruction))
+        }
     }
 }

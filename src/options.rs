@@ -1,13 +1,14 @@
 extern crate argparse;
+extern crate strum;
 
 use std::path::Path;
-
 use argparse::{ArgumentParser, Store, StoreTrue};
 
 #[derive(Default, Debug)]
 pub struct Options {
     pub source: String,
     pub output: String,
+    pub z80n: bool,
     pub verbose: bool,
 }
 
@@ -26,6 +27,9 @@ impl Options {
                 .add_argument("output", Store, "Output file")
                 .required();
 
+            parser.refer(&mut options.z80n)
+                .add_option(&["--z80n"], StoreTrue, "Enable Z80n (ZX Next) cpu extensions");
+
             parser.refer(&mut options.verbose)
                 .add_option(&["-v", "--verbose"], StoreTrue, "Enable verbose output");
 
@@ -33,7 +37,7 @@ impl Options {
         }
 
         if !Path::new(&options.source).exists() {
-            return Err(format!("Source file: {} - does not exist", options.source))
+            return Err(format!("Source file: {} - does not exist", options.source));
         }
 
         Ok(options)

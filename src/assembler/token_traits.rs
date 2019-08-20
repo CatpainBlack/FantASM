@@ -34,11 +34,11 @@ impl Tokens for Token {
         }
 
         // Directives
-        if let Ok(d) = Directive::from_str(w.as_str()) {
+        if let Ok(d) = Directive::from_str(&w) {
             return Token::Directive(d);
         }
         //Opcodes
-        if let Ok(o) = OpCode::from_str(w.as_str()) {
+        if let Ok(o) = OpCode::from_str(&w) {
             return Token::OpCode(o);
         }
         // Numbers
@@ -46,37 +46,37 @@ impl Tokens for Token {
             return Token::Number(n as isize);
         }
         //Register pairs
-        if let Ok(rp) = RegPair::from_str(w.as_str()) {
+        if let Ok(rp) = RegPair::from_str(&w) {
             return Token::RegisterPair(rp);
         }
         // Registers
-        if let Ok(r) = Reg::from_str(w.as_str()) {
+        if let Ok(r) = Reg::from_str(&w) {
             return Token::Register(r);
         }
 
         // I/R Register
-        if let Ok(r) = Ir::from_str(&w.as_str()) {
+        if let Ok(r) = Ir::from_str(&w) {
             return Token::RegisterIR(r);
         }
 
         // Delimiters
-        if let Ok(d) = Del::from_str(w.as_str()) {
+        if let Ok(d) = Del::from_str(&w) {
             return Token::Delimiter(d);
         }
         // Operators
-        if let Ok(op) = Op::from_str(w.as_str()) {
+        if let Ok(op) = Op::from_str(&w) {
             return Token::Operator(op);
         }
         // IHx/IXh
-        if let Ok(ixu) = IxU::from_str(w.as_str()) {
+        if let Ok(ixu) = IxU::from_str(&w) {
             return Token::RegisterIX(ixu);
         }
         // IYx/IYh
-        if let Ok(iyu) = IyU::from_str(w.as_str()) {
+        if let Ok(iyu) = IyU::from_str(&w) {
             return Token::RegisterIY(iyu);
         }
         // Conditions
-        if let Ok(cnd) = Cnd::from_str(w.as_str()) {
+        if let Ok(cnd) = Cnd::from_str(&w) {
             return Token::Condition(cnd);
         }
         // Label

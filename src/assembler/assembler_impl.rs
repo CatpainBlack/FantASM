@@ -13,6 +13,7 @@ use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Label, Number, Operator};
+use crate::assembler::error_impl::ErrorType::{SyntaxError, ByteTrunctated};
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -29,7 +30,13 @@ impl Assembler {
             console_output: false,
             total_lines: 0,
             expr: ExpressionParser::new(),
+            z80n_enabled: false,
         }
+    }
+
+    pub fn enable_z80n(&mut self) -> &mut Assembler {
+        self.z80n_enabled = true;
+        self
     }
 
     pub fn enable_console(&mut self) -> &mut Assembler {
@@ -71,13 +78,16 @@ impl Assembler {
 
     pub fn second_pass(&mut self) -> Result<(), Error> {
         loop {
-            if let Some((dest, label, relative)) = self.forward_references.pop() {
-                let addr = self.get_label_or_constant_value(label.as_str())?;
+            if let Some((dest, label, relative, swap_bytes)) = self.forward_references.pop() {
+                let mut addr = self.get_label_or_constant_value(label.as_str())?;
                 let index = dest as usize - self.origin as usize;
                 if relative {
                     let offset = addr - (dest + 1) as isize;
                     self.bytes[index] = offset as u8;
                 } else {
+                    if swap_bytes {
+                        addr = ((addr & 0xff) << 8) | ((addr & 0xFF00) >> 8);
+                    }
                     self.bytes[index] = addr.lo();
                     self.bytes[index + 1] = addr.hi();
                 }
@@ -140,7 +150,7 @@ impl Assembler {
         match self.next_token()? {
             Number(n) => Ok((n - (self.current_pc as isize + 2)) as u8),
             Label(s) => {
-                let mut addr = self.try_resolve_label(&s, 1, true) as isize;
+                let mut addr = self.try_resolve_label(&s, 1, true, false) as isize;
                 let pc = (self.current_pc + 2) as isize;
                 if addr == 0 {
                     addr = pc;
@@ -151,7 +161,7 @@ impl Assembler {
         }
     }
 
-    pub(crate) fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
+    pub(crate) fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool, swap_bytes: bool) -> u16 {
         let mut addr = 0;
         let label_name = &*name.replace(":", "");
 
@@ -160,15 +170,27 @@ impl Assembler {
         } else if let Some(a) = self.labels.get(label_name) {
             addr = *a as u16;
         } else {
-            self.forward_references.push(((self.current_pc + pc_offset) as u16, label_name.to_string(), relative));
+            self.forward_references.push(((self.current_pc + pc_offset) as u16, label_name.to_string(), relative, swap_bytes));
         }
         return addr;
+    }
+
+    pub fn get_byte(&mut self) -> Result<u8, Error> {
+        let b = match self.next_token()? {
+            Number(n) => n,
+            Label(l) => self.try_resolve_label(&l, 0, false, false) as isize,
+            _ => return Err(self.error(SyntaxError))
+        };
+        if !(0..256).contains(&b) {
+            self.warn(ByteTrunctated);
+        }
+        Ok(b as u8)
     }
 
     pub fn get_address(&mut self, pc_offset: isize) -> Result<Option<u16>, Error> {
         let t = self.tokens.last().unwrap_or(&Token::None).clone();
         let addr = match t {
-            Label(s) => self.try_resolve_label(&s, pc_offset, false),
+            Label(s) => self.try_resolve_label(&s, pc_offset, false, false),
             Number(n) => if (0isize..65536).contains(&n) {
                 n as u16
             } else {
@@ -304,7 +326,28 @@ impl Assembler {
             OpCode::Srl => self.rot(Srl)?,
             OpCode::Sub => self.alu_op(AluOp::Sub)?,
             OpCode::Xor => self.alu_op(AluOp::Xor)?,
-            //_ => return Err(Error::fatal(format!("Unhandled opcode: {:?}", op).as_str(), self.line_number))
+            _ => if self.z80n_enabled {
+                match op {
+                    OpCode::Ldix => vec![0xED, 0xA4],
+                    OpCode::Ldws => vec![0xED, 0xA5],
+                    OpCode::Ldirx => vec![0xED, 0xB4],
+                    OpCode::Lddx => vec![0xED, 0xAC],
+                    OpCode::Lddrx => vec![0xED, 0xBC],
+                    OpCode::Ldpirx => vec![0xED, 0xB7],
+                    OpCode::Outinb => vec![0xED, 0x90],
+                    OpCode::Mul => self.mul()?,
+                    OpCode::Swapnib => vec![0xED, 0x23],
+                    OpCode::Mirror => vec![0xED, 0x24],
+                    OpCode::Nextreg => self.next_reg()?,
+                    OpCode::Pixeldn => vec![0xED, 0x93],
+                    OpCode::Pixelad => vec![0xED, 0x94],
+                    OpCode::Setae => vec![0xED, 0x95],
+                    OpCode::Test => vec![0xED, 0x27, self.get_byte()?],
+                    _ => return Err(self.error(ErrorType::InvalidInstruction))
+                }
+            } else {
+                return Err(self.error(ErrorType::InvalidInstruction));
+            }
         };
         self.emit(bytes);
         Ok(())

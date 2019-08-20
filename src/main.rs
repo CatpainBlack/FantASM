@@ -26,6 +26,10 @@ fn main() -> Result<(), Error> {
         assembler.enable_console();
     }
 
+    if options.z80n {
+        assembler.enable_z80n();
+    }
+
     match assembler.assemble(options.source.as_str()) {
         Ok(_) => assembler.save_raw(options.output.as_str())?,
         Err(e) => {

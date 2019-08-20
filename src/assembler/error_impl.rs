@@ -18,11 +18,13 @@ pub enum ErrorType {
     IntegerOutOfRange,
     IntegerExpected,
     AddressTruncated,
+    ByteTrunctated,
     LabelOrConstantExists,
     UnexpectedEndOfLine,
     InvalidCondition,
     BadOperator,
     DivideByZero,
+    Z80NDisabled,
 }
 
 impl ToString for ErrorType {
@@ -42,7 +44,9 @@ impl ToString for ErrorType {
             ErrorType::UnexpectedEndOfLine => String::from("Unexpected end of line"),
             ErrorType::InvalidCondition => String::from("Invalid condition"),
             ErrorType::BadOperator => String::from("Bad operator in expression"),
-            ErrorType::DivideByZero => String::from("Expression resulted in a divide by zero")
+            ErrorType::DivideByZero => String::from("Expression resulted in a divide by zero"),
+            ErrorType::Z80NDisabled => String::from("Z80n extended instructions are not enables"),
+            ErrorType::ByteTrunctated => String::from("Integer has been truncated to 8 bits")
         }
     }
 }
