@@ -1,8 +1,5 @@
-extern crate strum;
-
 #[repr(usize)]
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum RegPairInd {
     Bc = 0,
     De = 1,
@@ -11,8 +8,7 @@ pub enum RegPairInd {
 }
 
 #[repr(usize)]
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Ir {
     I = 8,
     R = 9,
@@ -20,8 +16,7 @@ pub enum Ir {
 
 
 #[repr(u8)]
-#[derive(EnumString, Debug, Clone, PartialEq, Copy)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum Cnd {
     Nz = 0,
     Z = 1,
@@ -34,24 +29,21 @@ pub enum Cnd {
 }
 
 #[repr(usize)]
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum IxU {
     Ixh = 4,
     Ixl = 5,
 }
 
 #[repr(usize)]
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum IyU {
     Iyh = 4,
     Iyl = 5,
 }
 
 #[repr(usize)]
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Reg {
     B = 0,
     C = 1,
@@ -64,8 +56,7 @@ pub enum Reg {
 }
 
 #[repr(usize)]
-#[derive(EnumString, Debug, Clone, PartialEq, Copy)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum RegPair {
     Bc = 0,
     De = 1,
@@ -74,12 +65,12 @@ pub enum RegPair {
     Ix = 4,
     Iy = 5,
     Af = 6,
-    #[strum(serialize = "af'")]
+    //#[strum(serialize = "af'")]
     _Af = 7,
 }
 
 #[repr(u8)]
-#[derive(EnumString, Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum AluOp {
     Add = 0,
     Adc = 1,
@@ -92,7 +83,7 @@ pub enum AluOp {
 }
 
 #[repr(u8)]
-#[derive(EnumString, Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum RotOp {
     Rlc = 0,
     Rrc = 1,
@@ -104,59 +95,40 @@ pub enum RotOp {
     Srl = 7,
 }
 
-#[derive(EnumString, Debug, Copy, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Directive {
     Org,
     Include,
     Binary,
-    #[strum(serialize = "!message")]
     Message,
     Db,
     Dw,
     Ds,
 }
 
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Del {
-    #[strum(serialize = ",")]
     Comma,
 }
 
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Op {
-    #[strum(serialize = "+")]
     Add,
-    #[strum(serialize = "-")]
     Sub,
-    #[strum(serialize = "*")]
     Mul,
-    #[strum(serialize = "/")]
     Div,
-    #[strum(serialize = "<<")]
     Shl,
-    #[strum(serialize = ">>")]
     Shr,
-    #[strum(serialize = "<")]
     Lt,
-    #[strum(serialize = ">")]
     Gt,
-    #[strum(serialize = "(")]
     LParens,
-    #[strum(serialize = ")")]
     RParens,
-    #[strum(serialize = "=", serialize = "equ")]
     Equals,
-    #[strum(serialize = "&")]
     Ampersand,
-    #[strum(serialize = "|")]
     Pipe,
 }
 
-#[derive(EnumString, Debug, Clone, PartialEq)]
-#[strum(serialize_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum OpCode {
     Nop,
     Adc,
@@ -226,6 +198,23 @@ pub enum OpCode {
     Srl,
     Sub,
     Xor,
+
+    // Z80n
+    Ldix,
+    Ldws,
+    Ldirx,
+    Lddx,
+    Lddrx,
+    Ldpirx,
+    Outinb,
+    Mul,
+    Swapnib,
+    Mirror,
+    Nextreg,
+    Pixeldn,
+    Pixelad,
+    Setae,
+    Test,
 }
 
 #[derive(Debug, Clone, PartialEq)]

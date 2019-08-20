@@ -1,8 +1,8 @@
 #[macro_use]
-extern crate colour;
-extern crate strum;
+extern crate lazy_static;
+
 #[macro_use]
-extern crate strum_macros;
+extern crate colour;
 
 use std::time::Instant;
 
@@ -15,17 +15,21 @@ mod assembler;
 fn main() -> Result<(), Error> {
     let options = Options::parse()?;
 
-    if options.verbose {
-        white_ln!("FantASM 0.7.0 - (C)2019 Captain Black");
+    if !options.nologo {
+        white_ln!("FantASM 0.7.2 - (C)2019 Captain Black");
     }
 
-    let now = Instant::now();
 
     let mut assembler = Assembler::new();
     if options.verbose {
         assembler.enable_console();
     }
 
+    if options.z80n {
+        assembler.enable_z80n();
+    }
+
+    let now = Instant::now();
     match assembler.assemble(options.source.as_str()) {
         Ok(_) => assembler.save_raw(options.output.as_str())?,
         Err(e) => {
@@ -35,7 +39,11 @@ fn main() -> Result<(), Error> {
 
     if options.verbose {
         dark_yellow_ln!("Assembly complete [{}s]", (now.elapsed().as_millis() as f64)/1000f64);
+    }
+
+    if options.debug {
         assembler.dump();
     }
+
     Ok(())
 }

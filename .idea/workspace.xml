@@ -4,18 +4,16 @@
     <generated />
   </component>
   <component name="CMakeSettings">
-    <configurations>
-      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
-    </configurations>
+    <configurations />
   </component>
   <component name="CargoProjects">
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e89e9c37-016b-4126-afa2-22b29b9596c7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/tests/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test.sh" afterDir="false" />
+    <list default="true" id="9087e374-0d4e-4bbf-8a06-1a0a5af09360" name="Default Changelist" comment="Major speed improvement">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,20 +28,9 @@
   <component name="MacroExpansionManager">
     <option name="directoryName" value="yYjCIlyF" />
   </component>
-  <component name="ProjectId" id="1PatWUGMTyr9GQVbqLRSchRfOqI" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
-    <property name="settings.editor.selected.configurable" value="language.rust" />
-  </component>
-  <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/tests/include" />
-    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -57,10 +44,10 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Cargo Command.Run (Debug)">
-    <configuration name="Run (Debug)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+  <component name="RunManager">
+    <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- tests/all_opcodes.asm test.bin --verbose" />
+      <option name="command" value="run -- tests/z80n.asm test.bin --verbose --z80n" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -69,87 +56,28 @@
       <envs />
       <method v="2" />
     </configuration>
-    <configuration name="Run (Release)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --release -- tests/all_opcodes.asm test.bin --verbose" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2" />
-    </configuration>
-    <list>
-      <item itemvalue="Cargo Command.Run (Release)" />
-      <item itemvalue="Cargo Command.Run (Debug)" />
-    </list>
   </component>
   <component name="RustProjectSettings">
-    <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+    <option name="explicitPathToStdlib" value="$USER_HOME$/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src" />
+    <option name="toolchainHomeDirectory" value="$USER_HOME$/.rustup/toolchains/stable-x86_64-apple-darwin/bin" />
     <option name="version" value="2" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
   <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="e89e9c37-016b-4126-afa2-22b29b9596c7" name="Default Changelist" comment="" />
-      <created>1566124067368</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1566124067368</updated>
-      <workItem from="1566124070121" duration="1742000" />
-      <workItem from="1566125948463" duration="124000" />
-      <workItem from="1566128074683" duration="727000" />
-    </task>
-    <task id="LOCAL-00001" summary="Fixed call/jp cc,label issue">
-      <created>1566125511858</created>
+    <task id="LOCAL-00001" summary="Major speed improvement">
+      <created>1566330799184</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1566125511858</updated>
+      <updated>1566330799184</updated>
     </task>
-    <task id="LOCAL-00002" summary="CLion workspace settings">
-      <created>1566125858193</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1566125858193</updated>
-    </task>
-    <option name="localTasksCounter" value="3" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed call/jp cc,label issue" />
-    <MESSAGE value="CLion workspace settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="CLion workspace settings" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/assembler/instruction_encoder.rs</url>
-          <line>120</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Major speed improvement" />
+    <option name="LAST_COMMIT_MESSAGE" value="Major speed improvement" />
   </component>
 </project>

@@ -13,6 +13,7 @@ use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Label, Number, Operator};
+use crate::assembler::error_impl::ErrorType::{SyntaxError, ByteTrunctated};
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -29,7 +30,13 @@ impl Assembler {
             console_output: false,
             total_lines: 0,
             expr: ExpressionParser::new(),
+            z80n_enabled: false,
         }
+    }
+
+    pub fn enable_z80n(&mut self) -> &mut Assembler {
+        self.z80n_enabled = true;
+        self
     }
 
     pub fn enable_console(&mut self) -> &mut Assembler {
@@ -57,7 +64,7 @@ impl Assembler {
         reader.delimiters(",").operators("()*/+-<>=^&|");
         self.tokens.clear();
         loop {
-            let tokens = reader.read_line()?;
+            let tokens = &mut reader.read_line()?;
             self.total_lines += 1;
             match tokens.first() {
                 Some(Token::EndOfFile) => break,
@@ -71,13 +78,16 @@ impl Assembler {
 
     pub fn second_pass(&mut self) -> Result<(), Error> {
         loop {
-            if let Some((dest, label, relative)) = self.forward_references.pop() {
-                let addr = self.get_label_or_constant_value(label.as_str())?;
+            if let Some((dest, label, relative, swap_bytes)) = self.forward_references.pop() {
+                let mut addr = self.get_label_or_constant_value(label.as_str())?;
                 let index = dest as usize - self.origin as usize;
                 if relative {
                     let offset = addr - (dest + 1) as isize;
                     self.bytes[index] = offset as u8;
                 } else {
+                    if swap_bytes {
+                        addr = ((addr & 0xff) << 8) | ((addr & 0xFF00) >> 8);
+                    }
                     self.bytes[index] = addr.lo();
                     self.bytes[index + 1] = addr.hi();
                 }
@@ -95,22 +105,22 @@ impl Assembler {
     }
 
     fn get_label_or_constant_value(&mut self, name: &str) -> Result<isize, Error> {
-        if let Some(address) = self.labels.get(name) {
-            return Ok(address.clone());
+        if let Some(&address) = self.labels.get(name) {
+            return Ok(address);
         }
-        if let Some(address) = self.constants.get(name) {
-            return Ok(address.clone());
+        if let Some(&address) = self.constants.get(name) {
+            return Ok(address);
         }
         Err(self.error(ErrorType::LabelNotFound))
     }
 
 
     fn cur_file(&self) -> String {
-        self.file_name.last().unwrap_or(&String::from("fantasm")).to_string()
+        self.file_name.last().unwrap_or(&String::from("<none>")).to_string()
     }
 
     fn cur_line(&self) -> isize {
-        self.line_number.last().unwrap_or(&0isize).clone()
+        *self.line_number.last().unwrap_or(&0isize)
     }
 
     pub fn warn(&mut self, t: ErrorType) {
@@ -127,7 +137,7 @@ impl Assembler {
 
     pub fn error(&mut self, t: ErrorType) -> Error {
         let mut e = Error {
-            line_no: self.line_number.last().unwrap().clone(),
+            line_no: *self.line_number.last().unwrap(),
             message: t.to_string(),
             level: ErrorLevel::Fatal,
             file_name: "".to_string(),
@@ -140,7 +150,7 @@ impl Assembler {
         match self.next_token()? {
             Number(n) => Ok((n - (self.current_pc as isize + 2)) as u8),
             Label(s) => {
-                let mut addr = self.try_resolve_label(&s, 1, true) as isize;
+                let mut addr = self.try_resolve_label(&s, 1, true, false) as isize;
                 let pc = (self.current_pc + 2) as isize;
                 if addr == 0 {
                     addr = pc;
@@ -151,28 +161,41 @@ impl Assembler {
         }
     }
 
-    fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
+    pub(crate) fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool, swap_bytes: bool) -> u16 {
         let mut addr = 0;
-        let label_name = name.replace(":", "").to_string();
+        let label_name = &*name.replace(":", "");
 
-        if let Some(a) = self.constants.get(label_name.as_str()) {
-            addr = a.clone() as u16;
-        } else if let Some(a) = self.labels.get(label_name.as_str()) {
-            addr = a.clone() as u16;
+        if let Some(a) = self.constants.get(label_name) {
+            addr = *a as u16;
+        } else if let Some(a) = self.labels.get(label_name) {
+            addr = *a as u16;
         } else {
-            self.forward_references.push(((self.current_pc + pc_offset) as u16, label_name, relative));
+            self.forward_references.push(((self.current_pc + pc_offset) as u16, label_name.to_string(), relative, swap_bytes));
         }
         return addr;
     }
 
+    pub fn get_byte(&mut self) -> Result<u8, Error> {
+        let b = match self.next_token()? {
+            Number(n) => n,
+            Label(l) => self.try_resolve_label(&l, 0, false, false) as isize,
+            _ => return Err(self.error(SyntaxError))
+        };
+        if !(0..256).contains(&b) {
+            self.warn(ByteTrunctated);
+        }
+        Ok(b as u8)
+    }
+
     pub fn get_address(&mut self, pc_offset: isize) -> Result<Option<u16>, Error> {
-        let addr = match self.tokens.clone().last() {
-            Some(Label(s)) => self.try_resolve_label(s.as_str(), pc_offset, false),
-            Some(Number(n)) => if (0isize..65536).contains(&n) {
-                n.clone() as u16
+        let t = self.tokens.last().unwrap_or(&Token::None).clone();
+        let addr = match t {
+            Label(s) => self.try_resolve_label(&s, pc_offset, false, false),
+            Number(n) => if (0isize..65536).contains(&n) {
+                n as u16
             } else {
                 self.warn(ErrorType::AddressTruncated);
-                n.clone() as u16
+                n as u16
             }
             _ => 0
         };
@@ -303,16 +326,34 @@ impl Assembler {
             OpCode::Srl => self.rot(Srl)?,
             OpCode::Sub => self.alu_op(AluOp::Sub)?,
             OpCode::Xor => self.alu_op(AluOp::Xor)?,
-            //_ => return Err(Error::fatal(format!("Unhandled opcode: {:?}", op).as_str(), self.line_number))
+            _ => if self.z80n_enabled {
+                match op {
+                    OpCode::Ldix => vec![0xED, 0xA4],
+                    OpCode::Ldws => vec![0xED, 0xA5],
+                    OpCode::Ldirx => vec![0xED, 0xB4],
+                    OpCode::Lddx => vec![0xED, 0xAC],
+                    OpCode::Lddrx => vec![0xED, 0xBC],
+                    OpCode::Ldpirx => vec![0xED, 0xB7],
+                    OpCode::Outinb => vec![0xED, 0x90],
+                    OpCode::Mul => self.mul()?,
+                    OpCode::Swapnib => vec![0xED, 0x23],
+                    OpCode::Mirror => vec![0xED, 0x24],
+                    OpCode::Nextreg => self.next_reg()?,
+                    OpCode::Pixeldn => vec![0xED, 0x93],
+                    OpCode::Pixelad => vec![0xED, 0x94],
+                    OpCode::Setae => vec![0xED, 0x95],
+                    OpCode::Test => vec![0xED, 0x27, self.get_byte()?],
+                    _ => return Err(self.error(ErrorType::InvalidInstruction))
+                }
+            } else {
+                return Err(self.error(ErrorType::InvalidInstruction));
+            }
         };
         self.emit(bytes);
         Ok(())
     }
 
     fn handle_label(&mut self, l: &str) -> Result<(), Error> {
-        if self.tokens.is_empty() {
-            self.add_label(l.to_string())?;
-        }
         if self.next_token_is(&Operator(Equals)) {
             self.tokens.pop();
             match self.expr.parse(&mut self.tokens, &mut self.constants, &mut self.labels) {
@@ -320,14 +361,16 @@ impl Assembler {
                 Ok(None) => return Err(self.error(ErrorType::SyntaxError)),
                 Err(e) => return Err(self.error(e))
             };
+        } else {
+            self.add_label(l.to_string())?
         }
         Ok(())
     }
 
-    pub fn translate(&mut self, tokens: Vec<Token>) -> Result<(), Error> {
+    pub fn translate(&mut self, tokens: &mut Vec<Token>) -> Result<(), Error> {
         let len = self.line_number.len() - 1;
         self.line_number[len] += 1;
-        self.tokens = tokens.clone();
+        self.tokens = tokens.to_owned();
         self.tokens.reverse();
         while !self.tokens.is_empty() {
             if let Some(tok) = self.tokens.pop() {
