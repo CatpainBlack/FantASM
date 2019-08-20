@@ -453,7 +453,7 @@ impl InstructionEncoder for Assembler {
             (AddressIndirect(a), RegisterPair(Sp)) => return Ok(vec![0xED, 0x73, a.lo(), a.hi()]),
             (RegisterPair(Sp), AddressIndirect(a)) => return Ok(vec![0xED, 0x7B, a.lo(), a.hi()]),
             _ => {
-                self.info(format!("{:?},{:?}", dst, src).as_ref());
+                //self.info(format!("{:?},{:?}", dst, src).as_ref());
             }
         }
 

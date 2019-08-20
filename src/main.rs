@@ -1,8 +1,5 @@
 #[macro_use]
 extern crate colour;
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
 
 use std::time::Instant;
 

@@ -1,5 +1,3 @@
-extern crate strum;
-
 use std::io::BufRead;
 
 use crate::assembler::{Error, TokenReader};

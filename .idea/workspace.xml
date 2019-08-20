@@ -13,20 +13,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e89e9c37-016b-4126-afa2-22b29b9596c7" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Docs/index.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Docs/z80n.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/z80n.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/error_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/error_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/reg_pair.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/reg_pair.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/token_traits.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_traits.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/tokens.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/tokens.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/options.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/options.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/z80n.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/z80n.asm" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -141,7 +137,7 @@
       <workItem from="1566201602533" duration="5053000" />
       <workItem from="1566208979883" duration="3648000" />
       <workItem from="1566287646878" duration="192000" />
-      <workItem from="1566288808132" duration="13610000" />
+      <workItem from="1566288808132" duration="16580000" />
     </task>
     <task id="LOCAL-00001" summary="Fixed call/jp cc,label issue">
       <created>1566125511858</created>

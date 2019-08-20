@@ -1,5 +1,4 @@
 extern crate argparse;
-extern crate strum;
 
 use std::path::Path;
 use argparse::{ArgumentParser, Store, StoreTrue};
