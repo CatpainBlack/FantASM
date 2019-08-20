@@ -86,13 +86,16 @@ impl<R> TokenReader<R> where R: BufRead {
     }
 
     fn next_token(&mut self) -> Option<Token> {
-        let w = if let Some(word) = self.words.pop() { word } else { return None; };
+        if self.words.is_empty() {
+            return None;
+        }
+        let w = self.words.pop().unwrap_or(String::new());
         let mut tok = Token::from_string(w);
         if self.preceding_token.can_be_conditional() && tok == Register(Reg::C) {
             tok = Condition(Cnd::C);
         }
         self.preceding_token = tok.clone();
-        Some(tok.clone())
+        Some(tok.to_owned())
     }
 
     fn handle_index_indirect(&mut self, tokens: &mut Vec<Token>, rp: RegPair) -> Result<Option<Token>, Error> {

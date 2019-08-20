@@ -116,7 +116,7 @@ impl Assembler {
 
 
     fn cur_file(&self) -> String {
-        self.file_name.last().unwrap_or(&String::from("fantasm")).to_string()
+        self.file_name.last().unwrap_or(&String::from("<none>")).to_string()
     }
 
     fn cur_line(&self) -> isize {
