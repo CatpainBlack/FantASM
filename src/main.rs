@@ -1,4 +1,7 @@
 #[macro_use]
+extern crate lazy_static;
+
+#[macro_use]
 extern crate colour;
 
 use std::time::Instant;
@@ -13,7 +16,7 @@ fn main() -> Result<(), Error> {
     let options = Options::parse()?;
 
     if !options.nologo {
-        white_ln!("FantASM 0.7.1 - (C)2019 Captain Black");
+        white_ln!("FantASM 0.7.2 - (C)2019 Captain Black");
     }
 
 
