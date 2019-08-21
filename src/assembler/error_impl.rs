@@ -27,6 +27,7 @@ pub enum ErrorType {
     Z80NDisabled,
     UnexpectedClose,
     UnclosedParentheses,
+    CSpectDisabled,
 }
 
 impl ToString for ErrorType {
@@ -47,10 +48,11 @@ impl ToString for ErrorType {
             ErrorType::InvalidCondition => String::from("Invalid condition"),
             ErrorType::BadOperator => String::from("Bad operator in expression"),
             ErrorType::DivideByZero => String::from("Expression resulted in a divide by zero"),
-            ErrorType::Z80NDisabled => String::from("Z80n extended instructions are not enables"),
+            ErrorType::Z80NDisabled => String::from("Z80n extended instructions are not enabled"),
             ErrorType::ByteTrunctated => String::from("Integer has been truncated to 8 bits"),
             ErrorType::UnexpectedClose => String::from("Unexpected closing parentheses"),
             ErrorType::UnclosedParentheses => String::from("Unclosed parentheses"),
+            ErrorType::CSpectDisabled => String::from("CSpect pseudo ops are not enabled"),
         }
     }
 }

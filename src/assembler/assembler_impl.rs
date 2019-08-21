@@ -31,6 +31,7 @@ impl Assembler {
             total_lines: 0,
             expr: ExpressionParser::new(),
             z80n_enabled: false,
+            cspect_enabled: false,
         }
     }
 
@@ -41,6 +42,11 @@ impl Assembler {
 
     pub fn enable_console(&mut self) -> &mut Assembler {
         self.console_output = true;
+        self
+    }
+
+    pub fn enable_cspect(&mut self) -> &mut Assembler {
+        self.cspect_enabled = true;
         self
     }
 
@@ -326,31 +332,55 @@ impl Assembler {
             OpCode::Srl => self.rot(Srl)?,
             OpCode::Sub => self.alu_op(AluOp::Sub)?,
             OpCode::Xor => self.alu_op(AluOp::Xor)?,
-            _ => if self.z80n_enabled {
-                match op {
-                    OpCode::Ldix => vec![0xED, 0xA4],
-                    OpCode::Ldws => vec![0xED, 0xA5],
-                    OpCode::Ldirx => vec![0xED, 0xB4],
-                    OpCode::Lddx => vec![0xED, 0xAC],
-                    OpCode::Lddrx => vec![0xED, 0xBC],
-                    OpCode::Ldpirx => vec![0xED, 0xB7],
-                    OpCode::Outinb => vec![0xED, 0x90],
-                    OpCode::Mul => self.mul()?,
-                    OpCode::Swapnib => vec![0xED, 0x23],
-                    OpCode::Mirror => vec![0xED, 0x24],
-                    OpCode::Nextreg => self.next_reg()?,
-                    OpCode::Pixeldn => vec![0xED, 0x93],
-                    OpCode::Pixelad => vec![0xED, 0x94],
-                    OpCode::Setae => vec![0xED, 0x95],
-                    OpCode::Test => vec![0xED, 0x27, self.get_byte()?],
-                    _ => return Err(self.error(ErrorType::InvalidInstruction))
-                }
+            _ => if let Some(code) = self.encode_z80n(&op)? {
+                code
+            } else if let Some(code) = self.encode_cspect(&op)? {
+                code
             } else {
                 return Err(self.error(ErrorType::InvalidInstruction));
             }
         };
         self.emit(bytes);
         Ok(())
+    }
+
+    fn encode_cspect(&mut self, op: &OpCode) -> Result<Option<Vec<u8>>, Error> {
+        let code = match op {
+            OpCode::Break => Some(vec![0xDD, 1]),
+            OpCode::Exit => Some(vec![0xDD, 0]),
+            _ => None
+        };
+        if code.is_some() && !self.cspect_enabled {
+            Err(self.error(ErrorType::CSpectDisabled))
+        } else {
+            Ok(code)
+        }
+    }
+
+    fn encode_z80n(&mut self, op: &OpCode) -> Result<Option<Vec<u8>>, Error> {
+        let code = match op {
+            OpCode::Ldix => Some(vec![0xED, 0xA4]),
+            OpCode::Ldws => Some(vec![0xED, 0xA5]),
+            OpCode::Ldirx => Some(vec![0xED, 0xB4]),
+            OpCode::Lddx => Some(vec![0xED, 0xAC]),
+            OpCode::Lddrx => Some(vec![0xED, 0xBC]),
+            OpCode::Ldpirx => Some(vec![0xED, 0xB7]),
+            OpCode::Outinb => Some(vec![0xED, 0x90]),
+            OpCode::Mul => Some(self.mul()?),
+            OpCode::Swapnib => Some(vec![0xED, 0x23]),
+            OpCode::Mirror => Some(vec![0xED, 0x24]),
+            OpCode::Nextreg => Some(self.next_reg()?),
+            OpCode::Pixeldn => Some(vec![0xED, 0x93]),
+            OpCode::Pixelad => Some(vec![0xED, 0x94]),
+            OpCode::Setae => Some(vec![0xED, 0x95]),
+            OpCode::Test => Some(vec![0xED, 0x27, self.get_byte()?]),
+            _ => None
+        };
+        if code.is_some() && !self.z80n_enabled {
+            Err(self.error(ErrorType::Z80NDisabled))
+        } else {
+            Ok(code)
+        }
     }
 
     fn handle_label(&mut self, l: &str) -> Result<(), Error> {

@@ -76,10 +76,11 @@ impl Directives for Assembler {
             Directive::Org => self.set_origin()?,
             Directive::Include => self.include_file()?,
             Directive::Message => self.write_message()?,
-//            Directive::Binary => {}
-            Directive::Db => self.handle_data(0..256)?,
-//            Directive::Dw => {}
-//            Directive::Ds => {}
+            Directive::Byte => self.handle_data(0..256)?,
+            //Directive::Binary => {}
+            //Directive::Word => {}
+            //Directive::Block => {}
+            //Directive::Hex => {}
             _ => {
                 let line_no = self.line_number.last().unwrap_or(&0);
                 return Err(Error::fatal(&format!("Unhandled directive: {:?}", directive), *line_no));

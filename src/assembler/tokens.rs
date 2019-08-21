@@ -101,9 +101,10 @@ pub enum Directive {
     Include,
     Binary,
     Message,
-    Db,
-    Dw,
-    Ds,
+    Byte,
+    Word,
+    Block,
+    Hex,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -215,6 +216,10 @@ pub enum OpCode {
     Pixelad,
     Setae,
     Test,
+
+    // cspect
+    Break,
+    Exit,
 }
 
 #[derive(Debug, Clone, PartialEq)]

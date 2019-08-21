@@ -15,7 +15,7 @@ mod assembler;
 fn main() -> Result<(), Error> {
     let options = Options::parse()?;
 
-    if !options.nologo {
+    if !options.no_logo {
         white_ln!("FantASM 0.7.2 - (C)2019 Captain Black");
     }
 
@@ -27,6 +27,10 @@ fn main() -> Result<(), Error> {
 
     if options.z80n {
         assembler.enable_z80n();
+    }
+
+    if options.c_spect {
+        assembler.enable_cspect();
     }
 
     let now = Instant::now();

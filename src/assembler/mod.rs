@@ -1,4 +1,3 @@
-
 use std::collections::HashMap;
 
 use crate::assembler::expression_impl::ExpressionParser;
@@ -41,6 +40,7 @@ pub struct Assembler {
     total_lines: isize,
     expr: ExpressionParser,
     z80n_enabled: bool,
+    cspect_enabled: bool,
 }
 
 #[derive(Debug)]

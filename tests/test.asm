@@ -1,6 +1,9 @@
 	org	 32768+64-64
 
-;!message "Start"
+	;!message "Start"
+	;!opt z80n
+	;!opt verbose
+
 
 start
 	call	end
@@ -8,6 +11,7 @@ start
 	jr		end
 	ld		hl,end
 	;ld	(end),a
+	break
 	ret
 
 end
@@ -18,4 +22,4 @@ end
 message:
 	db	255,"Hello, World!",0 ; db
 
-;!message "End "
+	;!message "End "
