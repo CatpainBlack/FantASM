@@ -9,10 +9,10 @@ use crate::assembler::tokens::Token::{Delimiter, Label, Number, StringLiteral, O
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
     fn handle_data(&mut self, range: Range<isize>) -> Result<(), Error>;
-    fn include_file(&mut self) -> Result<(), Error>;
+    fn set_option(&mut self) -> Result<(), Error>;
+    fn include_source_file(&mut self) -> Result<(), Error>;
     fn write_message(&mut self) -> Result<(), Error>;
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error>;
-    fn handle_opt(&mut self) -> Result<(), Error>;
 }
 
 impl Directives for Assembler {
@@ -55,7 +55,19 @@ impl Directives for Assembler {
         Ok(())
     }
 
-    fn include_file(&mut self) -> Result<(), Error> {
+    fn set_option(&mut self) -> Result<(), Error> {
+        let o = self.next_token()?;
+        let b = self.next_token()?;
+        match (o, b) {
+            (Opt(OptionType::Verbose), Token::Boolean(b)) => self.enable_console(b),
+            (Opt(OptionType::CSpect), Token::Boolean(b)) => self.enable_cspect(b),
+            (Opt(OptionType::Z80n), Token::Boolean(b)) => self.enable_z80n(b),
+            (_, _) => return Err(self.error(ErrorType::InvalidOption))
+        };
+        Ok(())
+    }
+
+    fn include_source_file(&mut self) -> Result<(), Error> {
         let file_name = match self.next_token()? {
             StringLiteral(s) => s,
             Label(l) => l,
@@ -72,25 +84,13 @@ impl Directives for Assembler {
         Ok(())
     }
 
-    fn handle_opt(&mut self) -> Result<(), Error> {
-        let o = self.next_token()?;
-        let b = self.next_token()?;
-        match (o, b) {
-            (Opt(OptionType::Verbose), Token::Boolean(b)) => self.enable_console(b),
-            (Opt(OptionType::CSpect), Token::Boolean(b)) => self.enable_cspect(b),
-            (Opt(OptionType::Z80n), Token::Boolean(b)) => self.enable_z80n(b),
-            (_, _) => return Err(self.error(ErrorType::InvalidOption))
-        };
-        Ok(())
-    }
-
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error> {
         match directive {
             Directive::Org => self.set_origin()?,
-            Directive::Include => self.include_file()?,
+            Directive::Include => self.include_source_file()?,
             Directive::Message => self.write_message()?,
             Directive::Byte => self.handle_data(0..256)?,
-            Directive::Opt => self.handle_opt()?,
+            Directive::Opt => self.set_option()?,
             //Directive::Binary => {}
             //Directive::Word => {}
             //Directive::Block => {}

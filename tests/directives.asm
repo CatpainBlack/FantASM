@@ -1,8 +1,9 @@
 	org	 32768+64-64
 
+	#pragma z80n off
 	!opt z80n on
-	!opt cspect on
-	!opt verbose on
+	!opt cspect true
+	!opt verbose yes
 
 start
 	;!message "start"

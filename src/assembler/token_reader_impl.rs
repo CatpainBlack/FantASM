@@ -90,7 +90,10 @@ impl<R> TokenReader<R> where R: BufRead {
             return None;
         }
         let w = self.words.pop().unwrap_or(String::new());
-        let tok = Token::from_string(w);
+        let mut tok = Token::from_string(w);
+        if self.preceding_token.can_be_conditional() && tok == Register(Reg::C) {
+            tok = Condition(Cnd::C)
+        }
         self.preceding_token = tok.clone();
         Some(tok.to_owned())
     }

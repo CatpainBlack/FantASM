@@ -173,7 +173,7 @@ impl FromStr for Directive {
             "dw" | "word" => Ok(Directive::Word),
             "ds" | "block" => Ok(Directive::Block),
             "dh" | "hex" => Ok(Directive::Hex),
-            "!opt" => Ok(Directive::Opt),
+            "!opt" | "#pragma" => Ok(Directive::Opt),
             _ => Err(())
         }
     }
