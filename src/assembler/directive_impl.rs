@@ -80,7 +80,10 @@ impl Directives for Assembler {
             Directive::Db => self.handle_data(0..256)?,
 //            Directive::Dw => {}
 //            Directive::Ds => {}
-            _ => return Err(Error::fatal(format!("Unhandled directive: {:?}", directive).as_str(), self.line_number.last().unwrap().clone()))
+            _ => {
+                let line_no = self.line_number.last().unwrap_or(&0);
+                return Err(Error::fatal(&format!("Unhandled directive: {:?}", directive), *line_no));
+            }
         }
         Ok(())
     }

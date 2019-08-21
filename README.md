@@ -2,10 +2,12 @@
 
 ## Usage
 
-`fantasm <source> <output>`
+`fantasm <source> <output> [options]`
 
 ## Commandline options
 
+* `--nologo` suppress the startup banner
+* `--z80n` enable z80n extended opcodes
 * `--verbose` enable verbose output
 * `--help` display command line help
 
@@ -18,12 +20,3 @@ The assembler supports all Z80 opcodes and most undocumented ones, except for un
 ## Building
 
 `curgo build --release` currently builds with rust >= 1.35.0
-
-## ToDo
-
-- [ ] Implement all undocumented opcodes
-- [ ] Implement Z80n extended instructions (ZX Next)
-- [ ] Improve the expression parser to handle nested expresions in brackets
-- [ ] Add support for more directives
-- - [ ] Incbin/Binary includes
-- - [ ] Macros

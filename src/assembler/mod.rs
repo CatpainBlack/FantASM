@@ -1,4 +1,3 @@
-extern crate strum;
 
 use std::collections::HashMap;
 
@@ -36,11 +35,12 @@ pub struct Assembler {
     labels: HashMap<String, isize>,
     constants: HashMap<String, isize>,
     bytes: Vec<u8>,
-    forward_references: Vec<(u16, String, bool)>,
+    forward_references: Vec<(u16, String, bool, bool)>,
     file_name: Vec<String>,
     console_output: bool,
     total_lines: isize,
     expr: ExpressionParser,
+    z80n_enabled: bool,
 }
 
 #[derive(Debug)]
