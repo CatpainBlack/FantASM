@@ -1,6 +1,8 @@
 	org	 32768+64-64
 
 	#pragma z80n off
+	#pragma cspect false
+	#pragma verbose no
 	!opt z80n on
 	!opt cspect true
 	!opt verbose yes

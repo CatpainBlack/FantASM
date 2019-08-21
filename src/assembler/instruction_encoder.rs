@@ -345,8 +345,20 @@ impl InstructionEncoder for Assembler {
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
         let b = match (dst, src) {
             (RegisterPair(Hl), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Hl), LabelIndirect(l)) => {
+                let a = self.try_resolve_label(l, 1, false, false);
+                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+            }
             (RegisterPair(Ix), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Ix), LabelIndirect(l)) => {
+                let a = self.try_resolve_label(l, 2, false, false);
+                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+            }
             (RegisterPair(Iy), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Iy), LabelIndirect(l)) => {
+                let a = self.try_resolve_label(l, 2, false, false);
+                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+            }
             (RegisterPair(r), AddressIndirect(a)) => Some(vec![0xED, Self::xpqz(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
 
             (RegisterIndirect(rp), Register(Reg::A)) => Some(vec![Self::xpqz(0, rp.clone() as u8, 0, 2)]),
@@ -355,9 +367,25 @@ impl InstructionEncoder for Assembler {
             (Register(Reg::A), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 3, 1, 2), a.lo(), a.hi()]),
             (AddressIndirect(a), Register(Reg::A)) => Some(vec![Self::xpqz(0, 3, 0, 2), a.lo(), a.hi()]),
             (AddressIndirect(a), RegisterPair(Hl)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (LabelIndirect(l), RegisterPair(Hl)) => {
+                let a = self.try_resolve_label(l, 1, false, false);
+                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), RegisterPair(Ix)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (LabelIndirect(l), RegisterPair(Ix)) => {
+                let a = self.try_resolve_label(l, 2, false, false);
+                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), RegisterPair(Iy)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (LabelIndirect(l), RegisterPair(Iy)) => {
+                let a = self.try_resolve_label(l, 2, false, false);
+                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), RegisterPair(r)) => Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
+            (LabelIndirect(l), RegisterPair(r)) => {
+                let a = self.try_resolve_label(l, 2, false, false);
+                Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()])
+            }
 
             (Register(r), IndexIndirect(reg, o)) => Some(vec![0xDD | (reg.clone() as u8 - 4) << 5, Self::xyz(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
 
@@ -414,6 +442,7 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_rp(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
+        //println!("load_rp {:?},{:?}", dst, src);
         let mut encoded: Vec<u8> = vec![];
         let mut instr_size = 1;
         if let Some(p) = dst.is_index_prefix().or_else(|| src.is_index_prefix()).or(None) {
@@ -423,11 +452,20 @@ impl InstructionEncoder for Assembler {
 
         let rp = if let RegisterPair(rp) = dst { rp.rp1()? } else { 0 };
 
-        self.tokens.push(src.clone());
-        if let Some(addr) = self.get_address(instr_size)? {
-            self.next_token()?;
+        let addr = match (dst, src) {
+            (RegisterPair(_), Number(n)) => *n,
+            (RegisterPair(_), Label(l)) => self.try_resolve_label(l, instr_size, false, false) as isize,
+            //(RegisterPair(Hl), LabelIndirect(l)) => self.try_resolve_label(l, instr_size, false, false) as isize,
+            //(RegisterPair(Hl), AddressIndirect(a)) => *a as isize,
+            _ => return Err(self.error(ErrorType::SyntaxError))
+        };
+
+        if src.is_indirect() {
+            encoded.append(&mut vec![Self::xpqz(0, 2, 1, 2), addr.lo(), addr.hi()]);
+        } else {
             encoded.append(&mut vec![Self::xpqz(0, rp, 0, 1), addr.lo(), addr.hi()]);
         }
+
         return Ok(encoded);
     }
 
