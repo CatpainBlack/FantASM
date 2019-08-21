@@ -35,18 +35,18 @@ impl Assembler {
         }
     }
 
-    pub fn enable_z80n(&mut self) -> &mut Assembler {
-        self.z80n_enabled = true;
+    pub fn enable_z80n(&mut self, enabled: bool) -> &mut Assembler {
+        self.z80n_enabled = enabled;
         self
     }
 
-    pub fn enable_console(&mut self) -> &mut Assembler {
-        self.console_output = true;
+    pub fn enable_console(&mut self, enabled: bool) -> &mut Assembler {
+        self.console_output = enabled;
         self
     }
 
-    pub fn enable_cspect(&mut self) -> &mut Assembler {
-        self.cspect_enabled = true;
+    pub fn enable_cspect(&mut self, enabled: bool) -> &mut Assembler {
+        self.cspect_enabled = enabled;
         self
     }
 

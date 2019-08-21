@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate lazy_static;
-
 #[macro_use]
 extern crate colour;
+#[macro_use]
+extern crate version;
 
 use std::time::Instant;
 
@@ -16,26 +17,19 @@ fn main() -> Result<(), Error> {
     let options = Options::parse()?;
 
     if !options.no_logo {
-        white_ln!("FantASM 0.7.2 - (C)2019 Captain Black");
+        white_ln!("FantASM {} - (C)2019 Captain Black",version!());
     }
 
 
     let mut assembler = Assembler::new();
-    if options.verbose {
-        assembler.enable_console();
-    }
-
-    if options.z80n {
-        assembler.enable_z80n();
-    }
-
-    if options.c_spect {
-        assembler.enable_cspect();
-    }
+    assembler
+        .enable_cspect(options.c_spect)
+        .enable_z80n(options.z80n)
+        .enable_console(options.verbose);
 
     let now = Instant::now();
     match assembler.assemble(options.source.as_str()) {
-        Ok(_) => assembler.save_raw(options.output.as_str())?,
+        Ok(_) => assembler.save_raw(&options.output)?,
         Err(e) => {
             red_ln!("[{} : {}] {}",e.file_name,e.line_no,e.message);
         }

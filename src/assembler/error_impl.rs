@@ -28,6 +28,7 @@ pub enum ErrorType {
     UnexpectedClose,
     UnclosedParentheses,
     CSpectDisabled,
+    InvalidOption,
 }
 
 impl ToString for ErrorType {
@@ -53,6 +54,7 @@ impl ToString for ErrorType {
             ErrorType::UnexpectedClose => String::from("Unexpected closing parentheses"),
             ErrorType::UnclosedParentheses => String::from("Unclosed parentheses"),
             ErrorType::CSpectDisabled => String::from("CSpect pseudo ops are not enabled"),
+            ErrorType::InvalidOption => String::from("Invalid assembler option"),
         }
     }
 }

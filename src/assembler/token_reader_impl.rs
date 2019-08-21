@@ -90,10 +90,7 @@ impl<R> TokenReader<R> where R: BufRead {
             return None;
         }
         let w = self.words.pop().unwrap_or(String::new());
-        let mut tok = Token::from_string(w);
-        if self.preceding_token.can_be_conditional() && tok == Register(Reg::C) {
-            tok = Condition(Cnd::C);
-        }
+        let tok = Token::from_string(w);
         self.preceding_token = tok.clone();
         Some(tok.to_owned())
     }
@@ -126,7 +123,11 @@ impl<R> TokenReader<R> where R: BufRead {
                 Some(RegisterPair(RegPair::Sp)) => Some(RegisterIndirect(RegPairInd::Sp)),
                 Some(RegisterPair(RegPair::De)) => Some(RegisterIndirect(RegPairInd::De)),
                 Some(RegisterPair(RegPair::Hl)) => Some(Register(Reg::_HL_)),
-                Some(Register(Reg::C)) => Some(RegisterIndirect(RegPairInd::C)),
+                Some(Register(Reg::C)) => if self.preceding_token.can_be_conditional() {
+                    Some(Condition(Cnd::C))
+                } else {
+                    Some(RegisterIndirect(RegPairInd::C))
+                },
                 Some(Number(n)) => Some(AddressIndirect(n as usize)),
                 Some(Label(l)) => Some(LabelIndirect(l)),
                 _ => None

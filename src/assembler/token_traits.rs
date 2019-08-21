@@ -3,7 +3,7 @@ use std::str::FromStr;
 use regex::Regex;
 
 use crate::assembler::number_parser::NumberParser;
-use crate::assembler::tokens::{RegPair, Token, AluOp, RotOp};
+use crate::assembler::tokens::{RegPair, Token, AluOp, RotOp, OptionType, Bool};
 use crate::assembler::tokens::{Cnd, Del, Directive, Ir, IxU, IyU, Op, OpCode, Reg};
 use crate::assembler::tokens::Token::{AddressIndirect, IndexIndirect, Label, Number, Operator, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair};
 
@@ -18,6 +18,29 @@ pub trait Tokens {
     fn can_be_conditional(&self) -> bool;
     fn number_to_u8(&self) -> Option<u8>;
     fn reg_value(&self) -> Option<u8>;
+}
+
+impl FromStr for Bool {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "on" | "true" | "yes" => Ok(Bool::True),
+            "off" | "false" | "no" => Ok(Bool::False),
+            _ => Err(())
+        }
+    }
+}
+
+impl FromStr for OptionType {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "verbose" => Ok(OptionType::Verbose),
+            "cspect" => Ok(OptionType::CSpect),
+            "z80n" => Ok(OptionType::Z80n),
+            _ => Err(())
+        }
+    }
 }
 
 impl FromStr for Ir {
@@ -150,6 +173,7 @@ impl FromStr for Directive {
             "dw" | "word" => Ok(Directive::Word),
             "ds" | "block" => Ok(Directive::Block),
             "dh" | "hex" => Ok(Directive::Hex),
+            "!opt" => Ok(Directive::Opt),
             _ => Err(())
         }
     }
@@ -246,13 +270,25 @@ impl Tokens for Token {
         if let Ok(iyu) = IyU::from_str(&w) {
             return Token::RegisterIY(iyu);
         }
-// Conditions
+
+        // Conditions
         if let Ok(cnd) = Cnd::from_str(&w) {
             return Token::Condition(cnd);
         }
-// Label
+
+        // Options
+        if let Ok(opt) = OptionType::from_str(&w) {
+            return Token::Opt(opt);
+        }
+
+        // Boolean/Truth
+        if let Ok(t) = Bool::from_str(&w) {
+            return Token::Boolean(t == Bool::True);
+        }
+
+        // Label
         if LABEL.is_match_at(&word, 0) {
-//println!("Label: {}", word);
+            //println!("Label: {}", word);
             return Token::Label(word);
         }
 

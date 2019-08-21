@@ -101,6 +101,7 @@ pub enum Directive {
     Include,
     Binary,
     Message,
+    Opt,
     Byte,
     Word,
     Block,
@@ -223,6 +224,20 @@ pub enum OpCode {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum OptionType {
+    Verbose,
+    CSpect,
+    Z80n,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Bool {
+    True,
+    False,
+}
+
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     None,
     Invalid,
@@ -244,4 +259,6 @@ pub enum Token {
     LabelIndirect(String),
     Condition(Cnd),
     StringLiteral(String),
+    Opt(OptionType),
+    Boolean(bool),
 }

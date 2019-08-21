@@ -10,18 +10,17 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9087e374-0d4e-4bbf-8a06-1a0a5af09360" name="Default Changelist" comment="Major speed improvement">
+    <list default="true" id="9087e374-0d4e-4bbf-8a06-1a0a5af09360" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/directive_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/directive_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/error_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/error_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/token_traits.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_traits.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/tokens.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/tokens.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/options.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/options.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test.asm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -92,9 +91,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1566374378245</updated>
-      <workItem from="1566374381486" duration="2989000" />
+      <workItem from="1566374381486" duration="8672000" />
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Implemented CSpect pseudo ops, &quot;break&quot; and &quot;exit&quot;">
+      <created>1566377478328</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1566377478328</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -103,6 +109,31 @@
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
+        <entry key="1">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
         <entry key="MAIN">
           <value>
             <State />
@@ -110,9 +141,17 @@
         </entry>
       </map>
     </option>
+    <option name="OPEN_TABS">
+      <set>
+        <option value="1" />
+      </set>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="Major speed improvement" />
-    <option name="LAST_COMMIT_MESSAGE" value="Major speed improvement" />
+    <MESSAGE value="Implemented CSpect pseudo ops, &quot;break&quot; and &quot;exit&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented CSpect pseudo ops, &quot;break&quot; and &quot;exit&quot;" />
   </component>
 </project>

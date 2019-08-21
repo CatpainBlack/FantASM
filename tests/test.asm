@@ -1,11 +1,11 @@
 	org	 32768+64-64
 
-	;!message "Start"
-	;!opt z80n
-	;!opt verbose
-
+	!opt z80n on
+	!opt cspect on
+	!opt verbose on
 
 start
+	;!message "start"
 	call	end
 	djnz	end
 	jr		end
@@ -15,6 +15,7 @@ start
 	ret
 
 end
+	;!message "end"
 	ret
 
 
