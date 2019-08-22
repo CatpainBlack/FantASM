@@ -79,11 +79,13 @@ impl ExpressionParser {
         self.accumulator = 0;
         for token in expr {
             match token {
-                ConstLabel(l) => unsafe {
-                    if let Some(n) = (*self.constants).get(l) {
+                ConstLabel(l) => {
+                    if let Some(n) = unsafe { (*self.constants).get(l) } {
                         self.accumulate(n.clone())?;
-                    } else if let Some(n) = (*self.labels).get(l) {
+                    } else if let Some(n) = unsafe { (*self.labels).get(l) } {
                         self.accumulate(n.clone())?;
+                    } else {
+                        return Err(ErrorType::BadConstant);
                     }
                 }
                 Number(n) => self.accumulate(*n)?,

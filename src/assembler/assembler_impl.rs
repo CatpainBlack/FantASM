@@ -153,7 +153,7 @@ impl Assembler {
 
     pub fn error(&mut self, t: ErrorType) -> Error {
         let mut e = Error {
-            line_no: *self.line_number.last().unwrap(),
+            line_no: *self.line_number.last().unwrap_or(&0),
             message: t.to_string(),
             level: ErrorLevel::Fatal,
             file_name: "".to_string(),

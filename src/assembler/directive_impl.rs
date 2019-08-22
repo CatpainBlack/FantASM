@@ -1,14 +1,12 @@
-use std::ops::Range;
-
 use crate::assembler::{Assembler, Error};
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::{Directive, OptionType, Token};
-use crate::assembler::tokens::Token::{Delimiter, ConstLabel, Number, StringLiteral, Opt};
+use crate::assembler::tokens::Token::{Delimiter, ConstLabel, StringLiteral, Opt};
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
-    fn handle_data(&mut self, range: Range<isize>) -> Result<(), Error>;
+    fn handle_bytes(&mut self) -> Result<(), Error>;
     fn set_option(&mut self) -> Result<(), Error>;
     fn include_source_file(&mut self) -> Result<(), Error>;
     fn write_message(&mut self) -> Result<(), Error>;
@@ -32,22 +30,25 @@ impl Directives for Assembler {
         Ok(())
     }
 
-    fn handle_data(&mut self, range: Range<isize>) -> Result<(), Error> {
+    fn handle_bytes(&mut self) -> Result<(), Error> {
         let mut expect_comma = false;
         while !self.tokens.is_empty() {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                match self.next_token()? {
-                    StringLiteral(s) => {
-                        self.emit(s.into_bytes());
-                    }
-                    Number(n) => if range.contains(&n) {
+                match self.expr.parse(&mut self.tokens, 0) {
+                    Ok(Some(n)) => {
+                        if !(0..256).contains(&n) {
+                            self.warn(ErrorType::ByteTrunctated);
+                        }
                         self.emit(vec![n as u8])
-                    } else {
-                        return Err(self.error(ErrorType::IntegerOutOfRange));
                     }
-                    _ => return Err(self.error(ErrorType::SyntaxError))
+                    Ok(None) => if let StringLiteral(s) = self.next_token()? {
+                        self.emit(s.into_bytes());
+                    } else {
+                        return Err(self.error(ErrorType::SyntaxError));
+                    }
+                    Err(e) => return Err(self.error(e))
                 }
             }
             expect_comma = !expect_comma;
@@ -89,7 +90,7 @@ impl Directives for Assembler {
             Directive::Org => self.set_origin()?,
             Directive::Include => self.include_source_file()?,
             Directive::Message => self.write_message()?,
-            Directive::Byte => self.handle_data(0..256)?,
+            Directive::Byte => self.handle_bytes()?,
             Directive::Opt => self.set_option()?,
             //Directive::Binary => {}
             //Directive::Word => {}
