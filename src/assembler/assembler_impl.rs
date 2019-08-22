@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::ops::Range;
 
-use crate::assembler::{Assembler, Error, ErrorLevel, TokenReader};
+use crate::assembler::{Assembler, Error, ErrorLevel, TokenReader, ForwardReference};
 use crate::assembler::directive_impl::Directives;
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::expression_impl::ExpressionParser;
@@ -12,7 +12,7 @@ use crate::assembler::reg_pair::HighLow;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
-use crate::assembler::tokens::Token::{Label, Number, Operator};
+use crate::assembler::tokens::Token::{ConstLabel, Number, Operator, AddressIndirect, ConstLabelIndirect};
 use crate::assembler::error_impl::ErrorType::{SyntaxError, ByteTrunctated};
 
 impl Assembler {
@@ -51,6 +51,7 @@ impl Assembler {
     }
 
     pub fn assemble(&mut self, file_name: &str) -> Result<(), Error> {
+        self.expr.init(&mut self.labels, &mut self.constants, &mut self.forward_references);
         if self.console_output {
             dark_green_ln!("First pass...");
         }
@@ -83,22 +84,31 @@ impl Assembler {
     }
 
     pub fn second_pass(&mut self) -> Result<(), Error> {
-        loop {
-            if let Some((dest, label, relative, swap_bytes)) = self.forward_references.pop() {
-                let mut addr = self.get_label_or_constant_value(label.as_str())?;
-                let index = dest as usize - self.origin as usize;
-                if relative {
-                    let offset = addr - (dest + 1) as isize;
-                    self.bytes[index] = offset as u8;
-                } else {
-                    if swap_bytes {
-                        addr = ((addr & 0xff) << 8) | ((addr & 0xFF00) >> 8);
-                    }
-                    self.bytes[index] = addr.lo();
-                    self.bytes[index + 1] = addr.hi();
+        while let Some(mut fwd_ref) = self.forward_references.pop() {
+            let mut addr: isize;
+            if fwd_ref.is_expression {
+                addr = match self.expr.eval(fwd_ref.expression.as_mut()) {
+                    Ok(n) => n,
+                    Err(e) => return Err(self.error(e)),
                 }
             } else {
-                break;
+                addr = self.get_label_or_constant_value(fwd_ref.label.as_str())?;
+            }
+            let index = fwd_ref.pc as usize - self.origin as usize;
+            if fwd_ref.relative {
+                let offset = addr - (fwd_ref.pc + 1) as isize;
+                self.bytes[index] = offset as u8;
+            } else {
+                let stored = self.bytes[index] as isize | ((self.bytes[index + 1] as u16) << 8) as isize;
+                addr += stored;
+                if !(0..65536).contains(&addr) {
+                    self.warn(ErrorType::AddressTruncated);
+                }
+                if fwd_ref.swap_bytes {
+                    addr = ((addr & 0xff) << 8) | ((addr & 0xFF00) >> 8);
+                }
+                self.bytes[index] = addr.lo();
+                self.bytes[index + 1] = addr.hi();
             }
         }
         Ok(())
@@ -155,7 +165,7 @@ impl Assembler {
     pub fn relative(&mut self) -> Result<u8, Error> {
         match self.next_token()? {
             Number(n) => Ok((n - (self.current_pc as isize + 2)) as u8),
-            Label(s) => {
+            ConstLabel(s) => {
                 let mut addr = self.try_resolve_label(&s, 1, true, false) as isize;
                 let pc = (self.current_pc + 2) as isize;
                 if addr == 0 {
@@ -176,36 +186,56 @@ impl Assembler {
         } else if let Some(a) = self.labels.get(label_name) {
             addr = *a as u16;
         } else {
-            self.forward_references.push(((self.current_pc + pc_offset) as u16, label_name.to_string(), relative, swap_bytes));
+            self.forward_references.push(ForwardReference {
+                is_expression: false,
+                pc: self.current_pc + pc_offset,
+                label: label_name.to_string(),
+                expression: vec![],
+                swap_bytes,
+                relative,
+            });
         }
         return addr;
+    }
+
+    pub(crate) fn decode_number(&mut self, token: &Token, pc_offset: isize) -> Result<Option<isize>, Error> {
+        match &token {
+            Number(n) => Ok(Some(*n)),
+            AddressIndirect(a) => Ok(Some(*a as isize)),
+            ConstLabelIndirect(l) => Ok(Some(self.try_resolve_label(l, pc_offset, false, false) as isize)),
+            ConstLabel(l) => if let Some(n) = self.constants.get(l) {
+                Ok(Some(*n))
+            } else {
+                Err(self.error(ErrorType::BadConstant))
+            }
+            _ => Ok(None)
+        }
+    }
+
+    pub(crate) fn get_address(&mut self, token: &Token, pc_offset: isize) -> Option<u16> {
+        let addr = match &token {
+            Number(n) => *n,
+            AddressIndirect(a) => *a as isize,
+            ConstLabelIndirect(l) => self.try_resolve_label(l, pc_offset, false, false) as isize,
+            ConstLabel(l) => self.try_resolve_label(l, pc_offset, false, false) as isize,
+            _ => return None
+        };
+        if !(0..65536).contains(&addr) {
+            self.warn(ErrorType::AddressTruncated);
+        }
+        Some(addr as u16)
     }
 
     pub fn get_byte(&mut self) -> Result<u8, Error> {
         let b = match self.next_token()? {
             Number(n) => n,
-            Label(l) => self.try_resolve_label(&l, 0, false, false) as isize,
+            ConstLabel(l) => self.try_resolve_label(&l, 0, false, false) as isize,
             _ => return Err(self.error(SyntaxError))
         };
         if !(0..256).contains(&b) {
             self.warn(ByteTrunctated);
         }
         Ok(b as u8)
-    }
-
-    pub fn get_address(&mut self, pc_offset: isize) -> Result<Option<u16>, Error> {
-        let t = self.tokens.last().unwrap_or(&Token::None).clone();
-        let addr = match t {
-            Label(s) => self.try_resolve_label(&s, pc_offset, false, false),
-            Number(n) => if (0isize..65536).contains(&n) {
-                n as u16
-            } else {
-                self.warn(ErrorType::AddressTruncated);
-                n as u16
-            }
-            _ => 0
-        };
-        Ok(Some(addr))
     }
 
     pub fn next_token(&mut self) -> Result<Token, Error> {
@@ -269,7 +299,7 @@ impl Assembler {
             OpCode::Add => self.alu_op_r(AluOp::Add, 0, 1)?,
             OpCode::And => self.alu_op(AluOp::And)?,
             OpCode::Bit => self.bit_res_set(1)?,
-            OpCode::Call => self.call()?,
+            OpCode::Call => self.call_jp(1, 5)?,
             OpCode::Ccf => vec![0x3F],
             OpCode::Cp => self.alu_op(AluOp::Cp)?,
             OpCode::Cpd => vec![0xED, 0xA9],
@@ -386,7 +416,7 @@ impl Assembler {
     fn handle_label(&mut self, l: &str) -> Result<(), Error> {
         if self.next_token_is(&Operator(Equals)) {
             self.tokens.pop();
-            match self.expr.parse(&mut self.tokens, &mut self.constants, &mut self.labels) {
+            match self.expr.parse(&mut self.tokens, self.current_pc) {
                 Ok(Some(n)) => self.add_constant(l.to_string(), n)?,
                 Ok(None) => return Err(self.error(ErrorType::SyntaxError)),
                 Err(e) => return Err(self.error(e))
@@ -406,7 +436,7 @@ impl Assembler {
             if let Some(tok) = self.tokens.pop() {
                 match tok {
                     Token::Directive(d) => self.process_directive(d)?,
-                    Token::Label(l) => self.handle_label(&l)?,
+                    Token::ConstLabel(l) => self.handle_label(&l)?,
                     Token::OpCode(op) => self.handle_opcodes(op)?,
                     Token::Invalid => return Err(self.error(ErrorType::InvalidLabel)),
                     _ => return Err(self.error(ErrorType::SyntaxError))
@@ -424,7 +454,7 @@ impl Assembler {
         magenta_ln!("Code Length       : {:02X}", self.current_pc - self.origin);
         magenta_ln!("Labels            : {:?}", self.labels);
         magenta_ln!("Constants         : {:?}", self.constants);
-        //magenta_ln!("Forward references: {:02X?}", self.forward_references);
+        magenta_ln!("Forward references: {:02X?}", self.forward_references);
         //magenta_ln!("Assembled         : {:02X?}", self.bytes);
     }
 }

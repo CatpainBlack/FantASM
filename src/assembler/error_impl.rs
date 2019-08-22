@@ -29,6 +29,7 @@ pub enum ErrorType {
     UnclosedParentheses,
     CSpectDisabled,
     InvalidOption,
+    BadExpression,
 }
 
 impl ToString for ErrorType {
@@ -55,6 +56,7 @@ impl ToString for ErrorType {
             ErrorType::UnclosedParentheses => String::from("Unclosed parentheses"),
             ErrorType::CSpectDisabled => String::from("CSpect pseudo ops are not enabled"),
             ErrorType::InvalidOption => String::from("Invalid assembler option"),
+            ErrorType::BadExpression => String::from("Unable to parse expression")
         }
     }
 }

@@ -4,7 +4,7 @@ use crate::assembler::{Assembler, Error};
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::{Directive, OptionType, Token};
-use crate::assembler::tokens::Token::{Delimiter, Label, Number, StringLiteral, Opt};
+use crate::assembler::tokens::Token::{Delimiter, ConstLabel, Number, StringLiteral, Opt};
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
@@ -17,7 +17,7 @@ pub trait Directives {
 
 impl Directives for Assembler {
     fn set_origin(&mut self) -> Result<(), Error> {
-        match self.expr.parse(&mut self.tokens, &mut self.constants, &mut self.labels) {
+        match self.expr.parse(&mut self.tokens, 0) {
             Ok(Some(mut o)) => {
                 if o > 65535 {
                     o = o & 0xFFFF;
@@ -70,7 +70,7 @@ impl Directives for Assembler {
     fn include_source_file(&mut self) -> Result<(), Error> {
         let file_name = match self.next_token()? {
             StringLiteral(s) => s,
-            Label(l) => l,
+            ConstLabel(l) => l,
             _ => return Err(self.error(ErrorType::FileNotFound))
         };
         self.info(format!("Including file from {}", file_name).as_str());

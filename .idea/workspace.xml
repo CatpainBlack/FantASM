@@ -11,12 +11,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9087e374-0d4e-4bbf-8a06-1a0a5af09360" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/test_load_rp.asm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_load_r.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/directive_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/directive_impl.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/error_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/error_impl.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/expression_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/expression_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/instruction_encoder.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/token_traits.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_traits.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assembler/tokens.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/tokens.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/directives.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/directives.asm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -55,7 +61,7 @@
   <component name="RunManager">
     <configuration name="Run (Debug)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- tests/test_load_rp.asm test.bin --verbose --z80n --cspect" />
+      <option name="command" value="run -- tests/directives.asm test.bin --verbose --z80n --cspect --debug" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -88,7 +94,8 @@
       <option name="presentableId" value="Default" />
       <updated>1566374378245</updated>
       <workItem from="1566374381486" duration="10645000" />
-      <workItem from="1566390407650" duration="5951000" />
+      <workItem from="1566390407650" duration="7181000" />
+      <workItem from="1566460486456" duration="20707000" />
     </task>
     <task id="LOCAL-00002" summary="Implemented CSpect pseudo ops, &quot;break&quot; and &quot;exit&quot;">
       <created>1566377478328</created>
@@ -186,5 +193,15 @@
     <MESSAGE value="Implemented CSpect pseudo ops, &quot;break&quot; and &quot;exit&quot;" />
     <MESSAGE value="Implemented !opt directive" />
     <option name="LAST_COMMIT_MESSAGE" value="Implemented !opt directive" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/tests/directives.asm</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

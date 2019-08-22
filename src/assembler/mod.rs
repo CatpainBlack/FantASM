@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use crate::assembler::expression_impl::ExpressionParser;
 use crate::assembler::tokens::Token;
+use std::collections::HashMap;
 
 mod token_reader_impl;
 mod error_impl;
@@ -26,6 +25,17 @@ struct TokenReader<R> {
     preceding_token: Token,
 }
 
+#[derive(Debug)]
+pub struct ForwardReference {
+    is_expression: bool,
+    pc: isize,
+    label: String,
+    expression: Vec<Token>,
+    swap_bytes: bool,
+    relative: bool,
+}
+
+
 pub struct Assembler {
     line_number: Vec<isize>,
     tokens: Vec<Token>,
@@ -33,8 +43,8 @@ pub struct Assembler {
     current_pc: isize,
     labels: HashMap<String, isize>,
     constants: HashMap<String, isize>,
+    forward_references: Vec<ForwardReference>,
     bytes: Vec<u8>,
-    forward_references: Vec<(u16, String, bool, bool)>,
     file_name: Vec<String>,
     console_output: bool,
     total_lines: isize,
