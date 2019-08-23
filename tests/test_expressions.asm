@@ -6,7 +6,8 @@ start
 
 data
 	db	1,2,3,4,5,6,7,8,9
-	db	start
+	;db	start
 	db	data-start
+	dw	0,start,data,data-start,0x5555
 
 

@@ -11,15 +11,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9087e374-0d4e-4bbf-8a06-1a0a5af09360" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/test_expressions.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Docs/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Docs/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/assembler_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/directive_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/directive_impl.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/assembler/error_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/error_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/expression_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/expression_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/assembler/token_reader_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/directives.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/directives.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_expressions.asm" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_expressions.asm" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -92,7 +87,8 @@
       <updated>1566374378245</updated>
       <workItem from="1566374381486" duration="10645000" />
       <workItem from="1566390407650" duration="7181000" />
-      <workItem from="1566460486456" duration="27773000" />
+      <workItem from="1566460486456" duration="27864000" />
+      <workItem from="1566554203513" duration="660000" />
     </task>
     <task id="LOCAL-00002" summary="Implemented CSpect pseudo ops, &quot;break&quot; and &quot;exit&quot;">
       <created>1566377478328</created>

@@ -19,6 +19,7 @@ pub enum ErrorType {
     IntegerExpected,
     AddressTruncated,
     ByteTrunctated,
+    WordTruncated,
     LabelOrConstantExists,
     UnexpectedEndOfLine,
     InvalidCondition,
@@ -57,6 +58,7 @@ impl ToString for ErrorType {
             ErrorType::CSpectDisabled => String::from("CSpect pseudo ops are not enabled"),
             ErrorType::InvalidOption => String::from("Invalid assembler option"),
             ErrorType::BadExpression => String::from("Unable to parse expression"),
+            ErrorType::WordTruncated => String::from("Integer has been truncated to 16 bits"),
         }
     }
 }
