@@ -8,12 +8,10 @@ use crate::assembler::directive_impl::Directives;
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::expression_impl::ExpressionParser;
 use crate::assembler::instruction_encoder::InstructionEncoder;
-use crate::assembler::reg_pair::HighLow;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{ConstLabel, Number, Operator, AddressIndirect, ConstLabelIndirect};
-use crate::assembler::error_impl::ErrorType::{SyntaxError, ByteTrunctated};
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -85,30 +83,30 @@ impl Assembler {
 
     pub fn second_pass(&mut self) -> Result<(), Error> {
         while let Some(mut fwd_ref) = self.forward_references.pop() {
-            let mut addr: isize;
+            let mut data: isize;
             if fwd_ref.is_expression {
-                addr = match self.expr.eval(fwd_ref.expression.as_mut()) {
+                data = match self.expr.eval(fwd_ref.expression.as_mut()) {
                     Ok(n) => n,
                     Err(e) => return Err(self.error(e)),
                 }
             } else {
-                addr = self.get_label_or_constant_value(fwd_ref.label.as_str())?;
+                data = self.get_label_or_constant_value(fwd_ref.label.as_str())?;
             }
             let index = fwd_ref.pc as usize - self.origin as usize;
-            if fwd_ref.relative {
-                let offset = addr - (fwd_ref.pc + 1) as isize;
+            if fwd_ref.is_relative {
+                let offset = data - (fwd_ref.pc + 1) as isize;
                 self.bytes[index] = offset as u8;
             } else {
-                let stored = self.bytes[index] as isize | ((self.bytes[index + 1] as u16) << 8) as isize;
-                addr += stored;
-                if !(0..65536).contains(&addr) {
-                    self.warn(ErrorType::AddressTruncated);
+                for d in 0..fwd_ref.byte_count as usize {
+                    self.bytes[index + d] = (data & 0xff) as u8;
+                    data = data >> 8;
                 }
-                if fwd_ref.swap_bytes {
-                    addr = ((addr & 0xff) << 8) | ((addr & 0xFF00) >> 8);
+                // fixup the z80n "push nnnn" endiannnessssss
+                if self.z80n_enabled && fwd_ref.byte_count == 2 && index > 1 && self.bytes[index - 2] == 0xed && self.bytes[index - 1] == 0x8a {
+                    let b = self.bytes[index + 1];
+                    self.bytes[index + 1] = self.bytes[index];
+                    self.bytes[index] = b;
                 }
-                self.bytes[index] = addr.lo();
-                self.bytes[index + 1] = addr.hi();
             }
         }
         Ok(())
@@ -166,7 +164,7 @@ impl Assembler {
         match self.next_token()? {
             Number(n) => Ok((n - (self.current_pc as isize + 2)) as u8),
             ConstLabel(s) => {
-                let mut addr = self.try_resolve_label(&s, 1, true, false) as isize;
+                let mut addr = self.try_resolve_label(&s, 1, true) as isize;
                 let pc = (self.current_pc + 2) as isize;
                 if addr == 0 {
                     addr = pc;
@@ -177,7 +175,7 @@ impl Assembler {
         }
     }
 
-    pub(crate) fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool, swap_bytes: bool) -> u16 {
+    pub(crate) fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
         let mut addr = 0;
         let label_name = &*name.replace(":", "");
 
@@ -191,18 +189,39 @@ impl Assembler {
                 pc: self.current_pc + pc_offset,
                 label: label_name.to_string(),
                 expression: vec![],
-                swap_bytes,
-                relative,
+                is_relative: relative,
+                byte_count: 2,
             });
         }
         return addr;
+    }
+
+    pub(crate) fn expect_byte(&mut self, instr_size: isize) -> Result<isize, Error> {
+        self.expect_number_in_range(0..256, 1, ErrorType::ByteTrunctated, instr_size)
+    }
+
+    pub(crate) fn expect_word(&mut self, instr_size: isize) -> Result<isize, Error> {
+        self.expect_number_in_range(0..65536, 2, ErrorType::WordTruncated, instr_size)
+    }
+
+    fn expect_number_in_range(&mut self, range: Range<isize>, count: isize, error_type: ErrorType, instr_size: isize) -> Result<isize, Error> {
+        match self.expr.parse(&mut self.tokens, self.current_pc + instr_size, count) {
+            Ok(Some(n)) => {
+                if !range.contains(&n) {
+                    self.warn(error_type);
+                }
+                Ok(n)
+            }
+            Ok(None) => return Err(self.error(ErrorType::SyntaxError)),
+            Err(e) => return Err(self.error(e))
+        }
     }
 
     pub(crate) fn decode_number(&mut self, token: &Token, pc_offset: isize) -> Result<Option<isize>, Error> {
         match &token {
             Number(n) => Ok(Some(*n)),
             AddressIndirect(a) => Ok(Some(*a as isize)),
-            ConstLabelIndirect(l) => Ok(Some(self.try_resolve_label(l, pc_offset, false, false) as isize)),
+            ConstLabelIndirect(l) => Ok(Some(self.try_resolve_label(l, pc_offset, false) as isize)),
             ConstLabel(l) => if let Some(n) = self.constants.get(l) {
                 Ok(Some(*n))
             } else {
@@ -210,32 +229,6 @@ impl Assembler {
             }
             _ => Ok(None)
         }
-    }
-
-    pub(crate) fn get_address(&mut self, token: &Token, pc_offset: isize) -> Option<u16> {
-        let addr = match &token {
-            Number(n) => *n,
-            AddressIndirect(a) => *a as isize,
-            ConstLabelIndirect(l) => self.try_resolve_label(l, pc_offset, false, false) as isize,
-            ConstLabel(l) => self.try_resolve_label(l, pc_offset, false, false) as isize,
-            _ => return None
-        };
-        if !(0..65536).contains(&addr) {
-            self.warn(ErrorType::AddressTruncated);
-        }
-        Some(addr as u16)
-    }
-
-    pub fn get_byte(&mut self) -> Result<u8, Error> {
-        let b = match self.next_token()? {
-            Number(n) => n,
-            ConstLabel(l) => self.try_resolve_label(&l, 0, false, false) as isize,
-            _ => return Err(self.error(SyntaxError))
-        };
-        if !(0..256).contains(&b) {
-            self.warn(ByteTrunctated);
-        }
-        Ok(b as u8)
     }
 
     pub fn next_token(&mut self) -> Result<Token, Error> {
@@ -260,15 +253,15 @@ impl Assembler {
         Ok(())
     }
 
-    pub fn expect_number(&mut self, in_range: Range<isize>) -> Result<isize, Error> {
-        if let Number(n) = self.next_token()? {
-            if in_range.contains(&n) {
-                return Ok(n);
-            }
-            return Err(self.error(ErrorType::IntegerOutOfRange));
-        }
-        Err(self.error(ErrorType::IntegerExpected))
-    }
+//    pub fn expect_number(&mut self, in_range: Range<isize>) -> Result<isize, Error> {
+//        if let Number(n) = self.next_token()? {
+//            if in_range.contains(&n) {
+//                return Ok(n);
+//            }
+//            return Err(self.error(ErrorType::IntegerOutOfRange));
+//        }
+//        Err(self.error(ErrorType::IntegerExpected))
+//    }
 
 
     fn add_label(&mut self, name: String) -> Result<(), Error> {
@@ -288,6 +281,9 @@ impl Assembler {
     }
 
     pub(crate) fn emit(&mut self, mut b: Vec<u8>) {
+        if self.current_pc + b.len() as isize > 65535 {
+            self.warn(ErrorType::PCOverflow)
+        }
         self.current_pc += b.len() as isize;
         self.bytes.append(&mut b);
     }
@@ -403,7 +399,7 @@ impl Assembler {
             OpCode::Pixeldn => Some(vec![0xED, 0x93]),
             OpCode::Pixelad => Some(vec![0xED, 0x94]),
             OpCode::Setae => Some(vec![0xED, 0x95]),
-            OpCode::Test => Some(vec![0xED, 0x27, self.get_byte()?]),
+            OpCode::Test => Some(vec![0xED, 0x27, self.expect_byte(2)? as u8]),
             _ => None
         };
         if code.is_some() && !self.z80n_enabled {
@@ -416,7 +412,7 @@ impl Assembler {
     fn handle_label(&mut self, l: &str) -> Result<(), Error> {
         if self.next_token_is(&Operator(Equals)) {
             self.tokens.pop();
-            match self.expr.parse(&mut self.tokens, self.current_pc) {
+            match self.expr.parse(&mut self.tokens, self.current_pc, -1) {
                 Ok(Some(n)) => self.add_constant(l.to_string(), n)?,
                 Ok(None) => return Err(self.error(ErrorType::SyntaxError)),
                 Err(e) => return Err(self.error(e))

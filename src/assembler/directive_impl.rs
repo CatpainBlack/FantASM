@@ -9,6 +9,7 @@ pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
     fn handle_bytes(&mut self) -> Result<(), Error>;
     fn handle_words(&mut self) -> Result<(), Error>;
+    fn handle_block(&mut self) -> Result<(), Error>;
     fn set_option(&mut self) -> Result<(), Error>;
     fn include_source_file(&mut self) -> Result<(), Error>;
     fn write_message(&mut self) -> Result<(), Error>;
@@ -17,7 +18,7 @@ pub trait Directives {
 
 impl Directives for Assembler {
     fn set_origin(&mut self) -> Result<(), Error> {
-        match self.expr.parse(&mut self.tokens, 0) {
+        match self.expr.parse(&mut self.tokens, 0, -1) {
             Ok(Some(mut o)) => {
                 if o > 65535 {
                     o = o & 0xFFFF;
@@ -38,7 +39,7 @@ impl Directives for Assembler {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                match self.expr.parse(&mut self.tokens, 0) {
+                match self.expr.parse(&mut self.tokens, self.current_pc, 1) {
                     Ok(Some(n)) => {
                         if !(0..256).contains(&n) {
                             self.warn(ErrorType::IntegerOutOfRange);
@@ -64,19 +65,22 @@ impl Directives for Assembler {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                match self.expr.parse(&mut self.tokens, 0) {
-                    Ok(Some(n)) => {
-                        if !(0..65536).contains(&n) {
-                            self.warn(ErrorType::WordTruncated);
-                        }
-                        self.emit(vec![n.lo(), n.hi()]);
-                    }
-                    Ok(None) => return Err(self.error(ErrorType::SyntaxError)),
-                    Err(e) => return Err(self.error(e))
-                }
+                let word = self.expect_word(0)?;
+                self.emit(vec![word.lo(), word.hi()]);
             }
             expect_comma = !expect_comma;
         }
+        Ok(())
+    }
+
+    fn handle_block(&mut self) -> Result<(), Error> {
+        let size = self.expect_word(-1)? as usize;
+        let mut fill = 0u8;
+        if self.next_token_is(&Delimiter(Comma)) {
+            self.tokens.pop();
+            fill = self.expect_byte(-1)? as u8;
+        }
+        self.emit(vec![fill; size]);
         Ok(())
     }
 
@@ -118,7 +122,7 @@ impl Directives for Assembler {
             Directive::Word => self.handle_words()?,
             Directive::Opt => self.set_option()?,
             //Directive::Binary => {}
-            //Directive::Block => {}
+            Directive::Block => self.handle_block()?,
             //Directive::Hex => {}
             _ => {
                 let line_no = self.line_number.last().unwrap_or(&0);

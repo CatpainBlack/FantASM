@@ -31,8 +31,8 @@ pub struct ForwardReference {
     pc: isize,
     label: String,
     expression: Vec<Token>,
-    swap_bytes: bool,
-    relative: bool,
+    is_relative: bool,
+    byte_count: isize,
 }
 
 

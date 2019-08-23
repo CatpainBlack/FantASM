@@ -96,9 +96,11 @@ impl ExpressionParser {
         Ok(self.accumulator)
     }
 
-    pub fn parse(&mut self, tokens: &mut Vec<Token>, pc: isize) -> Result<Option<isize>, ErrorType> {
+    pub fn parse(&mut self, tokens: &mut Vec<Token>, pc: isize, count: isize) -> Result<Option<isize>, ErrorType> {
         let (has_forward_ref, mut expr) = self.get_expression(tokens);
-
+        if has_forward_ref && count < 0 {
+            return Err(ErrorType::BadConstant);
+        }
         if has_forward_ref {
             //println!("Expression FW REF:{} {:?}", pc, expr);
             unsafe {
@@ -107,8 +109,8 @@ impl ExpressionParser {
                     pc,
                     label: "".to_string(),
                     expression: expr,
-                    swap_bytes: false,
-                    relative: false,
+                    is_relative: false,
+                    byte_count: count,
                 });
             }
             return Ok(Some(0));

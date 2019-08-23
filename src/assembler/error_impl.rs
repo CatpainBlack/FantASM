@@ -8,6 +8,7 @@ use crate::assembler::{Error, ErrorLevel};
 
 pub enum ErrorType {
     //InternalError,
+    PCOverflow,
     InvalidLabel,
     LabelNotFound,
     FileNotFound,
@@ -16,7 +17,7 @@ pub enum ErrorType {
     InvalidRegisterPair,
     InvalidInstruction,
     IntegerOutOfRange,
-    IntegerExpected,
+    //IntegerExpected,
     AddressTruncated,
     ByteTrunctated,
     WordTruncated,
@@ -36,13 +37,14 @@ pub enum ErrorType {
 impl ToString for ErrorType {
     fn to_string(&self) -> String {
         match self {
+            ErrorType::PCOverflow => String::from("Address overflow, PC > 65535"),
             ErrorType::InvalidLabel => String::from("Invalid character in label"),
             ErrorType::SyntaxError => String::from("Syntax error"),
             ErrorType::BadConstant => String::from("Bad constant definition"),
             ErrorType::InvalidRegisterPair => String::from("Invalid register pair"),
             ErrorType::InvalidInstruction => String::from("Invalid instruction"),
             ErrorType::IntegerOutOfRange => String::from("Integer out of range"),
-            ErrorType::IntegerExpected => String::from("Integer expected"),
+            //ErrorType::IntegerExpected => String::from("Integer expected"),
             ErrorType::FileNotFound => String::from("File not found"),
             ErrorType::LabelNotFound => String::from("Undefined label or constant"),
             ErrorType::AddressTruncated => String::from("Address is out of range, the value has been truncated"),

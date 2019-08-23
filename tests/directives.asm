@@ -1,8 +1,10 @@
 	org	 32768 + 1024
 
 start
-	call end-end+end
-	ld	hl,end
+	call	end
+	call	end-start
+	push	32768
+	push	start
+	push	end
 	ret
 end
-	db	0
