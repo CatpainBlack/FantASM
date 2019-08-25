@@ -10,7 +10,8 @@ pub struct Options {
     pub z80n: bool,
     pub verbose: bool,
     pub debug: bool,
-    pub nologo: bool,
+    pub no_logo: bool,
+    pub c_spect: bool,
 }
 
 impl Options {
@@ -31,7 +32,10 @@ impl Options {
             parser.refer(&mut options.z80n)
                 .add_option(&["--z80n"], StoreTrue, "Enable Z80n (ZX Next) cpu extensions");
 
-            parser.refer(&mut options.nologo)
+            parser.refer(&mut options.c_spect)
+                .add_option(&["--cspect"], StoreTrue, "Enable cspect \"exit\" and \"break\" instructions");
+
+            parser.refer(&mut options.no_logo)
                 .add_option(&["-n", "--nologo"], StoreTrue, "Do no display the program name and version");
 
             parser.refer(&mut options.debug)

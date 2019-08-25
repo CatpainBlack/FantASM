@@ -101,9 +101,11 @@ pub enum Directive {
     Include,
     Binary,
     Message,
-    Db,
-    Dw,
-    Ds,
+    Opt,
+    Byte,
+    Word,
+    Block,
+    Hex,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -215,14 +217,33 @@ pub enum OpCode {
     Pixelad,
     Setae,
     Test,
+
+    // cspect
+    Break,
+    Exit,
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum OptionType {
+    Verbose,
+    CSpect,
+    Z80n,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Bool {
+    True,
+    False,
+}
+
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     None,
     Invalid,
     EndOfFile,
-    Label(String),
+    ConstLabel(String),
+    ConstLabelIndirect(String),
     Directive(Directive),
     OpCode(OpCode),
     Number(isize),
@@ -236,7 +257,8 @@ pub enum Token {
     RegisterIndirect(RegPairInd),
     IndexIndirect(RegPair, u8),
     AddressIndirect(usize),
-    LabelIndirect(String),
     Condition(Cnd),
     StringLiteral(String),
+    Opt(OptionType),
+    Boolean(bool),
 }

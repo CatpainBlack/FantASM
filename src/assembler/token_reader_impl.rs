@@ -4,7 +4,7 @@ use crate::assembler::{Error, TokenReader};
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Cnd, Op, Reg, RegPair, RegPairInd, Token};
 use crate::assembler::tokens::Op::{LParens, RParens};
-use crate::assembler::tokens::Token::{AddressIndirect, Condition, IndexIndirect, Label, LabelIndirect, Number, Operator, Register, RegisterIndirect, RegisterPair};
+use crate::assembler::tokens::Token::{AddressIndirect, Condition, IndexIndirect, ConstLabel, ConstLabelIndirect, Number, Operator, Register, RegisterIndirect, RegisterPair};
 use crate::assembler::error_impl::ErrorType;
 
 impl<R> TokenReader<R> where R: BufRead {
@@ -71,7 +71,10 @@ impl<R> TokenReader<R> where R: BufRead {
                 }
                 _ => {}
             }
-            let brk = in_quotes || c.is_whitespace() || self.delimiters.find(c).is_some() || self.operators.find(c).is_some();
+            let is_operator = self.operators.find(c).is_some();
+            let is_delimiter = self.delimiters.find(c).is_some();
+            let is_whitespace = c.is_whitespace();
+            let brk = in_quotes || is_whitespace || is_delimiter || is_operator;
             if brk {
                 self.store_token_string();
                 if !c.is_whitespace() {
@@ -83,6 +86,7 @@ impl<R> TokenReader<R> where R: BufRead {
         }
         self.store_token_string();
         self.words.reverse();
+        //println!("words: {:?}", self.words);
     }
 
     fn next_token(&mut self) -> Option<Token> {
@@ -92,7 +96,7 @@ impl<R> TokenReader<R> where R: BufRead {
         let w = self.words.pop().unwrap_or(String::new());
         let mut tok = Token::from_string(w);
         if self.preceding_token.can_be_conditional() && tok == Register(Reg::C) {
-            tok = Condition(Cnd::C);
+            tok = Condition(Cnd::C)
         }
         self.preceding_token = tok.clone();
         Some(tok.to_owned())
@@ -126,9 +130,13 @@ impl<R> TokenReader<R> where R: BufRead {
                 Some(RegisterPair(RegPair::Sp)) => Some(RegisterIndirect(RegPairInd::Sp)),
                 Some(RegisterPair(RegPair::De)) => Some(RegisterIndirect(RegPairInd::De)),
                 Some(RegisterPair(RegPair::Hl)) => Some(Register(Reg::_HL_)),
-                Some(Register(Reg::C)) => Some(RegisterIndirect(RegPairInd::C)),
+                Some(Register(Reg::C)) => if self.preceding_token.can_be_conditional() {
+                    Some(Condition(Cnd::C))
+                } else {
+                    Some(RegisterIndirect(RegPairInd::C))
+                },
                 Some(Number(n)) => Some(AddressIndirect(n as usize)),
-                Some(Label(l)) => Some(LabelIndirect(l)),
+                Some(ConstLabel(l)) => Some(ConstLabelIndirect(l)),
                 _ => None
             } {
                 if expr.is_empty() {
@@ -145,6 +153,7 @@ impl<R> TokenReader<R> where R: BufRead {
         let mut parens: Vec<usize> = vec![];
         self.line_number += 1;
         let count = self.reader.read_line(&mut line)?;
+        //println!("read_line: {}", line);
         if count <= 0 {
             return Ok(vec![Token::EndOfFile]);
         }
@@ -173,6 +182,7 @@ impl<R> TokenReader<R> where R: BufRead {
         if !parens.is_empty() {
             return Err(Error::fatal(&ErrorType::UnclosedParentheses.to_string(), self.line_number));
         }
+        //println!("read_line: {:?}", self.tokens);
         Ok(self.tokens.to_owned())
     }
 }

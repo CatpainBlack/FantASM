@@ -7,8 +7,7 @@ use crate::assembler::tokens::{AluOp, Cnd, Ir, Reg, RegPairInd, RotOp, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Reg::_HL_;
 use crate::assembler::tokens::RegPair::{_Af, Af, De, Hl, Ix, Iy, Sp};
-use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, Label, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, LabelIndirect};
-use crate::assembler::error_impl::ErrorType::{InvalidInstruction, ByteTrunctated};
+use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, ConstLabel, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, ConstLabelIndirect};
 
 pub(crate) trait InstructionEncoder {
     fn xyz(x: u8, y: u8, z: u8) -> u8;
@@ -20,7 +19,6 @@ pub(crate) trait InstructionEncoder {
     fn alu_op_r(&mut self, a: AluOp, x: u8, q: u8) -> Result<Vec<u8>, Error>;
     fn bit_res_set(&mut self, x: u8) -> Result<Vec<u8>, Error>;
 
-    fn call(&mut self) -> Result<Vec<u8>, Error>;
     fn call_jp(&mut self, q: u8, z: u8) -> Result<Vec<u8>, Error>;
     fn jp(&mut self) -> Result<Vec<u8>, Error>;
 
@@ -64,17 +62,18 @@ impl InstructionEncoder for Assembler {
     }
 
     fn alu_op(&mut self, a: AluOp) -> Result<Vec<u8>, Error> {
-        match self.next_token()? {
+        let tok = self.next_token()?;
+        match tok {
             IndexIndirect(r, n) => return Ok(vec![0xDD | (r as u8 - 4) << 5, Self::alu(a, Reg::_HL_ as u8), n]),
             RegisterIX(r) => return Ok(vec![0xDD, Self::alu(a, r as u8)]),
             RegisterIY(r) => return Ok(vec![0xFD, Self::alu(a, r as u8)]),
             Register(r) => return Ok(vec![Self::alu(a, r as u8)]),
-            Number(n) => return Ok(vec![Self::alu_imm(a), n as u8]),
-            t @ _ => {
-                println!("{:?}", t);
+            //Number(n) => return Ok(vec![Self::alu_imm(a), n as u8]),
+            _ => {
+                self.tokens.push(tok);
+                return Ok(vec![Self::alu_imm(a), self.expect_byte(1)? as u8]);
             }
         }
-        Err(self.error(ErrorType::InvalidInstruction))
     }
 
     fn alu_op_r(&mut self, a: AluOp, x: u8, q: u8) -> Result<Vec<u8>, Error> {
@@ -104,7 +103,7 @@ impl InstructionEncoder for Assembler {
 
             (RegisterPair(_), Register(Reg::A), false) => return Err(self.error(ErrorType::Z80NDisabled)),
             (RegisterPair(_), Number(_), false) => return Err(self.error(ErrorType::Z80NDisabled)),
-            (RegisterPair(_), Label(_), false) => return Err(self.error(ErrorType::Z80NDisabled)),
+            (RegisterPair(_), ConstLabel(_), false) => return Err(self.error(ErrorType::Z80NDisabled)),
 
             (RegisterPair(rp), Register(Reg::A), true) => return Ok(vec![0xED, 0x31 + rp.nrp()?]),
             (RegisterPair(rp), Number(addr), true) => {
@@ -113,8 +112,8 @@ impl InstructionEncoder for Assembler {
                 }
                 return Ok(vec![0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
             }
-            (RegisterPair(rp), Label(l), true) => {
-                let addr = self.try_resolve_label(l, 2, false, false);
+            (RegisterPair(rp), ConstLabel(l), true) => {
+                let addr = self.try_resolve_label(l, 2, false);
                 return Ok(vec![0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
             }
             _ => {}
@@ -123,7 +122,8 @@ impl InstructionEncoder for Assembler {
     }
 
     fn bit_res_set(&mut self, x: u8) -> Result<Vec<u8>, Error> {
-        let bit = self.expect_number(0..8)?;
+        // todo, fix if iX or Iy
+        let bit = self.expect_byte(1)?;
         self.expect_token(Delimiter(Comma))?;
         match self.next_token()? {
             RegisterIX(r) => Ok(vec![0xDD, 0xCb, Self::xyz(x, bit as u8, r as u8)]),
@@ -133,26 +133,19 @@ impl InstructionEncoder for Assembler {
         }
     }
 
-    fn call(&mut self) -> Result<Vec<u8>, Error> {
-        self.call_jp(1, 5)
-    }
-
     fn call_jp(&mut self, q: u8, z: u8) -> Result<Vec<u8>, Error> {
+        let instr: u8;
         if let Condition(c) = *self.tokens.last().unwrap_or(&Token::None)
         {
             self.tokens.pop();
             self.expect_token(Delimiter(Comma))?;
-            if let Some(addr) = self.get_address(1)? {
-                self.tokens.pop();
-                let y = c as u8;
-                return Ok(vec![Self::xyz(3, y, z - 1), addr.lo(), addr.hi()]);
-            }
+            instr = Self::xyz(3, c as u8, z - 1);
+        } else {
+            instr = Self::xpqz(3, 0, q, z);
         }
-        if let Some(addr) = self.get_address(1)? {
-            self.tokens.pop();
-            return Ok(vec![Self::xpqz(3, 0, q, z), addr.lo(), addr.hi()]);
-        }
-        Err(self.error(ErrorType::SyntaxError))
+
+        let addr = self.expect_word(1)?;
+        return Ok(vec![instr, addr.lo(), addr.hi()]);
     }
 
     fn jp(&mut self) -> Result<Vec<u8>, Error> {
@@ -254,7 +247,7 @@ impl InstructionEncoder for Assembler {
     fn jr(&mut self) -> Result<Vec<u8>, Error> {
         let token = self.tokens.last().unwrap_or(&Token::EndOfFile).clone();
         match token {
-            Number(_) | Label(_) => Ok(vec![Self::xyz(0, 3, 0), self.relative()?]),
+            Number(_) | ConstLabel(_) => Ok(vec![Self::xyz(0, 3, 0), self.relative()?]),
             Condition(c) => match &c {
                 Cnd::Z | Cnd::C | Cnd::Nz | Cnd::NC => {
                     self.next_token()?;
@@ -268,24 +261,20 @@ impl InstructionEncoder for Assembler {
     }
 
     fn push_pop(&mut self, z: u8) -> Result<Vec<u8>, Error> {
-        match (self.next_token()?, self.z80n_enabled) {
-            (RegisterPair(Ix), _) => Ok(vec![0xDD, Self::xpqz(3, 2, 0, z)]),
-            (RegisterPair(Iy), _) => Ok(vec![0xFD, Self::xpqz(3, 2, 0, z)]),
-            (RegisterPair(r), _) => Ok(vec![Self::xpqz(3, r.rp2()?, 0, z)]),
-            (Number(_), false) => Err(self.error(ErrorType::Z80NDisabled)),
-            (Label(_), false) => Err(self.error(ErrorType::Z80NDisabled)),
-            (Number(n), true) => {
-                if n < 0 || n > 65535 {
-                    self.warn(ErrorType::AddressTruncated)
-                }
+        let tok = self.next_token()?;
+        match tok {
+            RegisterPair(Ix) => Ok(vec![0xDD, Self::xpqz(3, 2, 0, z)]),
+            RegisterPair(Iy) => Ok(vec![0xFD, Self::xpqz(3, 2, 0, z)]),
+            RegisterPair(r) => Ok(vec![Self::xpqz(3, r.rp2()?, 0, z)]),
+            _ => if self.z80n_enabled {
+                self.tokens.push(tok);
+                let n = self.expect_word(2)?;
                 Ok(vec![0xED, 0x8A, n.hi(), n.lo()])
+            } else {
+                Err(self.error(ErrorType::InvalidInstruction))
             }
-            (Label(l), true) => {
-                let addr = self.try_resolve_label(&l, 2, false, true);
-                Ok(vec![0xED, 0x8A, addr.hi(), addr.lo()])
-            }
-            _ => Err(self.error(ErrorType::InvalidInstruction))
         }
+        //Err(self.error(ErrorType::InvalidInstruction))
     }
 
     fn ret(&mut self) -> Result<Vec<u8>, Error> {
@@ -345,19 +334,55 @@ impl InstructionEncoder for Assembler {
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
         let b = match (dst, src) {
             (RegisterPair(Hl), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Hl), ConstLabelIndirect(l)) => {
+                let a = self.try_resolve_label(l, 1, false);
+                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+            }
             (RegisterPair(Ix), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Ix), ConstLabelIndirect(l)) => {
+                let a = self.try_resolve_label(l, 2, false);
+                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+            }
             (RegisterPair(Iy), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Iy), ConstLabelIndirect(l)) => {
+                let a = self.try_resolve_label(l, 2, false);
+                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+            }
             (RegisterPair(r), AddressIndirect(a)) => Some(vec![0xED, Self::xpqz(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
 
             (RegisterIndirect(rp), Register(Reg::A)) => Some(vec![Self::xpqz(0, rp.clone() as u8, 0, 2)]),
 
             (Register(Reg::A), RegisterIndirect(r)) => Some(vec![Self::xpqz(0, r.clone() as u8, 1, 2)]),
             (Register(Reg::A), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 3, 1, 2), a.lo(), a.hi()]),
+            (Register(Reg::A), ConstLabelIndirect(s)) => {
+                let a = self.try_resolve_label(s, 1, false);
+                Some(vec![Self::xpqz(0, 3, 1, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), Register(Reg::A)) => Some(vec![Self::xpqz(0, 3, 0, 2), a.lo(), a.hi()]),
+            (ConstLabelIndirect(l), Register(Reg::A)) => {
+                let a = self.try_resolve_label(l, 1, false);
+                Some(vec![Self::xpqz(0, 3, 0, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), RegisterPair(Hl)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (ConstLabelIndirect(l), RegisterPair(Hl)) => {
+                let a = self.try_resolve_label(l, 1, false);
+                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), RegisterPair(Ix)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (ConstLabelIndirect(l), RegisterPair(Ix)) => {
+                let a = self.try_resolve_label(l, 2, false);
+                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), RegisterPair(Iy)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (ConstLabelIndirect(l), RegisterPair(Iy)) => {
+                let a = self.try_resolve_label(l, 2, false);
+                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+            }
             (AddressIndirect(a), RegisterPair(r)) => Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
+            (ConstLabelIndirect(l), RegisterPair(r)) => {
+                let a = self.try_resolve_label(l, 2, false);
+                Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()])
+            }
 
             (Register(r), IndexIndirect(reg, o)) => Some(vec![0xDD | (reg.clone() as u8 - 4) << 5, Self::xyz(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
 
@@ -365,7 +390,7 @@ impl InstructionEncoder for Assembler {
             (IndexIndirect(rp, o), Register(r)) => Some(vec![0xDD | (rp.clone() as u8 - 4) << 5, Self::xyz(1, Reg::_HL_ as u8, r.clone() as u8), o.clone()]),
 
             _ => {
-                //println!("load_indirect: {:?},{:?}", dst, src);
+                println!("load_indirect: {:?},{:?}", dst, src);
                 None
             }
         };
@@ -386,10 +411,14 @@ impl InstructionEncoder for Assembler {
 
     fn load_r(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
         let mut encoded: Vec<u8> = vec![];
+        let mut offset = 1;
+        // IX or IY?
         if let Some(p) = dst.is_index_prefix().or_else(|| src.is_index_prefix()).or(None) {
             encoded.push(p);
+            offset += 1;
         }
 
+        // LD A,(nn)
         match (dst, src) {
             (Register(Reg::A), AddressIndirect(addr)) => {
                 encoded.append(&mut vec![Self::xpqz(0, 3, 1, 2), addr.lo(), addr.hi()]);
@@ -398,13 +427,17 @@ impl InstructionEncoder for Assembler {
             _ => {}
         }
 
+        // is src a valid 8 bit reg?
         let r = if let Some(n) = dst.reg_value() { n } else {
             return Err(self.error(ErrorType::SyntaxError));
         };
 
-        if let Some(n) = src.number_to_u8() {
+        if let Some(n) = self.decode_number(src, offset)? {
+            if n < 0 || n > 255 {
+                self.warn(ErrorType::ByteTrunctated);
+            }
             encoded.push(Self::xyz(0, r, 6));
-            encoded.push(n);
+            encoded.push(n as u8);
         } else if let Some(rr) = src.reg_value() {
             encoded.push(Self::xyz(1, r, rr));
         } else {
@@ -414,6 +447,7 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_rp(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
+        //println!("load_rp {:?},{:?}", dst, src);
         let mut encoded: Vec<u8> = vec![];
         let mut instr_size = 1;
         if let Some(p) = dst.is_index_prefix().or_else(|| src.is_index_prefix()).or(None) {
@@ -423,11 +457,20 @@ impl InstructionEncoder for Assembler {
 
         let rp = if let RegisterPair(rp) = dst { rp.rp1()? } else { 0 };
 
-        self.tokens.push(src.clone());
-        if let Some(addr) = self.get_address(instr_size)? {
-            self.next_token()?;
+        let addr = match (dst, src) {
+            (RegisterPair(_), Number(n)) => *n,
+            (RegisterPair(_), ConstLabel(l)) => self.try_resolve_label(l, instr_size, false) as isize,
+            //(RegisterPair(Hl), LabelIndirect(l)) => self.try_resolve_label(l, instr_size, false, false) as isize,
+            //(RegisterPair(Hl), AddressIndirect(a)) => *a as isize,
+            _ => return Err(self.error(ErrorType::SyntaxError))
+        };
+
+        if src.is_indirect() {
+            encoded.append(&mut vec![Self::xpqz(0, 2, 1, 2), addr.lo(), addr.hi()]);
+        } else {
             encoded.append(&mut vec![Self::xpqz(0, rp, 0, 1), addr.lo(), addr.hi()]);
         }
+
         return Ok(encoded);
     }
 
@@ -439,12 +482,12 @@ impl InstructionEncoder for Assembler {
             } else {
                 return Err(self.error(ErrorType::IntegerOutOfRange));
             }
-            (LabelIndirect(l), RegisterPair(Sp)) => {
-                let addr = self.try_resolve_label(l, 2, false, false);
+            (ConstLabelIndirect(l), RegisterPair(Sp)) => {
+                let addr = self.try_resolve_label(l, 2, false);
                 return Ok(vec![0xED, 0x73, addr.lo(), addr.hi()]);
             }
-            (RegisterPair(Sp), LabelIndirect(l)) => {
-                let addr = self.try_resolve_label(l, 2, false, false);
+            (RegisterPair(Sp), ConstLabelIndirect(l)) => {
+                let addr = self.try_resolve_label(l, 2, false);
                 return Ok(vec![0xED, 0x7B, addr.lo(), addr.hi()]);
             }
             (RegisterPair(Sp), RegisterPair(Hl)) => return Ok(vec![Self::xpqz(3, 3, 1, 1)]),
@@ -486,17 +529,13 @@ impl InstructionEncoder for Assembler {
         if !self.z80n_enabled {
             return Err(self.error(ErrorType::Z80NDisabled));
         }
-        let reg = self.get_byte()?;
+        let reg = self.expect_byte(2)? as u8;
         self.expect_token(Delimiter(Comma))?;
-        match self.next_token()? {
-            Register(Reg::A) => Ok(vec![0xED, 0x92, reg]),
-            Number(n) => {
-                if n > 256 || n < 0 {
-                    self.warn(ByteTrunctated);
-                }
-                Ok(vec![0xED, 0x91, reg, n as u8])
-            }
-            _ => Err(self.error(InvalidInstruction))
+        if let Some(Register(Reg::A)) = self.tokens.last() {
+            self.tokens.pop();
+            return Ok(vec![0xED, 0x92, reg]);
         }
+        let n = self.expect_byte(2)? as u8;
+        Ok(vec![0xED, 0x91, reg, n as u8])
     }
 }
