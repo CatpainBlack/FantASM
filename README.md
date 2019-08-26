@@ -8,6 +8,7 @@
 
 * `--nologo` suppress the startup banner
 * `--z80n` enable z80n extended opcodes
+* `--cspect` enable CSpect pseudo ops, BREAK and QUIT
 * `--verbose` enable verbose output
 * `--help` display command line help
 
@@ -19,4 +20,4 @@ The assembler supports all Z80 opcodes and most undocumented ones, except for un
 
 ## Building
 
-`curgo build --release` currently builds with rust >= 1.35.0
+`cargo build --release` currently builds with rust >= 1.35.0
