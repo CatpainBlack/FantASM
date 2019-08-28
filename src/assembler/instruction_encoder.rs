@@ -101,9 +101,9 @@ impl InstructionEncoder for Assembler {
                 return self.alu_op(a);
             }
 
-            (RegisterPair(_), Register(Reg::A), false) => return Err(self.error(ErrorType::Z80NDisabled)),
-            (RegisterPair(_), Number(_), false) => return Err(self.error(ErrorType::Z80NDisabled)),
-            (RegisterPair(_), ConstLabel(_), false) => return Err(self.error(ErrorType::Z80NDisabled)),
+            (RegisterPair(_), Register(Reg::A), false) => return Err(self.context.error(ErrorType::Z80NDisabled)),
+            (RegisterPair(_), Number(_), false) => return Err(self.context.error(ErrorType::Z80NDisabled)),
+            (RegisterPair(_), ConstLabel(_), false) => return Err(self.context.error(ErrorType::Z80NDisabled)),
 
             (RegisterPair(rp), Register(Reg::A), true) => return Ok(vec![0xED, 0x31 + rp.nrp()?]),
             (RegisterPair(rp), Number(addr), true) => {
@@ -118,7 +118,7 @@ impl InstructionEncoder for Assembler {
             }
             _ => {}
         }
-        return Err(self.error(ErrorType::InvalidInstruction));
+        return Err(self.context.error(ErrorType::InvalidInstruction));
     }
 
     fn bit_res_set(&mut self, x: u8) -> Result<Vec<u8>, Error> {
@@ -129,7 +129,7 @@ impl InstructionEncoder for Assembler {
             RegisterIX(r) => Ok(vec![0xDD, 0xCb, Self::xyz(x, bit as u8, r as u8)]),
             RegisterIY(r) => Ok(vec![0xFD, 0xCb, Self::xyz(x, bit as u8, r as u8)]),
             Register(r) => Ok(vec![0xCb, Self::xyz(x, bit as u8, r as u8)]),
-            _ => Err(self.error(ErrorType::InvalidInstruction))
+            _ => Err(self.context.error(ErrorType::InvalidInstruction))
         }
     }
 
@@ -178,7 +178,7 @@ impl InstructionEncoder for Assembler {
             (RegisterIndirect(RegPairInd::Sp), RegisterPair(Iy)) => Ok(vec![0xFD, 0xE3]),
             _ => {
                 //self.info(format!("{:?},{:?}", lhs, rhs).as_str());
-                Err(self.error(ErrorType::InvalidRegisterPair))
+                Err(self.context.error(ErrorType::InvalidRegisterPair))
             }
         }
     }
@@ -191,9 +191,9 @@ impl InstructionEncoder for Assembler {
                 }
                 return Ok(vec![0xED, Self::xyz(1, n as u8, 6)]);
             }
-            return Err(self.error(ErrorType::IntegerOutOfRange));
+            return Err(self.context.error(ErrorType::IntegerOutOfRange));
         }
-        Err(self.error(ErrorType::SyntaxError))
+        Err(self.context.error(ErrorType::SyntaxError))
     }
 
     fn inc_dec(&mut self, q: u8) -> Result<Vec<u8>, Error> {
@@ -205,7 +205,7 @@ impl InstructionEncoder for Assembler {
             RegisterIX(r) => Ok(vec![0xDD, Self::xyz(0, r as u8, q + 4)]),
             RegisterIY(r) => Ok(vec![0xFD, Self::xyz(0, r as u8, q + 4)]),
             Register(r) => Ok(vec![Self::xyz(0, r as u8, q + 4)]),
-            _ => Err(self.error(ErrorType::SyntaxError))
+            _ => Err(self.context.error(ErrorType::SyntaxError))
         }
     }
 
@@ -216,7 +216,7 @@ impl InstructionEncoder for Assembler {
             if y == 3 {
                 return Ok(vec![0xED, 0x70]);
             } else {
-                return Err(self.error(ErrorType::SyntaxError));
+                return Err(self.context.error(ErrorType::SyntaxError));
             }
         }
         self.expect_token(Delimiter(Comma))?;
@@ -241,7 +241,7 @@ impl InstructionEncoder for Assembler {
             _ => {}
         }
 
-        Err(self.error(ErrorType::SyntaxError))
+        Err(self.context.error(ErrorType::SyntaxError))
     }
 
     fn jr(&mut self) -> Result<Vec<u8>, Error> {
@@ -254,9 +254,9 @@ impl InstructionEncoder for Assembler {
                     self.expect_token(Delimiter(Comma))?;
                     Ok(vec![Self::xyz(0, c.clone() as u8 + 4, 0), self.relative()?])
                 }
-                _ => Err(self.error(ErrorType::InvalidCondition))
+                _ => Err(self.context.error(ErrorType::InvalidCondition))
             }
-            _ => Err(self.error(ErrorType::SyntaxError))
+            _ => Err(self.context.error(ErrorType::SyntaxError))
         }
     }
 
@@ -271,7 +271,7 @@ impl InstructionEncoder for Assembler {
                 let n = self.expect_word(2)?;
                 Ok(vec![0xED, 0x8A, n.hi(), n.lo()])
             } else {
-                Err(self.error(ErrorType::InvalidInstruction))
+                Err(self.context.error(ErrorType::InvalidInstruction))
             }
         }
         //Err(self.error(ErrorType::InvalidInstruction))
@@ -294,17 +294,17 @@ impl InstructionEncoder for Assembler {
             Register(r) => return Ok(vec![0xCB, Self::rot_encode(a, r as u8)]),
             _ => {}
         }
-        Err(self.error(ErrorType::SyntaxError))
+        Err(self.context.error(ErrorType::SyntaxError))
     }
 
     fn rst(&mut self) -> Result<Vec<u8>, Error> {
         if let Number(n) = self.next_token()? {
             if ((n / 8) & 7) * 8 != n {
-                return Err(self.error(ErrorType::IntegerOutOfRange));
+                return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
             return Ok(vec![Self::xyz(3, n as u8 >> 3, 7)]);
         }
-        Err(self.error(ErrorType::InvalidInstruction))
+        Err(self.context.error(ErrorType::InvalidInstruction))
     }
 
     fn load(&mut self) -> Result<Vec<u8>, Error> {
@@ -328,7 +328,7 @@ impl InstructionEncoder for Assembler {
             return self.load_rp(&lhs, &rhs);
         }
 
-        Err(self.error(ErrorType::SyntaxError))
+        Err(self.context.error(ErrorType::SyntaxError))
     }
 
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
@@ -396,7 +396,7 @@ impl InstructionEncoder for Assembler {
         };
 
         match b {
-            None => Err(self.error(ErrorType::SyntaxError)),
+            None => Err(self.context.error(ErrorType::SyntaxError)),
             Some(mut b) => {
                 if let Some(prefix) = dst.is_index_prefix() {
                     b.insert(0, prefix);
@@ -429,7 +429,7 @@ impl InstructionEncoder for Assembler {
 
         // is src a valid 8 bit reg?
         let r = if let Some(n) = dst.reg_value() { n } else {
-            return Err(self.error(ErrorType::SyntaxError));
+            return Err(self.context.error(ErrorType::SyntaxError));
         };
 
         if let Some(n) = self.decode_number(src, offset)? {
@@ -441,7 +441,7 @@ impl InstructionEncoder for Assembler {
         } else if let Some(rr) = src.reg_value() {
             encoded.push(Self::xyz(1, r, rr));
         } else {
-            return Err(self.error(ErrorType::SyntaxError));
+            return Err(self.context.error(ErrorType::SyntaxError));
         }
         Ok(encoded)
     }
@@ -462,7 +462,7 @@ impl InstructionEncoder for Assembler {
             (RegisterPair(_), ConstLabel(l)) => self.try_resolve_label(l, instr_size, false) as isize,
             //(RegisterPair(Hl), LabelIndirect(l)) => self.try_resolve_label(l, instr_size, false, false) as isize,
             //(RegisterPair(Hl), AddressIndirect(a)) => *a as isize,
-            _ => return Err(self.error(ErrorType::SyntaxError))
+            _ => return Err(self.context.error(ErrorType::SyntaxError))
         };
 
         if src.is_indirect() {
@@ -480,7 +480,7 @@ impl InstructionEncoder for Assembler {
                 let addr = n.clone() as u16;
                 return Ok(vec![Self::xpqz(0, 3, 0, 1), addr.lo(), addr.hi()]);
             } else {
-                return Err(self.error(ErrorType::IntegerOutOfRange));
+                return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
             (ConstLabelIndirect(l), RegisterPair(Sp)) => {
                 let addr = self.try_resolve_label(l, 2, false);
@@ -509,7 +509,7 @@ impl InstructionEncoder for Assembler {
         };
 
         if y.is_none() {
-            return Err(self.error(ErrorType::InvalidInstruction));
+            return Err(self.context.error(ErrorType::InvalidInstruction));
         }
 
         Ok(vec![0xED, Self::xyz(1, y.unwrap(), 7)])
@@ -517,7 +517,7 @@ impl InstructionEncoder for Assembler {
 
     fn mul(&mut self) -> Result<Vec<u8>, Error> {
         if !self.z80n_enabled {
-            return Err(self.error(ErrorType::Z80NDisabled));
+            return Err(self.context.error(ErrorType::Z80NDisabled));
         }
         self.expect_token(Register(Reg::D))?;
         self.expect_token(Delimiter(Comma))?;
@@ -527,7 +527,7 @@ impl InstructionEncoder for Assembler {
 
     fn next_reg(&mut self) -> Result<Vec<u8>, Error> {
         if !self.z80n_enabled {
-            return Err(self.error(ErrorType::Z80NDisabled));
+            return Err(self.context.error(ErrorType::Z80NDisabled));
         }
         let reg = self.expect_byte(2)? as u8;
         self.expect_token(Delimiter(Comma))?;

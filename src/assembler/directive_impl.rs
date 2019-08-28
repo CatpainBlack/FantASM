@@ -18,7 +18,7 @@ pub trait Directives {
 
 impl Directives for Assembler {
     fn set_origin(&mut self) -> Result<(), Error> {
-        match self.expr.parse(&mut self.tokens, 0, -1) {
+        match self.expr.parse(&mut self.context, &mut self.tokens, 0, -1) {
             Ok(Some(mut o)) => {
                 if o > 65535 {
                     o = o & 0xFFFF;
@@ -26,10 +26,10 @@ impl Directives for Assembler {
                 }
                 self.origin = o
             }
-            Ok(None) => return Err(self.error(ErrorType::SyntaxError)),
-            Err(e) => return Err(self.error(e))
+            Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
+            Err(e) => return Err(self.context.error(e))
         }
-        self.current_pc = self.origin;
+        self.context.current_pc = self.origin;
         Ok(())
     }
 
@@ -39,7 +39,7 @@ impl Directives for Assembler {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                match self.expr.parse(&mut self.tokens, self.current_pc, 1) {
+                match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1) {
                     Ok(Some(n)) => {
                         if !(0..256).contains(&n) {
                             self.warn(ErrorType::IntegerOutOfRange);
@@ -49,9 +49,9 @@ impl Directives for Assembler {
                     Ok(None) => if let StringLiteral(s) = self.next_token()? {
                         self.emit(s.into_bytes());
                     } else {
-                        return Err(self.error(ErrorType::SyntaxError));
+                        return Err(self.context.error(ErrorType::SyntaxError));
                     }
-                    Err(e) => return Err(self.error(e))
+                    Err(e) => return Err(self.context.error(e))
                 }
             }
             expect_comma = !expect_comma;
@@ -91,7 +91,7 @@ impl Directives for Assembler {
             (Opt(OptionType::Verbose), Token::Boolean(b)) => self.enable_console(b),
             (Opt(OptionType::CSpect), Token::Boolean(b)) => self.enable_cspect(b),
             (Opt(OptionType::Z80n), Token::Boolean(b)) => self.enable_z80n(b),
-            (_, _) => return Err(self.error(ErrorType::InvalidOption))
+            (_, _) => return Err(self.context.error(ErrorType::InvalidOption))
         };
         Ok(())
     }
@@ -100,7 +100,7 @@ impl Directives for Assembler {
         let file_name = match self.next_token()? {
             StringLiteral(s) => s,
             ConstLabel(l) => l,
-            _ => return Err(self.error(ErrorType::FileNotFound))
+            _ => return Err(self.context.error(ErrorType::FileNotFound))
         };
         self.info(format!("Including file from {}", file_name).as_str());
         self.first_pass(file_name.as_str())
@@ -125,7 +125,7 @@ impl Directives for Assembler {
             Directive::Block => self.handle_block()?,
             //Directive::Hex => {}
             _ => {
-                let line_no = self.line_number.last().unwrap_or(&0);
+                let line_no = self.context.line_number.last().unwrap_or(&0);
                 return Err(Error::fatal(&format!("Unhandled directive: {:?}", directive), *line_no));
             }
         }
