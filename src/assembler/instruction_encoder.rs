@@ -113,7 +113,7 @@ impl InstructionEncoder for Assembler {
                 return Ok(vec![0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
             }
             (RegisterPair(rp), ConstLabel(l), true) => {
-                let addr = self.try_resolve_label(l, 2, false);
+                let addr = self.context.try_resolve_label(l, 2, false);
                 return Ok(vec![0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
             }
             _ => {}
@@ -335,17 +335,17 @@ impl InstructionEncoder for Assembler {
         let b = match (dst, src) {
             (RegisterPair(Hl), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
             (RegisterPair(Hl), ConstLabelIndirect(l)) => {
-                let a = self.try_resolve_label(l, 1, false);
+                let a = self.context.try_resolve_label(l, 1, false);
                 Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
             }
             (RegisterPair(Ix), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
             (RegisterPair(Ix), ConstLabelIndirect(l)) => {
-                let a = self.try_resolve_label(l, 2, false);
+                let a = self.context.try_resolve_label(l, 2, false);
                 Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
             }
             (RegisterPair(Iy), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
             (RegisterPair(Iy), ConstLabelIndirect(l)) => {
-                let a = self.try_resolve_label(l, 2, false);
+                let a = self.context.try_resolve_label(l, 2, false);
                 Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
             }
             (RegisterPair(r), AddressIndirect(a)) => Some(vec![0xED, Self::xpqz(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
@@ -355,32 +355,32 @@ impl InstructionEncoder for Assembler {
             (Register(Reg::A), RegisterIndirect(r)) => Some(vec![Self::xpqz(0, r.clone() as u8, 1, 2)]),
             (Register(Reg::A), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 3, 1, 2), a.lo(), a.hi()]),
             (Register(Reg::A), ConstLabelIndirect(s)) => {
-                let a = self.try_resolve_label(s, 1, false);
+                let a = self.context.try_resolve_label(s, 1, false);
                 Some(vec![Self::xpqz(0, 3, 1, 2), a.lo(), a.hi()])
             }
             (AddressIndirect(a), Register(Reg::A)) => Some(vec![Self::xpqz(0, 3, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), Register(Reg::A)) => {
-                let a = self.try_resolve_label(l, 1, false);
+                let a = self.context.try_resolve_label(l, 1, false);
                 Some(vec![Self::xpqz(0, 3, 0, 2), a.lo(), a.hi()])
             }
             (AddressIndirect(a), RegisterPair(Hl)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(Hl)) => {
-                let a = self.try_resolve_label(l, 1, false);
+                let a = self.context.try_resolve_label(l, 1, false);
                 Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
             }
             (AddressIndirect(a), RegisterPair(Ix)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(Ix)) => {
-                let a = self.try_resolve_label(l, 2, false);
+                let a = self.context.try_resolve_label(l, 2, false);
                 Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
             }
             (AddressIndirect(a), RegisterPair(Iy)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(Iy)) => {
-                let a = self.try_resolve_label(l, 2, false);
+                let a = self.context.try_resolve_label(l, 2, false);
                 Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
             }
             (AddressIndirect(a), RegisterPair(r)) => Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(r)) => {
-                let a = self.try_resolve_label(l, 2, false);
+                let a = self.context.try_resolve_label(l, 2, false);
                 Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()])
             }
 
@@ -459,7 +459,7 @@ impl InstructionEncoder for Assembler {
 
         let addr = match (dst, src) {
             (RegisterPair(_), Number(n)) => *n,
-            (RegisterPair(_), ConstLabel(l)) => self.try_resolve_label(l, instr_size, false) as isize,
+            (RegisterPair(_), ConstLabel(l)) => self.context.try_resolve_label(l, instr_size, false) as isize,
             //(RegisterPair(Hl), LabelIndirect(l)) => self.try_resolve_label(l, instr_size, false, false) as isize,
             //(RegisterPair(Hl), AddressIndirect(a)) => *a as isize,
             _ => return Err(self.context.error(ErrorType::SyntaxError))
@@ -483,11 +483,11 @@ impl InstructionEncoder for Assembler {
                 return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
             (ConstLabelIndirect(l), RegisterPair(Sp)) => {
-                let addr = self.try_resolve_label(l, 2, false);
+                let addr = self.context.try_resolve_label(l, 2, false);
                 return Ok(vec![0xED, 0x73, addr.lo(), addr.hi()]);
             }
             (RegisterPair(Sp), ConstLabelIndirect(l)) => {
-                let addr = self.try_resolve_label(l, 2, false);
+                let addr = self.context.try_resolve_label(l, 2, false);
                 return Ok(vec![0xED, 0x7B, addr.lo(), addr.hi()]);
             }
             (RegisterPair(Sp), RegisterPair(Hl)) => return Ok(vec![Self::xpqz(3, 3, 1, 1)]),

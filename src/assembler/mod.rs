@@ -1,6 +1,6 @@
 use crate::assembler::expression_impl::ExpressionParser;
 use crate::assembler::tokens::Token;
-use std::collections::HashMap;
+use crate::assembler::assembler_context_impl::AssemblerContext;
 
 mod token_reader_impl;
 mod error_impl;
@@ -16,57 +16,48 @@ mod assembler_context_impl;
 
 //#[derive(Debug)]
 struct TokenReader<R> {
-    reader: R,
-    operators: String,
-    delimiters: String,
-    line_number: isize,
-    words: Vec<String>,
-    token_string: String,
-    tokens: Vec<Token>,
-    preceding_token: Token,
+	reader: R,
+	operators: String,
+	delimiters: String,
+	line_number: isize,
+	words: Vec<String>,
+	token_string: String,
+	tokens: Vec<Token>,
+	preceding_token: Token,
 }
 
 #[derive(Debug)]
 pub struct ForwardReference {
-    is_expression: bool,
-    pc: isize,
-    label: String,
-    expression: Vec<Token>,
-    is_relative: bool,
-    byte_count: isize,
-    line_no: isize,
-    file_name: String,
-}
-
-pub struct AssemblerContext {
-    labels: HashMap<String, isize>,
-    constants: HashMap<String, isize>,
-    forward_references: Vec<ForwardReference>,
-    line_number: Vec<isize>,
-    file_name: Vec<String>,
-    current_pc: isize,
+	is_expression: bool,
+	pc: isize,
+	label: String,
+	expression: Vec<Token>,
+	is_relative: bool,
+	byte_count: isize,
+	line_no: isize,
+	file_name: String,
 }
 
 pub struct Assembler {
-    context: AssemblerContext,
-    tokens: Vec<Token>,
-    origin: isize,
-    bytes: Vec<u8>,
-    console_output: bool,
-    total_lines: isize,
-    expr: ExpressionParser,
-    z80n_enabled: bool,
-    cspect_enabled: bool,
+	context: AssemblerContext,
+	tokens: Vec<Token>,
+	origin: isize,
+	bytes: Vec<u8>,
+	console_output: bool,
+	total_lines: isize,
+	expr: ExpressionParser,
+	z80n_enabled: bool,
+	cspect_enabled: bool,
 }
 
 #[derive(Debug)]
 pub enum ErrorLevel {
-    Fatal,
+	Fatal,
 }
 
 pub struct Error {
-    pub line_no: isize,
-    pub message: String,
-    pub level: ErrorLevel,
-    pub file_name: String,
+	pub line_no: isize,
+	pub message: String,
+	pub level: ErrorLevel,
+	pub file_name: String,
 }
