@@ -106,6 +106,7 @@ pub enum Directive {
     Word,
     Block,
     Hex,
+    Align,
 }
 
 #[derive(Debug, Clone, PartialEq)]

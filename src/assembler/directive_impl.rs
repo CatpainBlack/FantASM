@@ -4,6 +4,9 @@ use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Token::{Delimiter, ConstLabel, StringLiteral, Opt};
 use crate::assembler::reg_pair::HighLow;
+use std::path::Path;
+use std::fs::File;
+use std::io::Read;
 
 pub trait Directives {
 	fn set_origin(&mut self) -> Result<(), Error>;
@@ -13,6 +16,7 @@ pub trait Directives {
 	fn set_option(&mut self) -> Result<(), Error>;
 	fn include_source_file(&mut self) -> Result<(), Error>;
 	fn write_message(&mut self) -> Result<(), Error>;
+	fn include_binary(&mut self) -> Result<(), Error>;
 	fn process_directive(&mut self, directive: Directive) -> Result<(), Error>;
 }
 
@@ -113,6 +117,23 @@ impl Directives for Assembler {
 		Ok(())
 	}
 
+	fn include_binary(&mut self) -> Result<(), Error> {
+		let file_name = match self.next_token()? {
+			StringLiteral(s) => s,
+			ConstLabel(l) => l,
+			_ => return Err(self.context.error(ErrorType::FileNotFound))
+		};
+		if !Path::new(&file_name).exists() {
+			return Err(self.context.error(ErrorType::FileNotFound));
+		}
+		self.info(format!("Including binary file from {}", file_name).as_str());
+		let mut f = File::open(&file_name)?;
+		let read = f.read(&mut self.bytes)? as isize;
+		let pc = self.context.offset_pc(read);
+		self.context.pc(pc);
+		Ok(())
+	}
+
 	fn process_directive(&mut self, directive: Directive) -> Result<(), Error> {
 		match directive {
 			Directive::Org => self.set_origin()?,
@@ -121,8 +142,9 @@ impl Directives for Assembler {
 			Directive::Byte => self.handle_bytes()?,
 			Directive::Word => self.handle_words()?,
 			Directive::Opt => self.set_option()?,
-			//Directive::Binary => {}
+			Directive::Binary => self.include_binary()?,
 			Directive::Block => self.handle_block()?,
+			Directive::Align => {}
 			//Directive::Hex => {}
 			_ => {
 				let line_no = self.context.current_line_number();
