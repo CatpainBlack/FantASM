@@ -9,12 +9,36 @@ use crate::assembler::tokens::Reg::_HL_;
 use crate::assembler::tokens::RegPair::{_Af, Af, De, Hl, Ix, Iy, Sp};
 use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, ConstLabel, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, ConstLabelIndirect};
 
+macro_rules! xyz {
+    ($x: expr, $y: expr, $z: expr) => {
+        (($x & 3) << 6) | (($y & 7) << 3) | ($z & 7)
+    }
+}
+
+macro_rules! xpqz {
+    ($x: expr, $p: expr, $q: expr, $z: expr) => {
+        (($x & 3) << 6) | (($p & 3) << 4) | (($q & 1) << 3) | ($z & 7)
+    }
+}
+
+macro_rules! alu {
+    ($op: expr, $r: expr) => {
+        (2 << 6) | ((($op as u8 & 7) << 3) | $r & 7)
+    }
+}
+macro_rules! rot_encode {
+    ($op: expr, $r: expr) => {
+        ($op as u8 & 7) << 3 | ($r & 7)
+    }
+}
+
+macro_rules! alu_imm {
+    ($op: expr) => {
+        (3 << 6) | ((($op as u8) << 3) | 6)
+    }
+}
+
 pub(crate) trait InstructionEncoder {
-    fn xyz(x: u8, y: u8, z: u8) -> u8;
-    fn xpqz(x: u8, p: u8, q: u8, z: u8) -> u8;
-    fn alu(op: AluOp, r: u8) -> u8;
-    fn rot_encode(op: RotOp, r: u8) -> u8;
-    fn alu_imm(op: AluOp) -> u8;
     fn alu_op(&mut self, a: AluOp) -> Result<Vec<u8>, Error>;
     fn alu_op_r(&mut self, a: AluOp, x: u8, q: u8) -> Result<Vec<u8>, Error>;
     fn bit_res_set(&mut self, x: u8) -> Result<Vec<u8>, Error>;
@@ -41,37 +65,18 @@ pub(crate) trait InstructionEncoder {
 }
 
 impl InstructionEncoder for Assembler {
-    fn xyz(x: u8, y: u8, z: u8) -> u8 {
-        ((x & 3) << 6) | ((y & 7) << 3) | (z & 7)
-    }
-
-    fn xpqz(x: u8, p: u8, q: u8, z: u8) -> u8 {
-        ((x & 3) << 6) | ((p & 3) << 4) | ((q & 1) << 3) | (z & 7)
-    }
-
-    fn alu(op: AluOp, r: u8) -> u8 {
-        (2 << 6) | (((op as u8 & 7) << 3) | r & 7)
-    }
-
-    fn rot_encode(op: RotOp, r: u8) -> u8 {
-        (op as u8 & 7) << 3 | (r & 7)
-    }
-
-    fn alu_imm(op: AluOp) -> u8 {
-        (3 << 6) | (((op as u8) << 3) | 6)
-    }
 
     fn alu_op(&mut self, a: AluOp) -> Result<Vec<u8>, Error> {
         let tok = self.next_token()?;
         match tok {
-            IndexIndirect(r, n) => return Ok(vec![0xDD | (r as u8 - 4) << 5, Self::alu(a, Reg::_HL_ as u8), n]),
-            RegisterIX(r) => return Ok(vec![0xDD, Self::alu(a, r as u8)]),
-            RegisterIY(r) => return Ok(vec![0xFD, Self::alu(a, r as u8)]),
-            Register(r) => return Ok(vec![Self::alu(a, r as u8)]),
+            IndexIndirect(r, n) => return Ok(vec![0xDD | (r as u8 - 4) << 5, alu!(a, Reg::_HL_ as u8), n]),
+            RegisterIX(r) => return Ok(vec![0xDD, alu!(a, r as u8)]),
+            RegisterIY(r) => return Ok(vec![0xFD, alu!(a, r as u8)]),
+            Register(r) => return Ok(vec![alu!(a, r as u8)]),
             //Number(n) => return Ok(vec![Self::alu_imm(a), n as u8]),
             _ => {
                 self.tokens.push(tok);
-                return Ok(vec![Self::alu_imm(a), self.expect_byte(1)? as u8]);
+                return Ok(vec![alu_imm!(a), self.expect_byte(1)? as u8]);
             }
         }
     }
@@ -88,14 +93,14 @@ impl InstructionEncoder for Assembler {
 
         match (&lhs, &rhs, self.z80n_enabled) {
             (RegisterPair(Hl), RegisterPair(reg), _) => match a {
-                AluOp::Add => return Ok(vec![Self::xpqz(0, reg.rp1()?, 1, 1)]),
-                AluOp::Adc => return Ok(vec![0xED, Self::xpqz(1, reg.rp1()?, 1, 2)]),
-                AluOp::Sbc => return Ok(vec![0xED, Self::xpqz(1, reg.rp1()?, 0, 2)]),
+                AluOp::Add => return Ok(vec![xpqz!(0, reg.rp1()?, 1, 1)]),
+                AluOp::Adc => return Ok(vec![0xED, xpqz!(1, reg.rp1()?, 1, 2)]),
+                AluOp::Sbc => return Ok(vec![0xED, xpqz!(1, reg.rp1()?, 0, 2)]),
                 _ => {}
             }
 
-            (RegisterPair(Ix), RegisterPair(rp), _) => return Ok(vec![0xDD, Self::xpqz(x, rp.rp1()?, q, 1)]),
-            (RegisterPair(Iy), RegisterPair(rp), _) => return Ok(vec![0xFD, Self::xpqz(x, rp.rp1()?, q, 1)]),
+            (RegisterPair(Ix), RegisterPair(rp), _) => return Ok(vec![0xDD, xpqz!(x, rp.rp1()?, q, 1)]),
+            (RegisterPair(Iy), RegisterPair(rp), _) => return Ok(vec![0xFD, xpqz!(x, rp.rp1()?, q, 1)]),
             (Register(Reg::A), _, _) => {
                 self.tokens.push(rhs);
                 return self.alu_op(a);
@@ -126,9 +131,9 @@ impl InstructionEncoder for Assembler {
         let bit = self.expect_byte(1)?;
         self.expect_token(Delimiter(Comma))?;
         match self.next_token()? {
-            RegisterIX(r) => Ok(vec![0xDD, 0xCb, Self::xyz(x, bit as u8, r as u8)]),
-            RegisterIY(r) => Ok(vec![0xFD, 0xCb, Self::xyz(x, bit as u8, r as u8)]),
-            Register(r) => Ok(vec![0xCb, Self::xyz(x, bit as u8, r as u8)]),
+            RegisterIX(r) => Ok(vec![0xDD, 0xCb, xyz!(x, bit as u8, r as u8)]),
+            RegisterIY(r) => Ok(vec![0xFD, 0xCb, xyz!(x, bit as u8, r as u8)]),
+            Register(r) => Ok(vec![0xCb, xyz!(x, bit as u8, r as u8)]),
             _ => Err(self.context.error(ErrorType::InvalidInstruction))
         }
     }
@@ -139,9 +144,9 @@ impl InstructionEncoder for Assembler {
         {
             self.tokens.pop();
             self.expect_token(Delimiter(Comma))?;
-            instr = Self::xyz(3, c as u8, z - 1);
+            instr = xyz!(3, c as u8, z - 1);
         } else {
-            instr = Self::xpqz(3, 0, q, z);
+            instr = xpqz!(3, 0, q, z);
         }
 
         let addr = self.expect_word(1)?;
@@ -152,10 +157,10 @@ impl InstructionEncoder for Assembler {
         if let Some(bytes) = match self.tokens.last() {
             Some(IndexIndirect(i, _)) => {
                 let ixy = (*i as u8) - 4 << 5;
-                Some(vec![0xDD | ixy, Self::xpqz(3, 2, 1, 1)])
+                Some(vec![0xDD | ixy, xpqz!(3, 2, 1, 1)])
             }
             Some(Register(_HL_)) => {
-                Some(vec![Self::xpqz(3, 2, 1, 1)])
+                Some(vec![xpqz!(3, 2, 1, 1)])
             }
             _ => None
         } {
@@ -189,7 +194,7 @@ impl InstructionEncoder for Assembler {
                 if n > 0 {
                     n += 1;
                 }
-                return Ok(vec![0xED, Self::xyz(1, n as u8, 6)]);
+                return Ok(vec![0xED, xyz!(1, n as u8, 6)]);
             }
             return Err(self.context.error(ErrorType::IntegerOutOfRange));
         }
@@ -198,13 +203,13 @@ impl InstructionEncoder for Assembler {
 
     fn inc_dec(&mut self, q: u8) -> Result<Vec<u8>, Error> {
         match self.next_token()? {
-            IndexIndirect(reg, n) => Ok(vec![0xDD | ((reg as u8 - 4) << 5), Self::xyz(0, _HL_ as u8, q + 4), n]),
-            RegisterPair(Ix) => Ok(vec![0xDD, Self::xpqz(0, 2, q, 3)]),
-            RegisterPair(Iy) => Ok(vec![0xFD, Self::xpqz(0, 2, q, 3)]),
-            RegisterPair(r) => Ok(vec![Self::xpqz(0, r.rp1()?, q, 3)]),
-            RegisterIX(r) => Ok(vec![0xDD, Self::xyz(0, r as u8, q + 4)]),
-            RegisterIY(r) => Ok(vec![0xFD, Self::xyz(0, r as u8, q + 4)]),
-            Register(r) => Ok(vec![Self::xyz(0, r as u8, q + 4)]),
+            IndexIndirect(reg, n) => Ok(vec![0xDD | ((reg as u8 - 4) << 5), xyz!(0, _HL_ as u8, q + 4), n]),
+            RegisterPair(Ix) => Ok(vec![0xDD, xpqz!(0, 2, q, 3)]),
+            RegisterPair(Iy) => Ok(vec![0xFD, xpqz!(0, 2, q, 3)]),
+            RegisterPair(r) => Ok(vec![xpqz!(0, r.rp1()?, q, 3)]),
+            RegisterIX(r) => Ok(vec![0xDD, xyz!(0, r as u8, q + 4)]),
+            RegisterIY(r) => Ok(vec![0xFD, xyz!(0, r as u8, q + 4)]),
+            Register(r) => Ok(vec![xyz!(0, r as u8, q + 4)]),
             _ => Err(self.context.error(ErrorType::SyntaxError))
         }
     }
@@ -225,19 +230,19 @@ impl InstructionEncoder for Assembler {
         match (&lhs, &rhs, &y) {
             //In
             (Register(Reg::A), AddressIndirect(_), 3) => if let Some(addr) = rhs.number_to_u8() {
-                return Ok(vec![Self::xyz(3, y, 3), addr]);
+                return Ok(vec![xyz!(3, y, 3), addr]);
             }
             (Register(r), RegisterIndirect(RegPairInd::C), 3) => {
                 let yy = r.clone() as u8;
-                return Ok(vec![0xED, Self::xyz(1, yy, 0)]);
+                return Ok(vec![0xED, xyz!(1, yy, 0)]);
             }
 
             //Out
             (AddressIndirect(_), Register(Reg::A), 2) => if let Some(addr) = lhs.number_to_u8() {
-                return Ok(vec![Self::xyz(3, y, 3), addr]);
+                return Ok(vec![xyz!(3, y, 3), addr]);
             }
             (RegisterIndirect(RegPairInd::C), Number(0), 2) => return Ok(vec![0xED, 0x71]),
-            (RegisterIndirect(RegPairInd::C), Register(r), 2) => return Ok(vec![0xED, Self::xyz(1, r.clone() as u8, 1)]),
+            (RegisterIndirect(RegPairInd::C), Register(r), 2) => return Ok(vec![0xED, xyz!(1, r.clone() as u8, 1)]),
             _ => {}
         }
 
@@ -247,12 +252,12 @@ impl InstructionEncoder for Assembler {
     fn jr(&mut self) -> Result<Vec<u8>, Error> {
         let token = self.tokens.last().unwrap_or(&Token::EndOfFile).clone();
         match token {
-            Number(_) | ConstLabel(_) => Ok(vec![Self::xyz(0, 3, 0), self.relative()?]),
+            Number(_) | ConstLabel(_) => Ok(vec![xyz!(0, 3, 0), self.relative()?]),
             Condition(c) => match &c {
                 Cnd::Z | Cnd::C | Cnd::Nz | Cnd::NC => {
                     self.next_token()?;
                     self.expect_token(Delimiter(Comma))?;
-                    Ok(vec![Self::xyz(0, c.clone() as u8 + 4, 0), self.relative()?])
+                    Ok(vec![xyz!(0, c.clone() as u8 + 4, 0), self.relative()?])
                 }
                 _ => Err(self.context.error(ErrorType::InvalidCondition))
             }
@@ -263,9 +268,9 @@ impl InstructionEncoder for Assembler {
     fn push_pop(&mut self, z: u8) -> Result<Vec<u8>, Error> {
         let tok = self.next_token()?;
         match tok {
-            RegisterPair(Ix) => Ok(vec![0xDD, Self::xpqz(3, 2, 0, z)]),
-            RegisterPair(Iy) => Ok(vec![0xFD, Self::xpqz(3, 2, 0, z)]),
-            RegisterPair(r) => Ok(vec![Self::xpqz(3, r.rp2()?, 0, z)]),
+            RegisterPair(Ix) => Ok(vec![0xDD, xpqz!(3, 2, 0, z)]),
+            RegisterPair(Iy) => Ok(vec![0xFD, xpqz!(3, 2, 0, z)]),
+            RegisterPair(r) => Ok(vec![xpqz!(3, r.rp2()?, 0, z)]),
             _ => if self.z80n_enabled {
                 self.tokens.push(tok);
                 let n = self.expect_word(2)?;
@@ -281,7 +286,7 @@ impl InstructionEncoder for Assembler {
         if self.tokens.len() > 0 {
             let tok = self.next_token()?;
             if let Condition(c) = tok {
-                return Ok(vec![Self::xyz(3, c.clone() as u8, 0)]);
+                return Ok(vec![xyz!(3, c.clone() as u8, 0)]);
             }
             self.tokens.push(tok);
         }
@@ -290,8 +295,8 @@ impl InstructionEncoder for Assembler {
 
     fn rot(&mut self, a: RotOp) -> Result<Vec<u8>, Error> {
         match self.next_token()? {
-            IndexIndirect(r, n) => return Ok(vec![0xDD | (r as u8 - 4) << 5, Self::rot_encode(a, Reg::_HL_ as u8), n]),
-            Register(r) => return Ok(vec![0xCB, Self::rot_encode(a, r as u8)]),
+            IndexIndirect(r, n) => return Ok(vec![0xDD | (r as u8 - 4) << 5, rot_encode!(a, Reg::_HL_ as u8), n]),
+            Register(r) => return Ok(vec![0xCB, rot_encode!(a, r as u8)]),
             _ => {}
         }
         Err(self.context.error(ErrorType::SyntaxError))
@@ -302,7 +307,7 @@ impl InstructionEncoder for Assembler {
             if ((n / 8) & 7) * 8 != n {
                 return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
-            return Ok(vec![Self::xyz(3, n as u8 >> 3, 7)]);
+            return Ok(vec![xyz!(3, n as u8 >> 3, 7)]);
         }
         Err(self.context.error(ErrorType::InvalidInstruction))
     }
@@ -333,61 +338,61 @@ impl InstructionEncoder for Assembler {
 
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<Vec<u8>, Error> {
         let b = match (dst, src) {
-            (RegisterPair(Hl), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Hl), AddressIndirect(a)) => Some(vec![xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
             (RegisterPair(Hl), ConstLabelIndirect(l)) => {
                 let a = self.context.try_resolve_label(l, 1, false);
-                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 2, 1, 2), a.lo(), a.hi()])
             }
-            (RegisterPair(Ix), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Ix), AddressIndirect(a)) => Some(vec![xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
             (RegisterPair(Ix), ConstLabelIndirect(l)) => {
                 let a = self.context.try_resolve_label(l, 2, false);
-                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 2, 1, 2), a.lo(), a.hi()])
             }
-            (RegisterPair(Iy), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()]),
+            (RegisterPair(Iy), AddressIndirect(a)) => Some(vec![xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
             (RegisterPair(Iy), ConstLabelIndirect(l)) => {
                 let a = self.context.try_resolve_label(l, 2, false);
-                Some(vec![Self::xpqz(0, 2, 1, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 2, 1, 2), a.lo(), a.hi()])
             }
-            (RegisterPair(r), AddressIndirect(a)) => Some(vec![0xED, Self::xpqz(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
+            (RegisterPair(r), AddressIndirect(a)) => Some(vec![0xED, xpqz!(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
 
-            (RegisterIndirect(rp), Register(Reg::A)) => Some(vec![Self::xpqz(0, rp.clone() as u8, 0, 2)]),
+            (RegisterIndirect(rp), Register(Reg::A)) => Some(vec![xpqz!(0, rp.clone() as u8, 0, 2)]),
 
-            (Register(Reg::A), RegisterIndirect(r)) => Some(vec![Self::xpqz(0, r.clone() as u8, 1, 2)]),
-            (Register(Reg::A), AddressIndirect(a)) => Some(vec![Self::xpqz(0, 3, 1, 2), a.lo(), a.hi()]),
+            (Register(Reg::A), RegisterIndirect(r)) => Some(vec![xpqz!(0, r.clone() as u8, 1, 2)]),
+            (Register(Reg::A), AddressIndirect(a)) => Some(vec![xpqz!(0, 3, 1, 2), a.lo(), a.hi()]),
             (Register(Reg::A), ConstLabelIndirect(s)) => {
                 let a = self.context.try_resolve_label(s, 1, false);
-                Some(vec![Self::xpqz(0, 3, 1, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 3, 1, 2), a.lo(), a.hi()])
             }
-            (AddressIndirect(a), Register(Reg::A)) => Some(vec![Self::xpqz(0, 3, 0, 2), a.lo(), a.hi()]),
+            (AddressIndirect(a), Register(Reg::A)) => Some(vec![xpqz!(0, 3, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), Register(Reg::A)) => {
                 let a = self.context.try_resolve_label(l, 1, false);
-                Some(vec![Self::xpqz(0, 3, 0, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 3, 0, 2), a.lo(), a.hi()])
             }
-            (AddressIndirect(a), RegisterPair(Hl)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (AddressIndirect(a), RegisterPair(Hl)) => Some(vec![xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(Hl)) => {
                 let a = self.context.try_resolve_label(l, 1, false);
-                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 2, 0, 2), a.lo(), a.hi()])
             }
-            (AddressIndirect(a), RegisterPair(Ix)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (AddressIndirect(a), RegisterPair(Ix)) => Some(vec![xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(Ix)) => {
                 let a = self.context.try_resolve_label(l, 2, false);
-                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 2, 0, 2), a.lo(), a.hi()])
             }
-            (AddressIndirect(a), RegisterPair(Iy)) => Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()]),
+            (AddressIndirect(a), RegisterPair(Iy)) => Some(vec![xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(Iy)) => {
                 let a = self.context.try_resolve_label(l, 2, false);
-                Some(vec![Self::xpqz(0, 2, 0, 2), a.lo(), a.hi()])
+                Some(vec![xpqz!(0, 2, 0, 2), a.lo(), a.hi()])
             }
-            (AddressIndirect(a), RegisterPair(r)) => Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
+            (AddressIndirect(a), RegisterPair(r)) => Some(vec![0xED, xpqz!(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(r)) => {
                 let a = self.context.try_resolve_label(l, 2, false);
-                Some(vec![0xED, Self::xpqz(1, r.rp1()?, 0, 3), a.lo(), a.hi()])
+                Some(vec![0xED, xpqz!(1, r.rp1()?, 0, 3), a.lo(), a.hi()])
             }
 
-            (Register(r), IndexIndirect(reg, o)) => Some(vec![0xDD | (reg.clone() as u8 - 4) << 5, Self::xyz(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
+            (Register(r), IndexIndirect(reg, o)) => Some(vec![0xDD | (reg.clone() as u8 - 4) << 5, xyz!(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
 
             (IndexIndirect(rp, i), Number(n)) => Some(vec![0xDD | (rp.clone() as u8 - 4) << 5, 0x36, i.clone(), n.clone() as u8]),
-            (IndexIndirect(rp, o), Register(r)) => Some(vec![0xDD | (rp.clone() as u8 - 4) << 5, Self::xyz(1, Reg::_HL_ as u8, r.clone() as u8), o.clone()]),
+            (IndexIndirect(rp, o), Register(r)) => Some(vec![0xDD | (rp.clone() as u8 - 4) << 5, xyz!(1, Reg::_HL_ as u8, r.clone() as u8), o.clone()]),
 
             _ => {
                 println!("load_indirect: {:?},{:?}", dst, src);
@@ -421,7 +426,7 @@ impl InstructionEncoder for Assembler {
         // LD A,(nn)
         match (dst, src) {
             (Register(Reg::A), AddressIndirect(addr)) => {
-                encoded.append(&mut vec![Self::xpqz(0, 3, 1, 2), addr.lo(), addr.hi()]);
+                encoded.append(&mut vec![xpqz!(0, 3, 1, 2), addr.lo(), addr.hi()]);
                 return Ok(encoded);
             }
             _ => {}
@@ -436,10 +441,10 @@ impl InstructionEncoder for Assembler {
             if n < 0 || n > 255 {
                 self.warn(ErrorType::ByteTrunctated);
             }
-            encoded.push(Self::xyz(0, r, 6));
+            encoded.push(xyz!(0, r, 6));
             encoded.push(n as u8);
         } else if let Some(rr) = src.reg_value() {
-            encoded.push(Self::xyz(1, r, rr));
+            encoded.push(xyz!(1, r, rr));
         } else {
             return Err(self.context.error(ErrorType::SyntaxError));
         }
@@ -466,9 +471,9 @@ impl InstructionEncoder for Assembler {
         };
 
         if src.is_indirect() {
-            encoded.append(&mut vec![Self::xpqz(0, 2, 1, 2), addr.lo(), addr.hi()]);
+            encoded.append(&mut vec![xpqz!(0, 2, 1, 2), addr.lo(), addr.hi()]);
         } else {
-            encoded.append(&mut vec![Self::xpqz(0, rp, 0, 1), addr.lo(), addr.hi()]);
+            encoded.append(&mut vec![xpqz!(0, rp, 0, 1), addr.lo(), addr.hi()]);
         }
 
         return Ok(encoded);
@@ -478,7 +483,7 @@ impl InstructionEncoder for Assembler {
         match (dst, src) {
             (RegisterPair(Sp), Number(n)) => if (0..65536).contains(n) {
                 let addr = n.clone() as u16;
-                return Ok(vec![Self::xpqz(0, 3, 0, 1), addr.lo(), addr.hi()]);
+                return Ok(vec![xpqz!(0, 3, 0, 1), addr.lo(), addr.hi()]);
             } else {
                 return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
@@ -490,9 +495,9 @@ impl InstructionEncoder for Assembler {
                 let addr = self.context.try_resolve_label(l, 2, false);
                 return Ok(vec![0xED, 0x7B, addr.lo(), addr.hi()]);
             }
-            (RegisterPair(Sp), RegisterPair(Hl)) => return Ok(vec![Self::xpqz(3, 3, 1, 1)]),
-            (RegisterPair(Sp), RegisterPair(Ix)) => return Ok(vec![0xDD, Self::xpqz(3, 3, 1, 1)]),
-            (RegisterPair(Sp), RegisterPair(Iy)) => return Ok(vec![0xFD, Self::xpqz(3, 3, 1, 1)]),
+            (RegisterPair(Sp), RegisterPair(Hl)) => return Ok(vec![xpqz!(3, 3, 1, 1)]),
+            (RegisterPair(Sp), RegisterPair(Ix)) => return Ok(vec![0xDD, xpqz!(3, 3, 1, 1)]),
+            (RegisterPair(Sp), RegisterPair(Iy)) => return Ok(vec![0xFD, xpqz!(3, 3, 1, 1)]),
             (AddressIndirect(a), RegisterPair(Sp)) => return Ok(vec![0xED, 0x73, a.lo(), a.hi()]),
             (RegisterPair(Sp), AddressIndirect(a)) => return Ok(vec![0xED, 0x7B, a.lo(), a.hi()]),
             _ => {
@@ -512,7 +517,7 @@ impl InstructionEncoder for Assembler {
             return Err(self.context.error(ErrorType::InvalidInstruction));
         }
 
-        Ok(vec![0xED, Self::xyz(1, y.unwrap(), 7)])
+        Ok(vec![0xED, xyz!(1, y.unwrap(), 7)])
     }
 
     fn mul(&mut self) -> Result<Vec<u8>, Error> {
