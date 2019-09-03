@@ -68,7 +68,7 @@ impl Directives for Assembler {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                let word = self.expect_word(0)? as u16;
+                let word = self.expect_word(0)?;
                 self.emit_word(word)?;
             }
             expect_comma = !expect_comma;

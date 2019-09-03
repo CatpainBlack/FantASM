@@ -232,7 +232,11 @@ impl Assembler {
         Ok(())
     }
 
-    pub(crate) fn emit_word(&mut self, w: u16) -> Result<(), Error> {
+    pub(crate) fn emit_word(&mut self, word: isize) -> Result<(), Error> {
+        if word < 0 || word > 65535 {
+            self.warn(ErrorType::WordTruncated);
+        }
+        let w = word as u16;
         let pc = self.context.offset_pc(2);
         if pc > 65535 {
             self.warn(ErrorType::PCOverflow)

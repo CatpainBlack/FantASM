@@ -3,16 +3,12 @@
 constant = 0x1234
 
 start
-	ld	ix,(end)
-	ld	ix,(constant)
+	call	start+1
+	call	start
+	call	end
+	call	0
+	call	65535
 
-	ld	iy,0
-	ld	iy,constant
-	ld	iy,start
-	ld	iy,end
-	ld	iy,(0x4567)
-	ld	iy,(start)
-	ld	iy,(end)
-	ld	iy,(constant)
+	jp	start+1
 end
 	ret

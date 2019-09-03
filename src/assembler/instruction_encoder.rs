@@ -70,33 +70,32 @@ impl InstructionEncoder for Assembler {
             self.context.pc_add(1);
         }
 
-        let bytes = match tok {
-            IndexIndirect(_, n) => vec![alu!(a, Reg::_HL_ as u8), n],
-            RegisterIX(r) => vec![alu!(a, r as u8)],
-            RegisterIY(r) => vec![alu!(a, r as u8)],
-            Register(r) => vec![alu!(a, r as u8)],
+        match tok {
+            IndexIndirect(_, n) => self.emit(&[alu!(a, Reg::_HL_ as u8), n]),
+            RegisterIX(r) => self.emit_byte(alu!(a, r as u8)),
+            RegisterIY(r) => self.emit_byte(alu!(a, r as u8)),
+            Register(r) => self.emit_byte(alu!(a, r as u8)),
             _ => {
                 self.tokens.push(tok);
-                vec![alu_imm!(a), self.expect_byte(1)? as u8]
+                let b = self.expect_byte(1)? as u8;
+                self.emit(&[alu_imm!(a), b])
             }
-        };
-        self.emit(bytes.as_slice())?;
-        Ok(())
+        }
     }
 
     fn alu_op_r(&mut self, a: AluOp, x: u8, q: u8) -> Result<(), Error> {
         let lhs = self.next_token()?;
-        if !self.next_token_is(&Delimiter(Comma)) {
+
+        if self.expect_token(Delimiter(Comma)).is_err() {
             self.tokens.push(lhs);
-            self.alu_op(a)?;
-            return Ok(());
+            return self.alu_op(a);
         }
-        self.expect_token(Delimiter(Comma))?;
+
         let rhs = self.next_token()?;
 
-//        if !self.bank.emit_prefix(&lhs) {
-//            self.bank.emit_prefix(&rhs);
-//        }
+        if self.bank.emit_prefix(&lhs) {
+            self.context.pc_add(1);
+        }
 
         match (&lhs, &rhs, self.z80n_enabled) {
             (RegisterPair(Hl), RegisterPair(reg), _) => match a {
@@ -106,12 +105,10 @@ impl InstructionEncoder for Assembler {
                 _ => {}
             }
 
-            (RegisterPair(Ix), RegisterPair(rp), _) => return self.emit(&[0xDD, xpqz!(x, rp.rp1()?, q, 1)]),
-            (RegisterPair(Iy), RegisterPair(rp), _) => return self.emit(&[0xFD, xpqz!(x, rp.rp1()?, q, 1)]),
+            (RegisterPair(Ix), RegisterPair(rp), _) | (RegisterPair(Iy), RegisterPair(rp), _) => return self.emit_byte(xpqz!(x, rp.rp1()?, q, 1)),
             (Register(Reg::A), _, _) => {
                 self.tokens.push(rhs);
-                self.alu_op(a)?;
-                return Ok(());
+                return self.alu_op(a);
             }
 
             (RegisterPair(_), Register(Reg::A), false) => return Err(self.context.error(ErrorType::Z80NDisabled)),
@@ -120,16 +117,13 @@ impl InstructionEncoder for Assembler {
 
             (RegisterPair(rp), Register(Reg::A), true) => return self.emit(&[0xED, 0x31 + rp.nrp()?]),
             (RegisterPair(rp), Number(addr), true) => {
-                if *addr < 0 || *addr > 65536 {
-                    self.warn(ErrorType::AddressTruncated);
-                }
-                return self.emit(&[0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
+                self.emit(&[0xED, 0x34 + rp.nrp()?])?;
+                return self.emit_word(*addr);
             }
             (RegisterPair(rp), ConstLabel(l), true) => {
                 self.emit(&[0xED, 0x34 + rp.nrp()?])?;
                 let addr = self.context.try_resolve_label(l, 0, false);
-                return self.emit_word(addr);
-                //return self.emit(vec![0xED, 0x34 + rp.nrp()?, addr.lo(), addr.hi()]);
+                return self.emit_word(addr as isize);
             }
             _ => {}
         }
@@ -141,8 +135,8 @@ impl InstructionEncoder for Assembler {
         let bit = self.expect_byte(1)?;
         self.expect_token(Delimiter(Comma))?;
         match self.next_token()? {
-            RegisterIX(r) => self.emit(&[0xDD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
-            RegisterIY(r) => self.emit(&[0xFD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
+            //RegisterIX(r) => self.emit(&[0xDD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
+            //RegisterIY(r) => self.emit(&[0xFD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
             Register(r) => self.emit(&[0xCb, xyz!(x, bit as u8, r as u8)])?,
             _ => return Err(self.context.error(ErrorType::InvalidInstruction))
         };
@@ -193,17 +187,17 @@ impl InstructionEncoder for Assembler {
         match (lhs, rhs) {
             (RegisterPair(Af), RegisterPair(_Af)) => self.emit_byte(0x08),
             (RegisterPair(De), RegisterPair(Hl)) => self.emit_byte(0xEB),
-            (RegisterIndirect(RegPairInd::Sp), RegisterPair(Hl)) => self.emit_byte(0xE3),
-            (RegisterIndirect(RegPairInd::Sp), RegisterPair(Ix)) => self.emit_byte(0xE3),
+            (RegisterIndirect(RegPairInd::Sp), RegisterPair(Hl)) |
+            (RegisterIndirect(RegPairInd::Sp), RegisterPair(Ix)) |
             (RegisterIndirect(RegPairInd::Sp), RegisterPair(Iy)) => self.emit_byte(0xE3),
             _ => {
-                //self.info(format!("{:?},{:?}", lhs, rhs).as_str());
                 Err(self.context.error(ErrorType::InvalidRegisterPair))
             }
         }
     }
 
     fn im(&mut self) -> Result<(), Error> {
+        // ToDo: Allow constants?
         if let Number(mut n) = self.next_token()? {
             if (0..3).contains(&n) {
                 if n > 0 {
@@ -225,12 +219,12 @@ impl InstructionEncoder for Assembler {
 
         match tok {
             IndexIndirect(_reg, n) => self.emit(&[xyz!(0, _HL_ as u8, q + 4), n]),
-            RegisterPair(Ix) => self.emit(&[xpqz!(0, 2, q, 3)]),
-            RegisterPair(Iy) => self.emit(&[xpqz!(0, 2, q, 3)]),
-            RegisterPair(r) => self.emit(&[xpqz!(0, r.rp1()?, q, 3)]),
-            RegisterIX(r) => self.emit(&[xyz!(0, r as u8, q + 4)]),
-            RegisterIY(r) => self.emit(&[xyz!(0, r as u8, q + 4)]),
-            Register(r) => self.emit(&[xyz!(0, r as u8, q + 4)]),
+            RegisterPair(Ix) => self.emit_byte(xpqz!(0, 2, q, 3)),
+            RegisterPair(Iy) => self.emit_byte(xpqz!(0, 2, q, 3)),
+            RegisterPair(r) => self.emit_byte(xpqz!(0, r.rp1()?, q, 3)),
+            RegisterIX(r) => self.emit_byte(xyz!(0, r as u8, q + 4)),
+            RegisterIY(r) => self.emit_byte(xyz!(0, r as u8, q + 4)),
+            Register(r) => self.emit_byte(xyz!(0, r as u8, q + 4)),
             _ => Err(self.context.error(ErrorType::SyntaxError))
         }
     }
@@ -334,6 +328,7 @@ impl InstructionEncoder for Assembler {
     }
 
     fn rst(&mut self) -> Result<(), Error> {
+        // ToDo: Allow constants?
         if let Number(n) = self.next_token()? {
             if ((n / 8) & 7) * 8 != n {
                 return Err(self.context.error(ErrorType::IntegerOutOfRange));
@@ -345,6 +340,7 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load(&mut self) -> Result<(), Error> {
+        // ToDo: Handle expressions
         let lhs = self.next_token()?;
         self.expect_token(Delimiter(Comma))?;
         let rhs = self.next_token()?;
@@ -375,23 +371,30 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
+        // ToDo: Handle expressions
+
         //println!("load_indirect {:?},{:?}", dst, src);
+
+        let dst = &match dst {
+            RegisterPair(Ix) => RegisterPair(Hl),
+            RegisterPair(Iy) => RegisterPair(Hl),
+            _ => dst.clone()
+        };
+
+        let src = &match src {
+            RegisterPair(Ix) => RegisterPair(Hl),
+            RegisterPair(Iy) => RegisterPair(Hl),
+            _ => src.clone()
+        };
+
         match (dst, src) {
             (RegisterPair(Hl), AddressIndirect(a)) => self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
+
             (RegisterPair(Hl), ConstLabelIndirect(l)) => {
                 let a = self.context.try_resolve_label(l, 1, false);
                 self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()])
             }
-            (RegisterPair(Ix), AddressIndirect(a)) => self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
-            (RegisterPair(Ix), ConstLabelIndirect(l)) => {
-                let a = self.context.try_resolve_label(l, 1, false);
-                self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()])
-            }
-            (RegisterPair(Iy), AddressIndirect(a)) => self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
-            (RegisterPair(Iy), ConstLabelIndirect(l)) => {
-                let a = self.context.try_resolve_label(l, 1, false);
-                self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()])
-            }
+
             (RegisterPair(r), AddressIndirect(a)) => self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
 
             (RegisterIndirect(rp), Register(Reg::A)) => self.emit(&[xpqz!(0, rp.clone() as u8, 0, 2)]),
@@ -412,16 +415,7 @@ impl InstructionEncoder for Assembler {
                 let a = self.context.try_resolve_label(l, 1, false);
                 self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()])
             }
-            (AddressIndirect(a), RegisterPair(Ix)) => self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
-            (ConstLabelIndirect(l), RegisterPair(Ix)) => {
-                let a = self.context.try_resolve_label(l, 1, false);
-                self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()])
-            }
-            (AddressIndirect(a), RegisterPair(Iy)) => self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
-            (ConstLabelIndirect(l), RegisterPair(Iy)) => {
-                let a = self.context.try_resolve_label(l, 1, false);
-                self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()])
-            }
+
             (AddressIndirect(a), RegisterPair(r)) => self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(r)) => {
                 let a = self.context.try_resolve_label(l, 2, false);
@@ -441,37 +435,31 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_r(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
-        let mut encoded: Vec<u8> = vec![];
-
-        // LD A,(nn)
-        match (dst, src) {
+        // ToDo: Handle expressions
+        let r = match (dst, src) {
             (Register(Reg::A), AddressIndirect(addr)) => {
-                encoded.append(&mut vec![xpqz!(0, 3, 1, 2), addr.lo(), addr.hi()]);
-                return self.emit(&encoded);
+                self.emit_byte(xpqz!(0, 3, 1, 2))?;
+                return self.emit_word(*addr as isize);
             }
-            _ => {}
-        }
-
-        // is src a valid 8 bit reg?
-        let r = if let Some(n) = dst.reg_value() { n } else {
-            return Err(self.context.error(ErrorType::SyntaxError));
+            _ => if let Some(n) = dst.reg_value() { n } else {
+                return Err(self.context.error(ErrorType::SyntaxError));
+            }
         };
 
         if let Some(n) = self.decode_number(src, 1)? {
             if n < 0 || n > 255 {
                 self.warn(ErrorType::ByteTrunctated);
             }
-            encoded.push(xyz!(0, r, 6));
-            encoded.push(n as u8);
+            return self.emit(&[xyz!(0, r, 6), n as u8]);
         } else if let Some(rr) = src.reg_value() {
-            encoded.push(xyz!(1, r, rr));
+            return self.emit_byte(xyz!(1, r, rr));
         } else {
             return Err(self.context.error(ErrorType::SyntaxError));
         }
-        self.emit(&encoded)
     }
 
     fn load_rp(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
+        // ToDo: Handle expressions
         //println!("load_rp {:?},{:?}", dst, src);
         let mut encoded: Vec<u8> = vec![];
 
