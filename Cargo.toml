@@ -1,6 +1,6 @@
 [package]
 name = "fantasm"
-version = "0.7.4"
+version = "0.7.5"
 authors = ["Guy Black <captainblack@zx-spectrum.org.uk>"]
 edition = "2018"
 

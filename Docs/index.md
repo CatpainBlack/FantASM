@@ -49,6 +49,13 @@ It supports the extended op-codes of the ZX Next and additional pseudo opcodes u
 
 ### History
 
+0.7.5
+- Big code refactoring in order to better implement future expression parser improvements
+
+0.7.4
+- Implemented "Incbin" directive
+- Internal code refactoring to remove some "unsafe" code
+
 0.7.3 
 - Better handling of expressions when referencing labels that have not yet been defined
 

@@ -3,7 +3,6 @@ use crate::assembler::error_impl::ErrorType;
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Token::{Delimiter, ConstLabel, StringLiteral, Opt};
-use crate::assembler::reg_pair::HighLow;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
@@ -48,10 +47,10 @@ impl Directives for Assembler {
                         if !(0..256).contains(&n) {
                             self.warn(ErrorType::IntegerOutOfRange);
                         }
-                        self.emit(vec![n as u8])?
+                        self.emit(&[n as u8])?
                     }
                     Ok(None) => if let StringLiteral(s) = self.next_token()? {
-                        self.emit(s.into_bytes())?;
+                        self.emit(s.into_bytes().as_slice())?;
                     } else {
                         return Err(self.context.error(ErrorType::SyntaxError));
                     }
@@ -69,8 +68,8 @@ impl Directives for Assembler {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                let word = self.expect_word(0)?;
-                self.emit(vec![word.lo(), word.hi()])?;
+                let word = self.expect_word(0)? as u16;
+                self.emit_word(word)?;
             }
             expect_comma = !expect_comma;
         }
@@ -84,7 +83,7 @@ impl Directives for Assembler {
             self.tokens.pop();
             fill = self.expect_byte(-1)? as u8;
         }
-        self.emit(vec![fill; size])?;
+        self.emit(vec![fill; size].as_slice())?;
         Ok(())
     }
 
