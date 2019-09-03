@@ -211,85 +211,99 @@ impl Assembler {
         Ok(())
     }
 
-    pub(crate) fn emit(&mut self, mut b: Vec<u8>) {
+    pub(crate) fn emit(&mut self, mut b: Vec<u8>) -> Result<(), Error> {
         let pc = self.context.offset_pc(b.len() as isize);
         if pc > 65535 {
             self.warn(ErrorType::PCOverflow)
         }
         self.context.pc(pc);
         self.bank.append(&mut b);
+        Ok(())
+    }
+
+    pub(crate) fn emit_byte(&mut self, b: u8) -> Result<(), Error> {
+        let pc = self.context.offset_pc(1);
+        if pc > 65535 {
+            self.warn(ErrorType::PCOverflow)
+        }
+        self.context.pc(pc);
+        self.bank.push(b);
+        Ok(())
     }
 
     fn handle_opcodes(&mut self, op: OpCode) -> Result<(), Error> {
         let bytes = match op {
-            OpCode::Nop => vec![0],
-            OpCode::Adc => self.alu_op_r(AluOp::Adc, 1, 0)?,
-            OpCode::Add => self.alu_op_r(AluOp::Add, 0, 1)?,
-            OpCode::And => self.alu_op(AluOp::And)?,
-            OpCode::Bit => self.bit_res_set(1)?,
-            OpCode::Call => self.call_jp(1, 5)?,
-            OpCode::Ccf => vec![0x3F],
-            OpCode::Cp => self.alu_op(AluOp::Cp)?,
-            OpCode::Cpd => vec![0xED, 0xA9],
-            OpCode::Cpdr => vec![0xED, 0xB9],
-            OpCode::Cpi => vec![0xED, 0xA1],
-            OpCode::Cpir => vec![0xED, 0xB1],
-            OpCode::Cpl => vec![0x2F],
-            OpCode::Daa => vec![0x27],
-            OpCode::Dec => self.inc_dec(1)?,
-            OpCode::Di => vec![0xF3],
-            OpCode::Djnz => vec![0x10, self.relative()?],
-            OpCode::Ei => vec![0xFB],
-            OpCode::Ex => self.ex()?,
-            OpCode::Exx => vec![0xD9],
-            OpCode::Halt => vec![0x76],
-            OpCode::Im => self.im()?,
-            OpCode::In => self.io_op(3)?,
-            OpCode::Inc => self.inc_dec(0)?,
-            OpCode::Ind => vec![0xED, 0xAA],
-            OpCode::Indr => vec![0xED, 0xBA],
-            OpCode::Ini => vec![0xED, 0xA2],
-            OpCode::Inir => vec![0xED, 0xB2],
-            OpCode::Jr => self.jr()?,
-            OpCode::Jp => self.jp()?,
+            OpCode::Nop => return self.emit_byte(0),
+            OpCode::Adc => return self.alu_op_r(AluOp::Adc, 1, 0),
+            OpCode::Add => return self.alu_op_r(AluOp::Add, 0, 1),
+            OpCode::And => return self.alu_op(AluOp::And),
+            OpCode::Bit => return self.bit_res_set(1),
+            OpCode::Call => return self.call_jp(1, 5),
+            OpCode::Ccf => return self.emit_byte(0x3F),
+            OpCode::Cp => return self.alu_op(AluOp::Cp),
+            OpCode::Cpd => return self.emit(vec![0xED, 0xA9]),
+            OpCode::Cpdr => return self.emit(vec![0xED, 0xB9]),
+            OpCode::Cpi => return self.emit(vec![0xED, 0xA1]),
+            OpCode::Cpir => return self.emit(vec![0xED, 0xB1]),
+            OpCode::Cpl => return self.emit_byte(0x2F),
+            OpCode::Daa => return self.emit_byte(0x27),
+            OpCode::Dec => return self.inc_dec(1),
+            OpCode::Di => return self.emit_byte(0xF3),
+            OpCode::Djnz => {
+                let rel = self.relative()?;
+                return self.emit(vec![0x10, rel]);
+            }
+            OpCode::Ei => return self.emit_byte(0xFB),
+            OpCode::Ex => return self.ex(),
+            OpCode::Exx => return self.emit_byte(0xD9),
+            OpCode::Halt => return self.emit_byte(0x76),
+            OpCode::Im => return self.im(),
+            OpCode::In => return self.io_op(3),
+            OpCode::Inc => return self.inc_dec(0),
+            OpCode::Ind => return self.emit(vec![0xED, 0xAA]),
+            OpCode::Indr => return self.emit(vec![0xED, 0xBA]),
+            OpCode::Ini => return self.emit(vec![0xED, 0xA2]),
+            OpCode::Inir => return self.emit(vec![0xED, 0xB2]),
+            OpCode::Jr => return self.jr(),
+            OpCode::Jp => return self.jp(),
             OpCode::Ld => self.load()?,
-            OpCode::Ldd => vec![0xED, 0xA8],
-            OpCode::Lddr => vec![0xED, 0xB8],
-            OpCode::Ldi => vec![0xED, 0xA0],
-            OpCode::Ldir => vec![0xED, 0xB0],
-            OpCode::Neg => vec![0xED, 0x44],
-            OpCode::Or => self.alu_op(AluOp::Or)?,
-            OpCode::Otdr => vec![0xED, 0xBB],
-            OpCode::Otir => vec![0xED, 0xB3],
-            OpCode::Out => self.io_op(2)?,
-            OpCode::Outd => vec![0xED, 0xAB],
-            OpCode::Outi => vec![0xED, 0xA3],
-            OpCode::Pop => self.push_pop(1)?,
-            OpCode::Push => self.push_pop(5)?,
-            OpCode::Res => self.bit_res_set(2)?,
-            OpCode::Ret => self.ret()?,
-            OpCode::Reti => vec![0xED, 0x4D],
-            OpCode::Retn => vec![0xED, 0x45],
-            OpCode::Rl => self.rot(Rl)?,
-            OpCode::Rla => vec![0x17],
-            OpCode::Rlc => self.rot(Rlc)?,
-            OpCode::Rlca => vec![0x07],
-            OpCode::Rld => vec![0xED, 0x6F],
-            OpCode::Rr => self.rot(Rr)?,
-            OpCode::Rra => vec![0x1F],
-            OpCode::Rrc => self.rot(Rrc)?,
-            OpCode::Rrca => vec![0x0F],
-            OpCode::Rrd => vec![0xED, 0x67],
-            OpCode::Rst => self.rst()?,
-            OpCode::Sbc => self.alu_op_r(AluOp::Sbc, 1, 1)?,
-            OpCode::Scf => vec![0x37],
-            OpCode::Set => self.bit_res_set(3)?,
-            OpCode::Sla => self.rot(Sla)?,
-            OpCode::Sll => self.rot(Sll)?,
-            OpCode::Sra => self.rot(Sra)?,
-            OpCode::Srl => self.rot(Srl)?,
-            OpCode::Sub => self.alu_op(AluOp::Sub)?,
-            OpCode::Xor => self.alu_op(AluOp::Xor)?,
+            OpCode::Ldd => return self.emit(vec![0xED, 0xA8]),
+            OpCode::Lddr => return self.emit(vec![0xED, 0xB8]),
+            OpCode::Ldi => return self.emit(vec![0xED, 0xA0]),
+            OpCode::Ldir => return self.emit(vec![0xED, 0xB0]),
+            OpCode::Neg => return self.emit(vec![0xED, 0x44]),
+            OpCode::Or => return self.alu_op(AluOp::Or),
+            OpCode::Otdr => return self.emit(vec![0xED, 0xBB]),
+            OpCode::Otir => return self.emit(vec![0xED, 0xB3]),
+            OpCode::Out => return self.io_op(2),
+            OpCode::Outd => return self.emit(vec![0xED, 0xAB]),
+            OpCode::Outi => return self.emit(vec![0xED, 0xA3]),
+            OpCode::Pop => return self.push_pop(1),
+            OpCode::Push => return self.push_pop(5),
+            OpCode::Res => return self.bit_res_set(2),
+            OpCode::Ret => return self.ret(),
+            OpCode::Reti => return self.emit(vec![0xED, 0x4D]),
+            OpCode::Retn => return self.emit(vec![0xED, 0x45]),
+            OpCode::Rl => return self.rot(Rl),
+            OpCode::Rla => return self.emit_byte(0x17),
+            OpCode::Rlc => return self.rot(Rlc),
+            OpCode::Rlca => return self.emit_byte(0x07),
+            OpCode::Rld => return self.emit(vec![0xED, 0x6F]),
+            OpCode::Rr => return self.rot(Rr),
+            OpCode::Rra => return self.emit_byte(0x1F),
+            OpCode::Rrc => return self.rot(Rrc),
+            OpCode::Rrca => return self.emit_byte(0x0F),
+            OpCode::Rrd => return self.emit(vec![0xED, 0x67]),
+            OpCode::Rst => return self.rst(),
+            OpCode::Sbc => return self.alu_op_r(AluOp::Sbc, 1, 1),
+            OpCode::Scf => return self.emit_byte(0x37),
+            OpCode::Set => return self.bit_res_set(3),
+            OpCode::Sla => return self.rot(Sla),
+            OpCode::Sll => return self.rot(Sll),
+            OpCode::Sra => return self.rot(Sra),
+            OpCode::Srl => return self.rot(Srl),
+            OpCode::Sub => return self.alu_op(AluOp::Sub),
+            OpCode::Xor => return self.alu_op(AluOp::Xor),
             _ => if let Some(code) = self.encode_z80n(&op)? {
                 code
             } else if let Some(code) = self.encode_cspect(&op)? {
@@ -298,8 +312,7 @@ impl Assembler {
                 return Err(self.context.error(ErrorType::InvalidInstruction));
             }
         };
-        self.emit(bytes);
-        Ok(())
+        self.emit(bytes)
     }
 
     fn encode_cspect(&mut self, op: &OpCode) -> Result<Option<Vec<u8>>, Error> {

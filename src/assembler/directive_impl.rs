@@ -48,10 +48,10 @@ impl Directives for Assembler {
                         if !(0..256).contains(&n) {
                             self.warn(ErrorType::IntegerOutOfRange);
                         }
-                        self.emit(vec![n as u8])
+                        self.emit(vec![n as u8])?
                     }
                     Ok(None) => if let StringLiteral(s) = self.next_token()? {
-                        self.emit(s.into_bytes());
+                        self.emit(s.into_bytes())?;
                     } else {
                         return Err(self.context.error(ErrorType::SyntaxError));
                     }
@@ -70,7 +70,7 @@ impl Directives for Assembler {
                 self.expect_token(Delimiter(Comma))?
             } else {
                 let word = self.expect_word(0)?;
-                self.emit(vec![word.lo(), word.hi()]);
+                self.emit(vec![word.lo(), word.hi()])?;
             }
             expect_comma = !expect_comma;
         }
@@ -84,7 +84,7 @@ impl Directives for Assembler {
             self.tokens.pop();
             fill = self.expect_byte(-1)? as u8;
         }
-        self.emit(vec![fill; size]);
+        self.emit(vec![fill; size])?;
         Ok(())
     }
 

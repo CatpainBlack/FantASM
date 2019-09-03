@@ -42,7 +42,7 @@ pub enum IyU {
     Iyl = 5,
 }
 
-#[repr(usize)]
+#[repr(u8)]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Reg {
     B = 0,
