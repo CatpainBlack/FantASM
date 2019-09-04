@@ -141,7 +141,7 @@ impl Assembler {
     }
 
     pub fn relative(&mut self) -> Result<u8, Error> {
-        match self.next_token()? {
+        match self.take_token()? {
             Number(n) => Ok((n - (self.context.offset_pc(2))) as u8),
             ConstLabel(s) => {
                 let mut addr = self.context.try_resolve_label(&s, 1, true) as isize;
@@ -190,7 +190,7 @@ impl Assembler {
         }
     }
 
-    pub fn next_token(&mut self) -> Result<Token, Error> {
+    pub fn take_token(&mut self) -> Result<Token, Error> {
         if let Some(tok) = self.tokens.pop() {
             return Ok(tok);
         }
@@ -205,7 +205,7 @@ impl Assembler {
     }
 
     pub fn expect_token(&mut self, tok: Token) -> Result<(), Error> {
-        let t = self.next_token()?;
+        let t = self.take_token()?;
         if t != tok {
             return Err(self.context.error(ErrorType::SyntaxError));
         }

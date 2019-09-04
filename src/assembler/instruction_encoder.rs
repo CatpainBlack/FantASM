@@ -7,7 +7,8 @@ use crate::assembler::tokens::{AluOp, Cnd, Ir, Reg, RegPairInd, RotOp, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Reg::_HL_;
 use crate::assembler::tokens::RegPair::{_Af, Af, De, Hl, Ix, Iy, Sp};
-use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, ConstLabel, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, ConstLabelIndirect};
+use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, ConstLabel, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, ConstLabelIndirect, Operator, IndirectExpression};
+use crate::assembler::tokens::Op::{LParens, RParens};
 
 macro_rules! xyz {
     ($x: expr, $y: expr, $z: expr) => {
@@ -60,15 +61,14 @@ pub(crate) trait InstructionEncoder {
     fn load_special(&mut self, dst: &Token, src: &Token) -> Result<(), Error>;
     fn mul(&mut self) -> Result<(), Error>;
     fn next_reg(&mut self) -> Result<(), Error>;
+    fn indirect_expression(&mut self) -> Result<Token, Error>;
 }
 
 impl InstructionEncoder for Assembler {
     fn alu_op(&mut self, a: AluOp) -> Result<(), Error> {
-        let tok = self.next_token()?;
+        let tok = self.take_token()?;
 
-        if self.bank.emit_prefix(&tok) {
-            self.context.pc_add(1);
-        }
+        self.context.pc_add(self.bank.emit_prefix(&tok));
 
         match tok {
             IndexIndirect(_, n) => self.emit(&[alu!(a, Reg::_HL_ as u8), n]),
@@ -84,18 +84,16 @@ impl InstructionEncoder for Assembler {
     }
 
     fn alu_op_r(&mut self, a: AluOp, x: u8, q: u8) -> Result<(), Error> {
-        let lhs = self.next_token()?;
+        let lhs = self.take_token()?;
 
         if self.expect_token(Delimiter(Comma)).is_err() {
             self.tokens.push(lhs);
             return self.alu_op(a);
         }
 
-        let rhs = self.next_token()?;
+        let rhs = self.take_token()?;
 
-        if self.bank.emit_prefix(&lhs) {
-            self.context.pc_add(1);
-        }
+        self.context.pc_add(self.bank.emit_prefix(&lhs));
 
         match (&lhs, &rhs, self.z80n_enabled) {
             (RegisterPair(Hl), RegisterPair(reg), _) => match a {
@@ -134,7 +132,7 @@ impl InstructionEncoder for Assembler {
         // todo, fix if iX or Iy
         let bit = self.expect_byte(1)?;
         self.expect_token(Delimiter(Comma))?;
-        match self.next_token()? {
+        match self.take_token()? {
             //RegisterIX(r) => self.emit(&[0xDD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
             //RegisterIY(r) => self.emit(&[0xFD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
             Register(r) => self.emit(&[0xCb, xyz!(x, bit as u8, r as u8)])?,
@@ -176,13 +174,11 @@ impl InstructionEncoder for Assembler {
     }
 
     fn ex(&mut self) -> Result<(), Error> {
-        let lhs = &self.next_token()?;
+        let lhs = &self.take_token()?;
         self.expect_token(Delimiter(Comma))?;
-        let rhs = &self.next_token()?;
+        let rhs = &self.take_token()?;
 
-        if self.bank.emit_prefix(&rhs) {
-            self.context.pc_add(1);
-        }
+        self.context.pc_add(self.bank.emit_prefix(&rhs));
 
         match (lhs, rhs) {
             (RegisterPair(Af), RegisterPair(_Af)) => self.emit_byte(0x08),
@@ -198,7 +194,7 @@ impl InstructionEncoder for Assembler {
 
     fn im(&mut self) -> Result<(), Error> {
         // ToDo: Allow constants?
-        if let Number(mut n) = self.next_token()? {
+        if let Number(mut n) = self.take_token()? {
             if (0..3).contains(&n) {
                 if n > 0 {
                     n += 1;
@@ -211,11 +207,8 @@ impl InstructionEncoder for Assembler {
     }
 
     fn inc_dec(&mut self, q: u8) -> Result<(), Error> {
-        let tok = self.next_token()?;
-
-        if self.bank.emit_prefix(&tok) {
-            self.context.pc_add(1);
-        }
+        let tok = self.take_token()?;
+        self.context.pc_add(self.bank.emit_prefix(&tok));
 
         match tok {
             IndexIndirect(_reg, n) => self.emit(&[xyz!(0, _HL_ as u8, q + 4), n]),
@@ -230,7 +223,7 @@ impl InstructionEncoder for Assembler {
     }
 
     fn io_op(&mut self, y: u8) -> Result<(), Error> {
-        let lhs = &self.next_token()?;
+        let lhs = &self.take_token()?;
 
         if !self.next_token_is(&Delimiter(Comma)) && lhs == &RegisterIndirect(RegPairInd::C) {
             if y == 3 {
@@ -240,7 +233,7 @@ impl InstructionEncoder for Assembler {
             }
         }
         self.expect_token(Delimiter(Comma))?;
-        let rhs = &self.next_token()?;
+        let rhs = &self.take_token()?;
 
         match (&lhs, &rhs, &y) {
             //In
@@ -276,7 +269,7 @@ impl InstructionEncoder for Assembler {
             }
             Condition(c) => match &c {
                 Cnd::Z | Cnd::C | Cnd::Nz | Cnd::NC => {
-                    self.next_token()?;
+                    self.take_token()?;
                     self.expect_token(Delimiter(Comma))?;
                     let offset = self.relative()?;
                     return self.emit(&[xyz!(0, c.clone() as u8 + 4, 0), offset]);
@@ -288,10 +281,8 @@ impl InstructionEncoder for Assembler {
     }
 
     fn push_pop(&mut self, z: u8) -> Result<(), Error> {
-        let tok = self.next_token()?;
-        if self.bank.emit_prefix(&tok) {
-            self.context.pc_add(1);
-        }
+        let tok = self.take_token()?;
+        self.context.pc_add(self.bank.emit_prefix(&tok));
         match tok {
             RegisterPair(r) => self.emit_byte(xpqz!(3, r.rp2()?, 0, z)),
             _ => if self.z80n_enabled {
@@ -306,7 +297,7 @@ impl InstructionEncoder for Assembler {
 
     fn ret(&mut self) -> Result<(), Error> {
         if self.tokens.len() > 0 {
-            let tok = self.next_token()?;
+            let tok = self.take_token()?;
             if let Condition(c) = tok {
                 return self.emit_byte(xyz!(3, c.clone() as u8, 0));
             }
@@ -316,10 +307,8 @@ impl InstructionEncoder for Assembler {
     }
 
     fn rot(&mut self, a: RotOp) -> Result<(), Error> {
-        let tok = self.next_token()?;
-        if self.bank.emit_prefix(&tok) {
-            self.context.pc_add(1);
-        }
+        let tok = self.take_token()?;
+        self.context.pc_add(self.bank.emit_prefix(&tok));
         match &tok {
             IndexIndirect(_r, n) => self.emit(&[rot_encode!(a, Reg::_HL_ as u8), *n]),
             Register(r) => self.emit(&[0xCB, rot_encode!(a, r.clone() as u8)]),
@@ -329,7 +318,7 @@ impl InstructionEncoder for Assembler {
 
     fn rst(&mut self) -> Result<(), Error> {
         // ToDo: Allow constants?
-        if let Number(n) = self.next_token()? {
+        if let Number(n) = self.take_token()? {
             if ((n / 8) & 7) * 8 != n {
                 return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
@@ -341,13 +330,15 @@ impl InstructionEncoder for Assembler {
 
     fn load(&mut self) -> Result<(), Error> {
         // ToDo: Handle expressions
-        let lhs = self.next_token()?;
+        let lhs = self.indirect_expression()?;
         self.expect_token(Delimiter(Comma))?;
-        let rhs = self.next_token()?;
+        let rhs = self.indirect_expression()?;
 
-        if self.bank.emit_prefix(&lhs) {
+        //println!("{:04?}: load {:?},{:?}", self.context.current_line_number(), lhs, rhs);
+
+        if self.bank.emit_prefix(&lhs) == 1 {
             self.context.pc_add(1);
-        } else if self.bank.emit_prefix(&rhs) {
+        } else if self.bank.emit_prefix(&rhs) == 1 {
             self.context.pc_add(1);
         }
 
@@ -370,10 +361,9 @@ impl InstructionEncoder for Assembler {
         Err(self.context.error(ErrorType::SyntaxError))
     }
 
+
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
         // ToDo: Handle expressions
-
-        //println!("load_indirect {:?},{:?}", dst, src);
 
         let dst = &match dst {
             RegisterPair(Ix) => RegisterPair(Hl),
@@ -389,37 +379,103 @@ impl InstructionEncoder for Assembler {
 
         match (dst, src) {
             (RegisterPair(Hl), AddressIndirect(a)) => self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
-
             (RegisterPair(Hl), ConstLabelIndirect(l)) => {
-                let a = self.context.try_resolve_label(l, 1, false);
-                self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()])
+                self.emit_byte(xpqz!(0, 2, 1, 2))?;
+                let addr = self.context.try_resolve_label(l, 0, false) as isize;
+                self.emit_word(addr)
+            }
+            (RegisterPair(Hl), IndirectExpression(tokens)) => {
+                self.emit_byte(xpqz!(0, 2, 1, 2))?;
+                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
+                    Ok(Some(addr)) => addr,
+                    Ok(None) => 0,
+                    Err(e) => return Err(self.context.error(e))
+                };
+                self.emit_word(a)
             }
 
             (RegisterPair(r), AddressIndirect(a)) => self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
+            (RegisterPair(r), ConstLabelIndirect(l)) => {
+                self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3)])?;
+                let addr = self.context.try_resolve_label(l, 0, false) as isize;
+                self.emit_word(addr)
+            }
+            (RegisterPair(r), IndirectExpression(tokens)) => {
+                self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3)])?;
+                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
+                    Ok(Some(addr)) => addr,
+                    Ok(None) => 0,
+                    Err(e) => return Err(self.context.error(e))
+                };
+                self.emit_word(a)
+            }
 
             (RegisterIndirect(rp), Register(Reg::A)) => self.emit(&[xpqz!(0, rp.clone() as u8, 0, 2)]),
+            (AddressIndirect(a), Register(Reg::A)) => self.emit(&[xpqz!(0, 3, 0, 2), a.lo(), a.hi()]),
+            (ConstLabelIndirect(l), Register(Reg::A)) => {
+                self.emit_byte(xpqz!(0, 3, 0, 2))?;
+                let a = self.context.try_resolve_label(l, 0, false) as isize;
+                self.emit_word(a)
+            }
+            (IndirectExpression(tokens), Register(Reg::A)) => {
+                self.emit_byte(xpqz!(0, 3, 0, 2))?;
+                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
+                    Ok(Some(addr)) => addr,
+                    Ok(None) => 0,
+                    Err(e) => return Err(self.context.error(e))
+                };
+                self.emit_word(a)
+            }
 
             (Register(Reg::A), RegisterIndirect(r)) => self.emit(&[xpqz!(0, r.clone() as u8, 1, 2)]),
             (Register(Reg::A), AddressIndirect(a)) => self.emit(&[xpqz!(0, 3, 1, 2), a.lo(), a.hi()]),
             (Register(Reg::A), ConstLabelIndirect(s)) => {
-                let a = self.context.try_resolve_label(s, 1, false);
-                self.emit(&[xpqz!(0, 3, 1, 2), a.lo(), a.hi()])
+                self.emit_byte(xpqz!(0, 3, 1, 2))?;
+                let a = self.context.try_resolve_label(s, 0, false) as isize;
+                self.emit_word(a)
             }
-            (AddressIndirect(a), Register(Reg::A)) => self.emit(&[xpqz!(0, 3, 0, 2), a.lo(), a.hi()]),
-            (ConstLabelIndirect(l), Register(Reg::A)) => {
-                let a = self.context.try_resolve_label(l, 1, false);
-                self.emit(&[xpqz!(0, 3, 0, 2), a.lo(), a.hi()])
+            (Register(Reg::A), IndirectExpression(tokens)) => {
+                self.emit_byte(xpqz!(0, 3, 1, 2))?;
+                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
+                    Ok(Some(addr)) => addr,
+                    Ok(None) => 0,
+                    Err(e) => return Err(self.context.error(e))
+                };
+                self.emit_word(a)
             }
+
             (AddressIndirect(a), RegisterPair(Hl)) => self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
+
+            (IndirectExpression(tokens), RegisterPair(Hl)) => {
+                self.emit_byte(xpqz!(0, 2, 0, 2))?;
+                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
+                    Ok(Some(addr)) => addr,
+                    Ok(None) => 0,
+                    Err(e) => return Err(self.context.error(e))
+                };
+                self.emit_word(a)
+            }
+
             (ConstLabelIndirect(l), RegisterPair(Hl)) => {
-                let a = self.context.try_resolve_label(l, 1, false);
-                self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()])
+                self.emit_byte(xpqz!(0, 2, 0, 2))?;
+                let a = self.context.try_resolve_label(l, 0, false) as isize;
+                self.emit_word(a)
             }
 
             (AddressIndirect(a), RegisterPair(r)) => self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
             (ConstLabelIndirect(l), RegisterPair(r)) => {
-                let a = self.context.try_resolve_label(l, 2, false);
-                self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3), a.lo(), a.hi()])
+                self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3)])?;
+                let a = self.context.try_resolve_label(l, 0, false) as isize;
+                self.emit_word(a)
+            }
+            (IndirectExpression(tokens), RegisterPair(r)) => {
+                self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3)])?;
+                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
+                    Ok(Some(addr)) => addr,
+                    Ok(None) => 0,
+                    Err(e) => return Err(self.context.error(e))
+                };
+                self.emit_word(a)
             }
 
             (Register(r), IndexIndirect(_reg, o)) => self.emit(&[xyz!(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
@@ -459,25 +515,25 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_rp(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
-        // ToDo: Handle expressions
-        //println!("load_rp {:?},{:?}", dst, src);
-        let mut encoded: Vec<u8> = vec![];
+        //println!("{:04?}: load_rp {:?},{:?}", self.context.current_line_number(), dst, src);
 
         let rp = if let RegisterPair(rp) = dst { rp.rp1()? } else { 0 };
 
-        let addr = match (dst, src) {
-            (RegisterPair(_), Number(n)) => *n,
-            (RegisterPair(_), ConstLabel(l)) => self.context.try_resolve_label(l, 1, false) as isize,
-            _ => return Err(self.context.error(ErrorType::SyntaxError))
-        };
+        self.tokens.push(src.clone());
 
         if src.is_indirect() {
-            encoded.append(&mut vec![xpqz!(0, 2, 1, 2), addr.lo(), addr.hi()]);
+            self.emit_byte(xpqz!(0, 2, 1, 2))?;
         } else {
-            encoded.append(&mut vec![xpqz!(0, rp, 0, 1), addr.lo(), addr.hi()]);
+            self.emit_byte(xpqz!(0, rp, 0, 1))?;
         }
 
-        self.emit(&encoded)
+        let addr = match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2) {
+            Ok(Some(a)) => a,
+            Ok(None) => 0,
+            Err(e) => return Err(self.context.error(e))
+        };
+
+        self.emit_word(addr)
     }
 
     fn load_special(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
@@ -544,5 +600,19 @@ impl InstructionEncoder for Assembler {
         }
         let n = self.expect_byte(2)? as u8;
         self.emit(&[0xED, 0x91, reg, n as u8])
+    }
+
+    fn indirect_expression(&mut self) -> Result<Token, Error> {
+        let lhs = self.take_token()?;
+        if lhs == Operator(LParens) {
+            let (_, mut tokens) = self.expr.get_expression(&mut self.context, &mut self.tokens);
+            match tokens.last() {
+                Some(Operator(RParens)) => tokens.pop(),
+                _ => return Err(self.context.error(ErrorType::UnclosedParentheses))
+            };
+            tokens.reverse();
+            return Ok(IndirectExpression(tokens));
+        }
+        Ok(lhs)
     }
 }

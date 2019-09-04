@@ -49,7 +49,7 @@ impl Directives for Assembler {
                         }
                         self.emit(&[n as u8])?
                     }
-                    Ok(None) => if let StringLiteral(s) = self.next_token()? {
+                    Ok(None) => if let StringLiteral(s) = self.take_token()? {
                         self.emit(s.into_bytes().as_slice())?;
                     } else {
                         return Err(self.context.error(ErrorType::SyntaxError));
@@ -88,8 +88,8 @@ impl Directives for Assembler {
     }
 
     fn set_option(&mut self) -> Result<(), Error> {
-        let o = self.next_token()?;
-        let b = self.next_token()?;
+        let o = self.take_token()?;
+        let b = self.take_token()?;
         match (o, b) {
             (Opt(OptionType::Verbose), Token::Boolean(b)) => self.enable_console(b),
             (Opt(OptionType::CSpect), Token::Boolean(b)) => self.enable_cspect(b),
@@ -100,7 +100,7 @@ impl Directives for Assembler {
     }
 
     fn include_source_file(&mut self) -> Result<(), Error> {
-        let file_name = match self.next_token()? {
+        let file_name = match self.take_token()? {
             StringLiteral(s) => s,
             ConstLabel(l) => l,
             _ => return Err(self.context.error(ErrorType::FileNotFound))
@@ -110,14 +110,14 @@ impl Directives for Assembler {
     }
 
     fn write_message(&mut self) -> Result<(), Error> {
-        if let StringLiteral(s) = self.next_token()? {
+        if let StringLiteral(s) = self.take_token()? {
             println!("{}", s);
         }
         Ok(())
     }
 
     fn include_binary(&mut self) -> Result<(), Error> {
-        let file_name = match self.next_token()? {
+        let file_name = match self.take_token()? {
             StringLiteral(s) => s,
             ConstLabel(l) => l,
             _ => return Err(self.context.error(ErrorType::FileNotFound))

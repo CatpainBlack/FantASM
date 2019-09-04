@@ -262,4 +262,5 @@ pub enum Token {
     StringLiteral(String),
     Opt(OptionType),
     Boolean(bool),
+    IndirectExpression(Vec<Token>),
 }

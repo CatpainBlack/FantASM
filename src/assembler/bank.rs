@@ -29,13 +29,13 @@ impl Bank {
         self.bytes.push(b);
     }
 
-    pub fn emit_prefix(&mut self, t: &Token) -> bool {
+    pub fn emit_prefix(&mut self, t: &Token) -> isize {
         match t {
             RegisterPair(RegPair::Ix) | RegisterIX(_) | IndexIndirect(RegPair::Ix, _) => self.push(0xDD),
             RegisterPair(RegPair::Iy) | RegisterIY(_) | IndexIndirect(RegPair::Iy, _) => self.push(0xFD),
-            _ => return false
+            _ => return 0
         }
-        true
+        1
     }
 }
 
