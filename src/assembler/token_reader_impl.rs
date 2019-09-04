@@ -4,7 +4,7 @@ use crate::assembler::{Error, TokenReader};
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Cnd, Op, Reg, RegPair, RegPairInd, Token};
 use crate::assembler::tokens::Op::{LParens, RParens};
-use crate::assembler::tokens::Token::{AddressIndirect, Condition, IndexIndirect, ConstLabel, ConstLabelIndirect, Number, Operator, Register, RegisterIndirect, RegisterPair};
+use crate::assembler::tokens::Token::{AddressIndirect, Condition, IndexIndirect, ConstLabel, Number, Operator, Register, RegisterIndirect, RegisterPair, IndirectExpression};
 use crate::assembler::error_impl::ErrorType;
 
 impl<R> TokenReader<R> where R: BufRead {
@@ -136,7 +136,7 @@ impl<R> TokenReader<R> where R: BufRead {
                     Some(RegisterIndirect(RegPairInd::C))
                 },
                 Some(Number(n)) => Some(AddressIndirect(n as usize)),
-                Some(ConstLabel(l)) => Some(ConstLabelIndirect(l)),
+                Some(ConstLabel(l)) => Some(IndirectExpression(vec![ConstLabel(l)])),
                 _ => None
             } {
                 if expr.is_empty() {

@@ -244,7 +244,7 @@ pub enum Token {
     Invalid,
     EndOfFile,
     ConstLabel(String),
-    ConstLabelIndirect(String),
+    //ConstLabelIndirect(String),
     Directive(Directive),
     OpCode(OpCode),
     Number(isize),

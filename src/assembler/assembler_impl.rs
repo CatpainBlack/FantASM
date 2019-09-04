@@ -10,7 +10,7 @@ use crate::assembler::instruction_encoder::InstructionEncoder;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
-use crate::assembler::tokens::Token::{ConstLabel, Number, Operator, AddressIndirect, ConstLabelIndirect};
+use crate::assembler::tokens::Token::{ConstLabel, Number, Operator, AddressIndirect};
 use crate::assembler::error_impl::ErrorType::SyntaxError;
 use crate::assembler::bank::Bank;
 use crate::assembler::reg_pair::HighLow;
@@ -176,11 +176,10 @@ impl Assembler {
         }
     }
 
-    pub(crate) fn decode_number(&mut self, token: &Token, pc_offset: isize) -> Result<Option<isize>, Error> {
+    pub(crate) fn decode_number(&mut self, token: &Token) -> Result<Option<isize>, Error> {
         match &token {
             Number(n) => Ok(Some(*n)),
             AddressIndirect(a) => Ok(Some(*a as isize)),
-            ConstLabelIndirect(l) => Ok(Some(self.context.try_resolve_label(l, pc_offset, false) as isize)),
             ConstLabel(l) => if let Some(n) = self.context.get_constant(l) {
                 Ok(Some(n))
             } else {

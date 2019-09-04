@@ -7,7 +7,7 @@ use crate::assembler::tokens::{AluOp, Cnd, Ir, Reg, RegPairInd, RotOp, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Reg::_HL_;
 use crate::assembler::tokens::RegPair::{_Af, Af, De, Hl, Ix, Iy, Sp};
-use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, ConstLabel, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, ConstLabelIndirect, Operator, IndirectExpression};
+use crate::assembler::tokens::Token::{AddressIndirect, Condition, Delimiter, IndexIndirect, ConstLabel, Number, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, Operator, IndirectExpression};
 use crate::assembler::tokens::Op::{LParens, RParens};
 
 macro_rules! xyz {
@@ -378,55 +378,55 @@ impl InstructionEncoder for Assembler {
 
         match (dst, src) {
             (RegisterPair(Hl), AddressIndirect(a)) => self.emit(&[xpqz!(0, 2, 1, 2), a.lo(), a.hi()]),
-            (RegisterPair(Hl), ConstLabelIndirect(l)) => {
-                self.emit_byte(xpqz!(0, 2, 1, 2))?;
-                let addr = self.context.try_resolve_label(l, 0, false) as isize;
-                self.emit_word(addr)
-            }
+//            (RegisterPair(Hl), ConstLabelIndirect(l)) => {
+//                self.emit_byte(xpqz!(0, 2, 1, 2))?;
+//                let addr = self.context.try_resolve_label(l, 0, false) as isize;
+//                self.emit_word(addr)
+//            }
             (RegisterPair(Hl), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 2, 1, 2), tokens.as_slice()),
 
             (RegisterPair(r), AddressIndirect(a)) => self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
-            (RegisterPair(r), ConstLabelIndirect(l)) => {
-                self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3)])?;
-                let addr = self.context.try_resolve_label(l, 0, false) as isize;
-                self.emit_word(addr)
-            }
+//            (RegisterPair(r), ConstLabelIndirect(l)) => {
+//                self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3)])?;
+//                let addr = self.context.try_resolve_label(l, 0, false) as isize;
+//                self.emit_word(addr)
+//            }
             (RegisterPair(r), IndirectExpression(tokens)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1().unwrap(), 1, 3), tokens.as_slice()),
 
             (RegisterIndirect(rp), Register(Reg::A)) => self.emit(&[xpqz!(0, rp.clone() as u8, 0, 2)]),
             (AddressIndirect(a), Register(Reg::A)) => self.emit(&[xpqz!(0, 3, 0, 2), a.lo(), a.hi()]),
-            (ConstLabelIndirect(l), Register(Reg::A)) => {
-                self.emit_byte(xpqz!(0, 3, 0, 2))?;
-                let a = self.context.try_resolve_label(l, 0, false) as isize;
-                self.emit_word(a)
-            }
+//            (ConstLabelIndirect(l), Register(Reg::A)) => {
+//                self.emit_byte(xpqz!(0, 3, 0, 2))?;
+//                let a = self.context.try_resolve_label(l, 0, false) as isize;
+//                self.emit_word(a)
+//            }
             (IndirectExpression(tokens), Register(Reg::A)) => self.emit_instr(None, xpqz!(0, 3, 0, 2), tokens.as_slice()),
 
             (Register(Reg::A), RegisterIndirect(r)) => self.emit(&[xpqz!(0, r.clone() as u8, 1, 2)]),
             (Register(Reg::A), AddressIndirect(a)) => self.emit(&[xpqz!(0, 3, 1, 2), a.lo(), a.hi()]),
-            (Register(Reg::A), ConstLabelIndirect(s)) => {
-                self.emit_byte(xpqz!(0, 3, 1, 2))?;
-                let a = self.context.try_resolve_label(s, 0, false) as isize;
-                self.emit_word(a)
-            }
+//            (Register(Reg::A), ConstLabelIndirect(s)) => {
+//                self.emit_byte(xpqz!(0, 3, 1, 2))?;
+//                let a = self.context.try_resolve_label(s, 0, false) as isize;
+//                self.emit_word(a)
+//            }
             (Register(Reg::A), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 3, 1, 2), tokens.as_slice()),
 
             (AddressIndirect(a), RegisterPair(Hl)) => self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
 
             (IndirectExpression(tokens), RegisterPair(Hl)) => self.emit_instr(None, xpqz!(0, 2, 0, 2), tokens.as_slice()),
 
-            (ConstLabelIndirect(l), RegisterPair(Hl)) => {
-                self.emit_byte(xpqz!(0, 2, 0, 2))?;
-                let a = self.context.try_resolve_label(l, 0, false) as isize;
-                self.emit_word(a)
-            }
+//            (ConstLabelIndirect(l), RegisterPair(Hl)) => {
+//                self.emit_byte(xpqz!(0, 2, 0, 2))?;
+//                let a = self.context.try_resolve_label(l, 0, false) as isize;
+//                self.emit_word(a)
+//            }
 
             (AddressIndirect(a), RegisterPair(r)) => self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3), a.lo(), a.hi()]),
-            (ConstLabelIndirect(l), RegisterPair(r)) => {
-                self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3)])?;
-                let a = self.context.try_resolve_label(l, 0, false) as isize;
-                self.emit_word(a)
-            }
+//            (ConstLabelIndirect(l), RegisterPair(r)) => {
+//                self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3)])?;
+//                let a = self.context.try_resolve_label(l, 0, false) as isize;
+//                self.emit_word(a)
+//            }
             (IndirectExpression(tokens), RegisterPair(r)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1()?, 0, 3), tokens.as_slice()),
 
             (Register(r), IndexIndirect(_reg, o)) => self.emit(&[xyz!(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
@@ -453,7 +453,7 @@ impl InstructionEncoder for Assembler {
             }
         };
 
-        if let Some(n) = self.decode_number(src, 1)? {
+        if let Some(n) = self.decode_number(src)? {
             if n < 0 || n > 255 {
                 self.warn(ErrorType::ByteTrunctated);
             }
@@ -490,14 +490,8 @@ impl InstructionEncoder for Assembler {
             } else {
                 return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
-            (ConstLabelIndirect(l), RegisterPair(Sp)) => {
-                let addr = self.context.try_resolve_label(l, 2, false);
-                return self.emit(&[0xED, 0x73, addr.lo(), addr.hi()]);
-            }
-            (RegisterPair(Sp), ConstLabelIndirect(l)) => {
-                let addr = self.context.try_resolve_label(l, 2, false);
-                return self.emit(&[0xED, 0x7B, addr.lo(), addr.hi()]);
-            }
+            (IndirectExpression(l), RegisterPair(Sp)) => return self.emit_instr(Some(0xED), 0x73, l.as_slice()),
+            (RegisterPair(Sp), IndirectExpression(l)) => return self.emit_instr(Some(0xED), 0x7B, l.as_slice()),
             (RegisterPair(Sp), RegisterPair(Hl)) => return self.emit(&[xpqz!(3, 3, 1, 1)]),
             (RegisterPair(Sp), RegisterPair(Ix)) => return self.emit(&[xpqz!(3, 3, 1, 1)]),
             (RegisterPair(Sp), RegisterPair(Iy)) => return self.emit(&[xpqz!(3, 3, 1, 1)]),
