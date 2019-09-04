@@ -49,24 +49,24 @@ impl HighLow for u16 {
         return (self & 0xFF) as u8;
     }
     fn hi(&self) -> u8 {
-        return (self >> 8u16 & 0xff) as u8;
+        (self >> 8u16 & 0xff) as u8
     }
 }
 
 impl HighLow for usize {
     fn lo(&self) -> u8 {
-        return (self & 0xFF) as u8;
+        (self & 0xFF) as u8
     }
     fn hi(&self) -> u8 {
-        return (self >> 8u16 & 0xff) as u8;
+        (self >> 8u16 & 0xff) as u8
     }
 }
 
 impl HighLow for isize {
     fn lo(&self) -> u8 {
-        return (self & 0xFF) as u8;
+        (self & 0xFF) as u8
     }
     fn hi(&self) -> u8 {
-        return (self >> 8u16 & 0xff) as u8;
+        (self >> 8u16 & 0xff) as u8
     }
 }

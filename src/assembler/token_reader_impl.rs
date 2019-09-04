@@ -4,7 +4,7 @@ use crate::assembler::{Error, TokenReader};
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Cnd, Op, Reg, RegPair, RegPairInd, Token};
 use crate::assembler::tokens::Op::{LParens, RParens};
-use crate::assembler::tokens::Token::{AddressIndirect, Condition, IndexIndirect, ConstLabel, ConstLabelIndirect, Number, Operator, Register, RegisterIndirect, RegisterPair};
+use crate::assembler::tokens::Token::{Condition, IndexIndirect, ConstLabel, Number, Operator, Register, RegisterIndirect, RegisterPair, IndirectExpression};
 use crate::assembler::error_impl::ErrorType;
 
 impl<R> TokenReader<R> where R: BufRead {
@@ -86,7 +86,6 @@ impl<R> TokenReader<R> where R: BufRead {
         }
         self.store_token_string();
         self.words.reverse();
-        //println!("words: {:?}", self.words);
     }
 
     fn next_token(&mut self) -> Option<Token> {
@@ -135,8 +134,8 @@ impl<R> TokenReader<R> where R: BufRead {
                 } else {
                     Some(RegisterIndirect(RegPairInd::C))
                 },
-                Some(Number(n)) => Some(AddressIndirect(n as usize)),
-                Some(ConstLabel(l)) => Some(ConstLabelIndirect(l)),
+                Some(Number(n)) => Some(IndirectExpression(vec![Number(n)])),
+                Some(ConstLabel(l)) => Some(IndirectExpression(vec![ConstLabel(l)])),
                 _ => None
             } {
                 if expr.is_empty() {
@@ -153,7 +152,6 @@ impl<R> TokenReader<R> where R: BufRead {
         let mut parens: Vec<usize> = vec![];
         self.line_number += 1;
         let count = self.reader.read_line(&mut line)?;
-        //println!("read_line: {}", line);
         if count <= 0 {
             return Ok(vec![Token::EndOfFile]);
         }
@@ -182,7 +180,6 @@ impl<R> TokenReader<R> where R: BufRead {
         if !parens.is_empty() {
             return Err(Error::fatal(&ErrorType::UnclosedParentheses.to_string(), self.line_number));
         }
-        //println!("read_line: {:?}", self.tokens);
         Ok(self.tokens.to_owned())
     }
 }

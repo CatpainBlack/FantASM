@@ -42,7 +42,7 @@ pub enum IyU {
     Iyl = 5,
 }
 
-#[repr(usize)]
+#[repr(u8)]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Reg {
     B = 0,
@@ -106,6 +106,7 @@ pub enum Directive {
     Word,
     Block,
     Hex,
+    Align,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -243,7 +244,6 @@ pub enum Token {
     Invalid,
     EndOfFile,
     ConstLabel(String),
-    ConstLabelIndirect(String),
     Directive(Directive),
     OpCode(OpCode),
     Number(isize),
@@ -256,9 +256,9 @@ pub enum Token {
     Operator(Op),
     RegisterIndirect(RegPairInd),
     IndexIndirect(RegPair, u8),
-    AddressIndirect(usize),
     Condition(Cnd),
     StringLiteral(String),
     Opt(OptionType),
     Boolean(bool),
+    IndirectExpression(Vec<Token>),
 }

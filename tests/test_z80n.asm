@@ -28,7 +28,7 @@ start
 
 	PUSH 	49152
 	push	start
-	;push	data
+	push	data
 
 	nextreg	register-register+20,20+0x13
 	NEXTREG	register,register

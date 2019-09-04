@@ -7,7 +7,6 @@ use std::fmt::Formatter;
 use crate::assembler::{Error, ErrorLevel};
 
 pub enum ErrorType {
-    //InternalError,
     PCOverflow,
     InvalidLabel,
     LabelNotFound,
@@ -17,9 +16,8 @@ pub enum ErrorType {
     InvalidRegisterPair,
     InvalidInstruction,
     IntegerOutOfRange,
-    //IntegerExpected,
     AddressTruncated,
-    ByteTrunctated,
+    ByteTruncated,
     WordTruncated,
     LabelOrConstantExists,
     UnexpectedEndOfLine,
@@ -44,7 +42,6 @@ impl ToString for ErrorType {
             ErrorType::InvalidRegisterPair => String::from("Invalid register pair"),
             ErrorType::InvalidInstruction => String::from("Invalid instruction"),
             ErrorType::IntegerOutOfRange => String::from("Integer out of range"),
-            //ErrorType::IntegerExpected => String::from("Integer expected"),
             ErrorType::FileNotFound => String::from("File not found"),
             ErrorType::LabelNotFound => String::from("Undefined label or constant"),
             ErrorType::AddressTruncated => String::from("Address is out of range, the value has been truncated"),
@@ -54,7 +51,7 @@ impl ToString for ErrorType {
             ErrorType::BadOperator => String::from("Bad operator in expression"),
             ErrorType::DivideByZero => String::from("Expression resulted in a divide by zero"),
             ErrorType::Z80NDisabled => String::from("Z80n extended instructions are not enabled"),
-            ErrorType::ByteTrunctated => String::from("Integer has been truncated to 8 bits"),
+            ErrorType::ByteTruncated => String::from("Integer has been truncated to 8 bits"),
             ErrorType::UnexpectedClose => String::from("Unexpected closing parentheses"),
             ErrorType::UnclosedParentheses => String::from("Unclosed parentheses"),
             ErrorType::CSpectDisabled => String::from("CSpect pseudo ops are not enabled"),
