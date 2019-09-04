@@ -10,7 +10,7 @@ use crate::assembler::instruction_encoder::InstructionEncoder;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
-use crate::assembler::tokens::Token::{ConstLabel, Number, Operator, AddressIndirect};
+use crate::assembler::tokens::Token::{ConstLabel, Number, Operator};
 use crate::assembler::error_impl::ErrorType::SyntaxError;
 use crate::assembler::bank::Bank;
 use crate::assembler::reg_pair::HighLow;
@@ -179,7 +179,7 @@ impl Assembler {
     pub(crate) fn decode_number(&mut self, token: &Token) -> Result<Option<isize>, Error> {
         match &token {
             Number(n) => Ok(Some(*n)),
-            AddressIndirect(a) => Ok(Some(*a as isize)),
+            //AddressIndirect(a) => Ok(Some(*a as isize)),
             ConstLabel(l) => if let Some(n) = self.context.get_constant(l) {
                 Ok(Some(n))
             } else {
@@ -246,7 +246,7 @@ impl Assembler {
         Ok(())
     }
 
-    pub(crate) fn emit_instr(&mut self, prefix: Option<u8>, instr: u8, expr: &[Token]) -> Result<(), Error> {
+    pub(crate) fn emit_instr(&mut self, prefix: Option<u8>, instr: u8, expr: &[Token], byte: bool) -> Result<(), Error> {
         if prefix.is_some() {
             self.emit_byte(prefix.unwrap())?;
         }
@@ -256,6 +256,9 @@ impl Assembler {
             Ok(None) => 0,
             Err(e) => return Err(self.context.error(e))
         };
+        if byte {
+            return self.emit_byte(a as u8);
+        }
         self.emit_word(a)
     }
 
