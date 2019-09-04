@@ -17,10 +17,6 @@ impl Bank {
         self.bytes.as_slice()
     }
 
-//    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-//        self.bytes.as_mut_slice()
-//    }
-
     pub fn append(&mut self, bytes: &mut Vec<u8>) {
         self.bytes.append(bytes);
     }

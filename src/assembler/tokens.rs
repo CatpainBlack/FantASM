@@ -256,7 +256,6 @@ pub enum Token {
     Operator(Op),
     RegisterIndirect(RegPairInd),
     IndexIndirect(RegPair, u8),
-    //AddressIndirect(usize),
     Condition(Cnd),
     StringLiteral(String),
     Opt(OptionType),

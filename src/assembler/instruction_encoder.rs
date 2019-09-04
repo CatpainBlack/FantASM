@@ -325,12 +325,9 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load(&mut self) -> Result<(), Error> {
-        // ToDo: Handle expressions
         let lhs = self.indirect_expression()?;
         self.expect_token(Delimiter(Comma))?;
         let rhs = self.indirect_expression()?;
-
-        //println!("{:04?}: load {:?},{:?}", self.context.current_line_number(), lhs, rhs);
 
         if self.bank.emit_prefix(&lhs) == 1 {
             self.context.pc_add(1);
@@ -358,8 +355,6 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
-        // ToDo: Handle expressions
-
         let dst = &match dst {
             RegisterPair(Ix) => RegisterPair(Hl),
             RegisterPair(Iy) => RegisterPair(Hl),
@@ -400,7 +395,6 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_r(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
-        // ToDo: Handle expressions
         let r = match (dst, src) {
             (Register(Reg::A), IndirectExpression(e)) => return self.emit_instr(None, xpqz!(0, 3, 1, 2), e,false),
             _ => if let Some(n) = dst.reg_value() { n } else {
@@ -410,7 +404,7 @@ impl InstructionEncoder for Assembler {
 
         if let Some(n) = self.decode_number(src)? {
             if n < 0 || n > 255 {
-                self.warn(ErrorType::ByteTrunctated);
+                self.warn(ErrorType::ByteTruncated);
             }
             return self.emit(&[xyz!(0, r, 6), n as u8]);
         } else if let Some(rr) = src.reg_value() {
@@ -437,7 +431,6 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_special(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
-        //println!("load_special {:?},{:?}", dst, src);
         match (dst, src) {
             (RegisterPair(Sp), Number(n)) => if (0..65536).contains(n) {
                 let addr = n.clone() as u16;

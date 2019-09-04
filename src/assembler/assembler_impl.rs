@@ -12,7 +12,7 @@ use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{ConstLabel, Number, Operator};
 use crate::assembler::error_impl::ErrorType::SyntaxError;
-use crate::assembler::bank::Bank;
+use crate::assembler::bank_impl::Bank;
 use crate::assembler::reg_pair::HighLow;
 
 impl Assembler {
@@ -59,8 +59,6 @@ impl Assembler {
 
 
     pub(crate) fn first_pass(&mut self, file_name: &str) -> Result<(), Error> {
-//        self.context.line_number.push(0);
-//        self.context.file_name.push(file_name.to_string());
         self.context.enter(file_name);
         let file = File::open(file_name)?;
         let buf = BufReader::new(file);
@@ -156,7 +154,7 @@ impl Assembler {
     }
 
     pub(crate) fn expect_byte(&mut self, instr_size: isize) -> Result<isize, Error> {
-        self.expect_number_in_range(0..256, 1, ErrorType::ByteTrunctated, instr_size)
+        self.expect_number_in_range(0..256, 1, ErrorType::ByteTruncated, instr_size)
     }
 
     pub(crate) fn expect_word(&mut self, instr_size: isize) -> Result<isize, Error> {
@@ -179,7 +177,6 @@ impl Assembler {
     pub(crate) fn decode_number(&mut self, token: &Token) -> Result<Option<isize>, Error> {
         match &token {
             Number(n) => Ok(Some(*n)),
-            //AddressIndirect(a) => Ok(Some(*a as isize)),
             ConstLabel(l) => if let Some(n) = self.context.get_constant(l) {
                 Ok(Some(n))
             } else {
@@ -421,9 +418,5 @@ impl Assembler {
         magenta_ln!("Origin            : {:02X}", self.origin);
         magenta_ln!("Total Lines       : {}", self.total_lines);
         magenta_ln!("Code Length       : {:02X}", self.context.current_pc() - self.origin);
-//		magenta_ln!("Labels            : {:?}", self.context.labels);
-//		magenta_ln!("Constants         : {:?}", self.context.constants);
-//		magenta_ln!("Forward references: {:02X?}", self.context.forward_references);
-        //magenta_ln!("Assembled         : {:02X?}", self.bytes);
     }
 }

@@ -1,7 +1,7 @@
 use crate::assembler::expression_impl::ExpressionParser;
 use crate::assembler::tokens::Token;
 use crate::assembler::assembler_context_impl::AssemblerContext;
-use crate::assembler::bank::Bank;
+use crate::assembler::bank_impl::Bank;
 
 
 mod token_reader_impl;
@@ -15,9 +15,8 @@ mod reg_pair;
 mod directive_impl;
 mod expression_impl;
 mod assembler_context_impl;
-mod bank;
+mod bank_impl;
 
-//#[derive(Debug)]
 struct TokenReader<R> {
     reader: R,
     operators: String,

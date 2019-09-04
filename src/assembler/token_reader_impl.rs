@@ -86,7 +86,6 @@ impl<R> TokenReader<R> where R: BufRead {
         }
         self.store_token_string();
         self.words.reverse();
-        //println!("words: {:?}", self.words);
     }
 
     fn next_token(&mut self) -> Option<Token> {
@@ -153,7 +152,6 @@ impl<R> TokenReader<R> where R: BufRead {
         let mut parens: Vec<usize> = vec![];
         self.line_number += 1;
         let count = self.reader.read_line(&mut line)?;
-        //println!("read_line: {}", line);
         if count <= 0 {
             return Ok(vec![Token::EndOfFile]);
         }
@@ -182,7 +180,6 @@ impl<R> TokenReader<R> where R: BufRead {
         if !parens.is_empty() {
             return Err(Error::fatal(&ErrorType::UnclosedParentheses.to_string(), self.line_number));
         }
-        //println!("read_line: {:?}", self.tokens);
         Ok(self.tokens.to_owned())
     }
 }

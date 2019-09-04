@@ -41,13 +41,17 @@ It supports the extended op-codes of the ZX Next and additional pseudo opcodes u
 
 `DS`
 
-`DH`
+`DH` - todo
 
 `include`
 
 `incbin`
 
 ### History
+
+0.7.6
+- Implemented expression parsing for Indirect load instructions
+- Refactored the instruction encoder, reduced the amount of spaghetti logic
 
 0.7.5
 - Big code refactoring in order to better implement future expression parser improvements

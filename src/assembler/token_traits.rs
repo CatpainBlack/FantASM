@@ -218,56 +218,54 @@ static ref LABEL: Regex = Regex::new(r"^\.?[a-zA-Z]+[a-zA-Z0-9_]*:?$").unwrap();
 
 impl Tokens for Token {
     fn from_string(word: String) -> Token {
-        //let re_label = Regex::new(r"^\.?[a-zA-Z]+[a-zA-Z0-9_]*:?$").unwrap();
-
         let w = word.to_lowercase();
 
-// string literals
+        // string literals
         if word.starts_with("\"") & &word.ends_with("\"") {
             if let Some(s) = word.get(1..word.len() - 1) {
                 return Token::StringLiteral(s.to_string());
             }
         }
 
-// Directives
+        // Directives
         if let Ok(d) = Directive::from_str(&w) {
             return Token::Directive(d);
         }
-//Opcodes
+        //Opcodes
         if let Ok(o) = OpCode::from_str(&w) {
             return Token::OpCode(o);
         }
-// Numbers
+        // Numbers
         if let Some(n) = word.to_number() {
             return Token::Number(n as isize);
         }
-//Register pairs
+        //Register pairs
         if let Ok(rp) = RegPair::from_str(&w) {
             return Token::RegisterPair(rp);
         }
-// Registers
+        // Registers
         if let Ok(r) = Reg::from_str(&w) {
             return Token::Register(r);
         }
 
-// I/R Register
+        // I/R Register
         if let Ok(r) = Ir::from_str(&w) {
             return Token::RegisterIR(r);
         }
 
-// Delimiters
+        // Delimiters
         if let Ok(d) = Del::from_str(&w) {
             return Token::Delimiter(d);
         }
-// Operators
+        // Operators
         if let Ok(op) = Op::from_str(&w) {
             return Token::Operator(op);
         }
-// IHx/IXh
+        // IHx/IXh
         if let Ok(ixu) = IxU::from_str(&w) {
             return Token::RegisterIX(ixu);
         }
-// IYx/IYh
+        // IYx/IYh
         if let Ok(iyu) = IyU::from_str(&w) {
             return Token::RegisterIY(iyu);
         }
@@ -289,7 +287,6 @@ impl Tokens for Token {
 
         // Label
         if LABEL.is_match_at(&word, 0) {
-            //println!("Label: {}", word);
             return Token::ConstLabel(word);
         }
 
