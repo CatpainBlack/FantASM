@@ -51,6 +51,7 @@ It supports the extended op-codes of the ZX Next and additional pseudo opcodes u
 
 0.7.6
 - Implemented expression parsing for Indirect load instructions
+- Added undocumented bit/res/set/rotate opcodes using the index registers, all undocumented instructions are now handled
 - Refactored the instruction encoder, reduced the amount of spaghetti logic
 
 0.7.5

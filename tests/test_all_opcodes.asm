@@ -839,52 +839,571 @@ iyinstr
 	jp (iy)
     ld sp,iy
 
-;ixcb
-;	rlc (ix+1),b
-;	rlc (ix+1),c
-;	rlc (ix+1),d
-;	rlc (ix+1),e
-;	rlc (ix+1),h
-;	rlc (ix+1),l
-;	rlc (ix+1)
-;	rlc (ix+1),a
-;	rrc (ix+1),b
-;	rrc (ix+1),c
-;	rrc (ix+1),d
-;	rrc (ix+1),e
-;	rrc (ix+1),h
-;	rrc (ix+1),l
-;	rrc (ix+1)
-;	rrc (ix+1),a
+ixcb
+	rlc (ix+1),b
+	rlc (ix+1),c
+	rlc (ix+1),d
+	rlc (ix+1),e
+	rlc (ix+1),h
+	rlc (ix+1),l
+	rlc (ix+1)
+	rlc (ix+1),a
+	rrc (ix+1),b
+	rrc (ix+1),c
+	rrc (ix+1),d
+	rrc (ix+1),e
+	rrc (ix+1),h
+	rrc (ix+1),l
+	rrc (ix+1)
+	rrc (ix+1),a
 
-;	rl (ix+1),b 	rl (ix+1),c 	rl (ix+1),d 	rl (ix+1),e 	rl (ix+1),h 	rl (ix+1),l 	rl (ix+1) 	rl (ix+1),a 	rr (ix+1),b 	rr (ix+1),c 	rr (ix+1),d 	rr (ix+1),e 	rr (ix+1),h 	rr (ix+1),l 	rr (ix+1) 	rr (ix+1),a
+	rl (ix+1),b
+	rl (ix+1),c
+	rl (ix+1),d
+	rl (ix+1),e
+	rl (ix+1),h
+	rl (ix+1),l
+	rl (ix+1)
+	rl (ix+1),a
+	rr (ix+1),b
+	rr (ix+1),c
+	rr (ix+1),d
+	rr (ix+1),e
+	rr (ix+1),h
+	rr (ix+1),l
+	rr (ix+1)
+	rr (ix+1),a
 
-;	sla (ix+1),b 	sla (ix+1),c 	sla (ix+1),d 	sla (ix+1),e 	sla (ix+1),h 	sla (ix+1),l 	sla (ix+1) 	sla (ix+1),a 	sra (ix+1),b 	sra (ix+1),c 	sra (ix+1),d 	sra (ix+1),e 	sra (ix+1),h 	sra (ix+1),l 	sra (ix+1) 	sra (ix+1),a
+	sla (ix+1),b
+	sla (ix+1),c
+	sla (ix+1),d
+	sla (ix+1),e
+	sla (ix+1),h
+	sla (ix+1),l
+	sla (ix+1)
+	sla (ix+1),a
+	sra (ix+1),b
+	sra (ix+1),c
+	sra (ix+1),d
+	sra (ix+1),e
+	sra (ix+1),h
+	sra (ix+1),l
+	sra (ix+1)
+	sra (ix+1),a
 
-;	sll (ix+1),b 	sll (ix+1),c 	sll (ix+1),d 	sll (ix+1),e 	sll (ix+1),h 	sll (ix+1),l 	sll (ix+1) 	sll (ix+1),a 	srl (ix+1),b 	srl (ix+1),c 	srl (ix+1),d 	srl (ix+1),e 	srl (ix+1),h 	srl (ix+1),l 	srl (ix+1) 	srl (ix+1),a
+	sll (ix+1),b
+	sll (ix+1),c
+	sll (ix+1),d
+	sll (ix+1),e
+	sll (ix+1),h
+	sll (ix+1),l
+	sll (ix+1)
+	sll (ix+1),a
+	srl (ix+1),b
+	srl (ix+1),c
+	srl (ix+1),d
+	srl (ix+1),e
+	srl (ix+1),h
+	srl (ix+1),l
+	srl (ix+1)
+	srl (ix+1),a
 
-;	bit 0,(ix+1) 	bit 0,(ix+1) 	bit 0,(ix+1) 	bit 0,(ix+1) 	bit 0,(ix+1) 	bit 0,(ix+1) 	bit 0,(ix+1) 	bit 0,(ix+1) 	bit 1,(ix+1) 	bit 1,(ix+1) 	bit 1,(ix+1) 	bit 1,(ix+1) 	bit 1,(ix+1) 	bit 1,(ix+1) 	bit 1,(ix+1) 	bit 1,(ix+1)
+	bit 0,(ix+1)
+	bit 0,(ix+1)
+	bit 0,(ix+1)
+	bit 0,(ix+1)
+	bit 0,(ix+1)
+	bit 0,(ix+1)
+	bit 0,(ix+1)
+	bit 0,(ix+1)
+	bit 1,(ix+1)
+	bit 1,(ix+1)
+	bit 1,(ix+1)
+	bit 1,(ix+1)
+	bit 1,(ix+1)
+	bit 1,(ix+1)
+	bit 1,(ix+1)
+	bit 1,(ix+1)
 
-;	bit 2,(ix+1) 	bit 2,(ix+1) 	bit 2,(ix+1) 	bit 2,(ix+1) 	bit 2,(ix+1) 	bit 2,(ix+1) 	bit 2,(ix+1) 	bit 2,(ix+1) 	bit 3,(ix+1) 	bit 3,(ix+1) 	bit 3,(ix+1) 	bit 3,(ix+1) 	bit 3,(ix+1) 	bit 3,(ix+1) 	bit 3,(ix+1) 	bit 3,(ix+1)
+	bit 2,(ix+1)
+	bit 2,(ix+1)
+	bit 2,(ix+1)
+	bit 2,(ix+1)
+	bit 2,(ix+1)
+	bit 2,(ix+1)
+	bit 2,(ix+1)
+	bit 2,(ix+1)
 
+	bit 3,(ix+1)
+	bit 3,(ix+1)
+	bit 3,(ix+1)
+	bit 3,(ix+1)
+	bit 3,(ix+1)
+	bit 3,(ix+1)
+	bit 3,(ix+1)
+	bit 3,(ix+1)
 
-;	bit 4,(ix+1) 	bit 4,(ix+1) 	bit 4,(ix+1) 	bit 4,(ix+1) 	bit 4,(ix+1) 	bit 4,(ix+1) 	bit 4,(ix+1) 	bit 4,(ix+1) 	bit 5,(ix+1) 	bit 5,(ix+1) 	bit 5,(ix+1) 	bit 5,(ix+1) 	bit 5,(ix+1) 	bit 5,(ix+1) 	bit 5,(ix+1) 	bit 5,(ix+1)
+	bit 4,(ix+1)
+	bit 4,(ix+1)
+	bit 4,(ix+1)
+	bit 4,(ix+1)
+	bit 4,(ix+1)
+	bit 4,(ix+1)
+	bit 4,(ix+1)
+	bit 4,(ix+1)
 
-;	bit 6,(ix+1) 	bit 6,(ix+1) 	bit 6,(ix+1) 	bit 6,(ix+1) 	bit 6,(ix+1) 	bit 6,(ix+1) 	bit 6,(ix+1) 	bit 6,(ix+1) 	bit 7,(ix+1) 	bit 7,(ix+1) 	bit 7,(ix+1) 	bit 7,(ix+1) 	bit 7,(ix+1) 	bit 7,(ix+1) 	bit 7,(ix+1) 	bit 7,(ix+1)
+	bit 5,(ix+1)
+	bit 5,(ix+1)
+	bit 5,(ix+1)
+	bit 5,(ix+1)
+	bit 5,(ix+1)
+	bit 5,(ix+1)
+	bit 5,(ix+1)
+	bit 5,(ix+1)
 
-;	res 0,(ix+1),b 	res 0,(ix+1),c 	res 0,(ix+1),d 	res 0,(ix+1),e 	res 0,(ix+1),h 	res 0,(ix+1),l 	res 0,(ix+1) 	res 0,(ix+1),a 	res 1,(ix+1),b 	res 1,(ix+1),c 	res 1,(ix+1),d 	res 1,(ix+1),e 	res 1,(ix+1),h 	res 1,(ix+1),l 	res 1,(ix+1) 	res 1,(ix+1),a
+	bit 6,(ix+1)
+	bit 6,(ix+1)
+	bit 6,(ix+1)
+	bit 6,(ix+1)
+	bit 6,(ix+1)
+	bit 6,(ix+1)
+	bit 6,(ix+1)
+	bit 6,(ix+1)
 
-;	res 2,(ix+1),b 	res 2,(ix+1),c 	res 2,(ix+1),d 	res 2,(ix+1),e 	res 2,(ix+1),h 	res 2,(ix+1),l 	res 2,(ix+1) 	res 2,(ix+1),a 	res 3,(ix+1),b 	res 3,(ix+1),c 	res 3,(ix+1),d 	res 3,(ix+1),e 	res 3,(ix+1),h 	res 3,(ix+1),l 	res 3,(ix+1) 	res 3,(ix+1),a
+	bit 7,(ix+1)
+	bit 7,(ix+1)
+	bit 7,(ix+1)
+	bit 7,(ix+1)
+	bit 7,(ix+1)
+	bit 7,(ix+1)
+	bit 7,(ix+1)
+	bit 7,(ix+1)
 
-;	res 4,(ix+1),b 	res 4,(ix+1),c 	res 4,(ix+1),d 	res 4,(ix+1),e 	res 4,(ix+1),h 	res 4,(ix+1),l 	res 4,(ix+1) 	res 4,(ix+1),a 	res 5,(ix+1),b 	res 5,(ix+1),c 	res 5,(ix+1),d 	res 5,(ix+1),e 	res 5,(ix+1),h 	res 5,(ix+1),l 	res 5,(ix+1) 	res 5,(ix+1),a
+	res 0,(ix+1),b
+	res 0,(ix+1),c
+	res 0,(ix+1),d
+	res 0,(ix+1),e
+	res 0,(ix+1),h
+	res 0,(ix+1),l
+	res 0,(ix+1)
+	res 0,(ix+1),a
 
-;	res 6,(ix+1),b 	res 6,(ix+1),c 	res 6,(ix+1),d 	res 6,(ix+1),e 	res 6,(ix+1),h 	res 6,(ix+1),l 	res 6,(ix+1) 	res 6,(ix+1),a 	res 7,(ix+1),b 	res 7,(ix+1),c 	res 7,(ix+1),d 	res 7,(ix+1),e 	res 7,(ix+1),h 	res 7,(ix+1),l 	res 7,(ix+1) 	res 7,(ix+1),a
+	res 1,(ix+1),b
+	res 1,(ix+1),c
+	res 1,(ix+1),d
+	res 1,(ix+1),e
+	res 1,(ix+1),h
+	res 1,(ix+1),l
+	res 1,(ix+1)
+	res 1,(ix+1),a
 
-;	set 0,(ix+1),b 	set 0,(ix+1),c 	set 0,(ix+1),d 	set 0,(ix+1),e 	set 0,(ix+1),h 	set 0,(ix+1),l 	set 0,(ix+1) 	set 0,(ix+1),a 	set 1,(ix+1),b 	set 1,(ix+1),c 	set 1,(ix+1),d 	set 1,(ix+1),e 	set 1,(ix+1),h 	set 1,(ix+1),l 	set 1,(ix+1) 	set 1,(ix+1),a
+	res 2,(ix+1),b
+	res 2,(ix+1),c
+	res 2,(ix+1),d
+	res 2,(ix+1),e
+	res 2,(ix+1),h
+	res 2,(ix+1),l
+	res 2,(ix+1)
+	res 2,(ix+1),a
 
-;	set 2,(ix+1),b 	set 2,(ix+1),c 	set 2,(ix+1),d 	set 2,(ix+1),e 	set 2,(ix+1),h 	set 2,(ix+1),l 	set 2,(ix+1) 	set 2,(ix+1),a 	set 3,(ix+1),b 	set 3,(ix+1),c 	set 3,(ix+1),d 	set 3,(ix+1),e 	set 3,(ix+1),h 	set 3,(ix+1),l 	set 3,(ix+1) 	set 3,(ix+1),a
+	res 3,(ix+1),b
+	res 3,(ix+1),c
+	res 3,(ix+1),d
+	res 3,(ix+1),e
+	res 3,(ix+1),h
+	res 3,(ix+1),l
+	res 3,(ix+1)
+	res 3,(ix+1),a
 
-;	set 4,(ix+1),b 	set 4,(ix+1),c 	set 4,(ix+1),d 	set 4,(ix+1),e 	set 4,(ix+1),h 	set 4,(ix+1),l 	set 4,(ix+1) 	set 4,(ix+1),a 	set 5,(ix+1),b 	set 5,(ix+1),c 	set 5,(ix+1),d 	set 5,(ix+1),e 	set 5,(ix+1),h 	set 5,(ix+1),l 	set 5,(ix+1) 	set 5,(ix+1),a
+	res 4,(ix+1),b
+	res 4,(ix+1),c
+	res 4,(ix+1),d
+	res 4,(ix+1),e
+	res 4,(ix+1),h
+	res 4,(ix+1),l
+	res 4,(ix+1)
+	res 4,(ix+1),a
 
-;	set 6,(ix+1),b 	set 6,(ix+1),c 	set 6,(ix+1),d 	set 6,(ix+1),e 	set 6,(ix+1),h 	set 6,(ix+1),l 	set 6,(ix+1) 	set 6,(ix+1),a 	set 7,(ix+1),b 	set 7,(ix+1),c 	set 7,(ix+1),d 	set 7,(ix+1),e 	set 7,(ix+1),h 	set 7,(ix+1),l 	set 7,(ix+1) 	set 7,(ix+1),a
+	res 5,(ix+1),b
+	res 5,(ix+1),c
+	res 5,(ix+1),d
+	res 5,(ix+1),e
+	res 5,(ix+1),h
+	res 5,(ix+1),l
+	res 5,(ix+1)
+	res 5,(ix+1),a
+
+	res 6,(ix+1),b
+	res 6,(ix+1),c
+	res 6,(ix+1),d
+	res 6,(ix+1),e
+	res 6,(ix+1),h
+	res 6,(ix+1),l
+	res 6,(ix+1)
+	res 6,(ix+1),a
+
+	res 7,(ix+1),b
+	res 7,(ix+1),c
+	res 7,(ix+1),d
+	res 7,(ix+1),e
+	res 7,(ix+1),h
+	res 7,(ix+1),l
+	res 7,(ix+1)
+	res 7,(ix+1),a
+
+	set 0,(ix+1),b
+	set 0,(ix+1),c
+	set 0,(ix+1),d
+	set 0,(ix+1),e
+	set 0,(ix+1),h
+	set 0,(ix+1),l
+	set 0,(ix+1)
+	set 0,(ix+1),a
+
+	set 1,(ix+1),b
+	set 1,(ix+1),c
+	set 1,(ix+1),d
+	set 1,(ix+1),e
+	set 1,(ix+1),h
+	set 1,(ix+1),l
+	set 1,(ix+1)
+	set 1,(ix+1),a
+
+	set 2,(ix+1),b
+	set 2,(ix+1),c
+	set 2,(ix+1),d
+	set 2,(ix+1),e
+	set 2,(ix+1),h
+	set 2,(ix+1),l
+	set 2,(ix+1)
+	set 2,(ix+1),a
+
+	set 3,(ix+1),b
+	set 3,(ix+1),c
+	set 3,(ix+1),d
+	set 3,(ix+1),e
+	set 3,(ix+1),h
+	set 3,(ix+1),l
+	set 3,(ix+1)
+	set 3,(ix+1),a
+
+	set 4,(ix+1),b
+	set 4,(ix+1),c
+	set 4,(ix+1),d
+	set 4,(ix+1),e
+	set 4,(ix+1),h
+	set 4,(ix+1),l
+	set 4,(ix+1)
+	set 4,(ix+1),a
+
+	set 5,(ix+1),b
+	set 5,(ix+1),c
+	set 5,(ix+1),d
+	set 5,(ix+1),e
+	set 5,(ix+1),h
+	set 5,(ix+1),l
+	set 5,(ix+1)
+	set 5,(ix+1),a
+
+	set 6,(ix+1),b
+	set 6,(ix+1),c
+	set 6,(ix+1),d
+	set 6,(ix+1),e
+	set 6,(ix+1),h
+	set 6,(ix+1),l
+	set 6,(ix+1)
+	set 6,(ix+1),a
+
+	set 7,(ix+1),b
+	set 7,(ix+1),c
+	set 7,(ix+1),d
+	set 7,(ix+1),e
+	set 7,(ix+1),h
+	set 7,(ix+1),l
+	set 7,(ix+1)
+	set 7,(ix+1),a
+
+iycb
+	rlc (iy+1),b
+	rlc (iy+1),c
+	rlc (iy+1),d
+	rlc (iy+1),e
+	rlc (iy+1),h
+	rlc (iy+1),l
+	rlc (iy+1)
+	rlc (iy+1),a
+	rrc (iy+1),b
+	rrc (iy+1),c
+	rrc (iy+1),d
+	rrc (iy+1),e
+	rrc (iy+1),h
+	rrc (iy+1),l
+	rrc (iy+1)
+	rrc (iy+1),a
+
+	rl (iy+1),b
+	rl (iy+1),c
+	rl (iy+1),d
+	rl (iy+1),e
+	rl (iy+1),h
+	rl (iy+1),l
+	rl (iy+1)
+	rl (iy+1),a
+	rr (iy+1),b
+	rr (iy+1),c
+	rr (iy+1),d
+	rr (iy+1),e
+	rr (iy+1),h
+	rr (iy+1),l
+	rr (iy+1)
+	rr (iy+1),a
+
+	sla (iy+1),b
+	sla (iy+1),c
+	sla (iy+1),d
+	sla (iy+1),e
+	sla (iy+1),h
+	sla (iy+1),l
+	sla (iy+1)
+	sla (iy+1),a
+	sra (iy+1),b
+	sra (iy+1),c
+	sra (iy+1),d
+	sra (iy+1),e
+	sra (iy+1),h
+	sra (iy+1),l
+	sra (iy+1)
+	sra (iy+1),a
+
+	sll (iy+1),b
+	sll (iy+1),c
+	sll (iy+1),d
+	sll (iy+1),e
+	sll (iy+1),h
+	sll (iy+1),l
+	sll (iy+1)
+	sll (iy+1),a
+	srl (iy+1),b
+	srl (iy+1),c
+	srl (iy+1),d
+	srl (iy+1),e
+	srl (iy+1),h
+	srl (iy+1),l
+	srl (iy+1)
+	srl (iy+1),a
+
+	bit 0,(iy+1)
+	bit 0,(iy+1)
+	bit 0,(iy+1)
+	bit 0,(iy+1)
+	bit 0,(iy+1)
+	bit 0,(iy+1)
+	bit 0,(iy+1)
+	bit 0,(iy+1)
+	bit 1,(iy+1)
+	bit 1,(iy+1)
+	bit 1,(iy+1)
+	bit 1,(iy+1)
+	bit 1,(iy+1)
+	bit 1,(iy+1)
+	bit 1,(iy+1)
+	bit 1,(iy+1)
+
+	bit 2,(iy+1)
+	bit 2,(iy+1)
+	bit 2,(iy+1)
+	bit 2,(iy+1)
+	bit 2,(iy+1)
+	bit 2,(iy+1)
+	bit 2,(iy+1)
+	bit 2,(iy+1)
+
+	bit 3,(iy+1)
+	bit 3,(iy+1)
+	bit 3,(iy+1)
+	bit 3,(iy+1)
+	bit 3,(iy+1)
+	bit 3,(iy+1)
+	bit 3,(iy+1)
+	bit 3,(iy+1)
+
+	bit 4,(iy+1)
+	bit 4,(iy+1)
+	bit 4,(iy+1)
+	bit 4,(iy+1)
+	bit 4,(iy+1)
+	bit 4,(iy+1)
+	bit 4,(iy+1)
+	bit 4,(iy+1)
+
+	bit 5,(iy+1)
+	bit 5,(iy+1)
+	bit 5,(iy+1)
+	bit 5,(iy+1)
+	bit 5,(iy+1)
+	bit 5,(iy+1)
+	bit 5,(iy+1)
+	bit 5,(iy+1)
+
+	bit 6,(iy+1)
+	bit 6,(iy+1)
+	bit 6,(iy+1)
+	bit 6,(iy+1)
+	bit 6,(iy+1)
+	bit 6,(iy+1)
+	bit 6,(iy+1)
+	bit 6,(iy+1)
+
+	bit 7,(iy+1)
+	bit 7,(iy+1)
+	bit 7,(iy+1)
+	bit 7,(iy+1)
+	bit 7,(iy+1)
+	bit 7,(iy+1)
+	bit 7,(iy+1)
+	bit 7,(iy+1)
+
+	res 0,(iy+1),b
+	res 0,(iy+1),c
+	res 0,(iy+1),d
+	res 0,(iy+1),e
+	res 0,(iy+1),h
+	res 0,(iy+1),l
+	res 0,(iy+1)
+	res 0,(iy+1),a
+
+	res 1,(iy+1),b
+	res 1,(iy+1),c
+	res 1,(iy+1),d
+	res 1,(iy+1),e
+	res 1,(iy+1),h
+	res 1,(iy+1),l
+	res 1,(iy+1)
+	res 1,(iy+1),a
+
+	res 2,(iy+1),b
+	res 2,(iy+1),c
+	res 2,(iy+1),d
+	res 2,(iy+1),e
+	res 2,(iy+1),h
+	res 2,(iy+1),l
+	res 2,(iy+1)
+	res 2,(iy+1),a
+
+	res 3,(iy+1),b
+	res 3,(iy+1),c
+	res 3,(iy+1),d
+	res 3,(iy+1),e
+	res 3,(iy+1),h
+	res 3,(iy+1),l
+	res 3,(iy+1)
+	res 3,(iy+1),a
+
+	res 4,(iy+1),b
+	res 4,(iy+1),c
+	res 4,(iy+1),d
+	res 4,(iy+1),e
+	res 4,(iy+1),h
+	res 4,(iy+1),l
+	res 4,(iy+1)
+	res 4,(iy+1),a
+
+	res 5,(iy+1),b
+	res 5,(iy+1),c
+	res 5,(iy+1),d
+	res 5,(iy+1),e
+	res 5,(iy+1),h
+	res 5,(iy+1),l
+	res 5,(iy+1)
+	res 5,(iy+1),a
+
+	res 6,(iy+1),b
+	res 6,(iy+1),c
+	res 6,(iy+1),d
+	res 6,(iy+1),e
+	res 6,(iy+1),h
+	res 6,(iy+1),l
+	res 6,(iy+1)
+	res 6,(iy+1),a
+
+	res 7,(iy+1),b
+	res 7,(iy+1),c
+	res 7,(iy+1),d
+	res 7,(iy+1),e
+	res 7,(iy+1),h
+	res 7,(iy+1),l
+	res 7,(iy+1)
+	res 7,(iy+1),a
+
+	set 0,(iy+1),b
+	set 0,(iy+1),c
+	set 0,(iy+1),d
+	set 0,(iy+1),e
+	set 0,(iy+1),h
+	set 0,(iy+1),l
+	set 0,(iy+1)
+	set 0,(iy+1),a
+
+	set 1,(iy+1),b
+	set 1,(iy+1),c
+	set 1,(iy+1),d
+	set 1,(iy+1),e
+	set 1,(iy+1),h
+	set 1,(iy+1),l
+	set 1,(iy+1)
+	set 1,(iy+1),a
+
+	set 2,(iy+1),b
+	set 2,(iy+1),c
+	set 2,(iy+1),d
+	set 2,(iy+1),e
+	set 2,(iy+1),h
+	set 2,(iy+1),l
+	set 2,(iy+1)
+	set 2,(iy+1),a
+
+	set 3,(iy+1),b
+	set 3,(iy+1),c
+	set 3,(iy+1),d
+	set 3,(iy+1),e
+	set 3,(iy+1),h
+	set 3,(iy+1),l
+	set 3,(iy+1)
+	set 3,(iy+1),a
+
+	set 4,(iy+1),b
+	set 4,(iy+1),c
+	set 4,(iy+1),d
+	set 4,(iy+1),e
+	set 4,(iy+1),h
+	set 4,(iy+1),l
+	set 4,(iy+1)
+	set 4,(iy+1),a
+
+	set 5,(iy+1),b
+	set 5,(iy+1),c
+	set 5,(iy+1),d
+	set 5,(iy+1),e
+	set 5,(iy+1),h
+	set 5,(iy+1),l
+	set 5,(iy+1)
+	set 5,(iy+1),a
+
+	set 6,(iy+1),b
+	set 6,(iy+1),c
+	set 6,(iy+1),d
+	set 6,(iy+1),e
+	set 6,(iy+1),h
+	set 6,(iy+1),l
+	set 6,(iy+1)
+	set 6,(iy+1),a
+
+	set 7,(iy+1),b
+	set 7,(iy+1),c
+	set 7,(iy+1),d
+	set 7,(iy+1),e
+	set 7,(iy+1),h
+	set 7,(iy+1),l
+	set 7,(iy+1)
+	set 7,(iy+1),a
 

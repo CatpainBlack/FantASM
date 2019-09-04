@@ -130,11 +130,30 @@ impl InstructionEncoder for Assembler {
 
     fn bit_res_set(&mut self, x: u8) -> Result<(), Error> {
         // todo, fix if iX or Iy
+
         let bit = self.expect_byte(1)?;
         self.expect_token(Delimiter(Comma))?;
-        match self.take_token()? {
-            //RegisterIX(r) => self.emit(&[0xDD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
-            //RegisterIY(r) => self.emit(&[0xFD, 0xCb, xyz!(x, bit as u8, r as u8)])?,
+
+        let tok = self.take_token()?;
+        self.context.pc_add(self.bank.emit_prefix(&tok));
+
+        //println!("bit_res_set {:?},{:?}", bit, tok);
+
+        match tok {
+            IndexIndirect(_, n) => {
+                if self.next_token_is(&Delimiter(Comma)) {
+                    self.tokens.pop();
+                    if let Register(r) = self.take_token()? {
+                        self.emit(&[0xCB, n, xyz!(x, bit as u8, r as u8)])?
+                    } else {
+                        return Err(self.context.error(ErrorType::SyntaxError));
+                    }
+                } else {
+                    self.emit(&[0xCB, n, xyz!(x, bit as u8, _HL_ as u8)])?
+                }
+            }
+            RegisterIX(_) => self.emit(&[0xCb, xyz!(x, bit as u8, _HL_ as u8)])?,
+            RegisterIY(_) => self.emit(&[0xCb, xyz!(x, bit as u8, _HL_ as u8)])?,
             Register(r) => self.emit(&[0xCb, xyz!(x, bit as u8, r as u8)])?,
             _ => return Err(self.context.error(ErrorType::InvalidInstruction))
         };
@@ -305,9 +324,19 @@ impl InstructionEncoder for Assembler {
     fn rot(&mut self, a: RotOp) -> Result<(), Error> {
         let tok = self.take_token()?;
         self.context.pc_add(self.bank.emit_prefix(&tok));
-        match &tok {
-            IndexIndirect(_r, n) => self.emit(&[rot_encode!(a, Reg::_HL_ as u8), *n]),
-            Register(r) => self.emit(&[0xCB, rot_encode!(a, r.clone() as u8)]),
+        match tok {
+            IndexIndirect(_, n) => {
+                if self.next_token_is(&Delimiter(Comma)) {
+                    self.tokens.pop();
+                    if let Register(r) = self.take_token()? {
+                        return self.emit(&[0xCB, n, rot_encode!(a, r.clone() as u8)]);
+                    }
+                } else {
+                    return self.emit(&[0xCB, n, rot_encode!(a, Reg::_HL_ as u8)]);
+                }
+                Err(self.context.error(ErrorType::SyntaxError))
+            }
+            Register(r) => return self.emit(&[0xCB, rot_encode!(a, r.clone() as u8)]),
             _ => Err(self.context.error(ErrorType::SyntaxError))
         }
     }
@@ -368,19 +397,19 @@ impl InstructionEncoder for Assembler {
         };
 
         match (dst, src) {
-            (RegisterPair(Hl), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 2, 1, 2), tokens.as_slice(),false),
+            (RegisterPair(Hl), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 2, 1, 2), tokens.as_slice(), false),
 
-            (RegisterPair(r), IndirectExpression(tokens)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1().unwrap(), 1, 3), tokens.as_slice(),false),
+            (RegisterPair(r), IndirectExpression(tokens)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1().unwrap(), 1, 3), tokens.as_slice(), false),
 
             (RegisterIndirect(rp), Register(Reg::A)) => self.emit(&[xpqz!(0, rp.clone() as u8, 0, 2)]),
-            (IndirectExpression(tokens), Register(Reg::A)) => self.emit_instr(None, xpqz!(0, 3, 0, 2), tokens.as_slice(),false),
+            (IndirectExpression(tokens), Register(Reg::A)) => self.emit_instr(None, xpqz!(0, 3, 0, 2), tokens.as_slice(), false),
 
             (Register(Reg::A), RegisterIndirect(r)) => self.emit(&[xpqz!(0, r.clone() as u8, 1, 2)]),
-            (Register(Reg::A), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 3, 1, 2), tokens.as_slice(),false),
+            (Register(Reg::A), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 3, 1, 2), tokens.as_slice(), false),
 
-            (IndirectExpression(tokens), RegisterPair(Hl)) => self.emit_instr(None, xpqz!(0, 2, 0, 2), tokens.as_slice(),false),
+            (IndirectExpression(tokens), RegisterPair(Hl)) => self.emit_instr(None, xpqz!(0, 2, 0, 2), tokens.as_slice(), false),
 
-            (IndirectExpression(tokens), RegisterPair(r)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1()?, 0, 3), tokens.as_slice(),false),
+            (IndirectExpression(tokens), RegisterPair(r)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1()?, 0, 3), tokens.as_slice(), false),
 
             (Register(r), IndexIndirect(_reg, o)) => self.emit(&[xyz!(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
 
@@ -396,7 +425,7 @@ impl InstructionEncoder for Assembler {
 
     fn load_r(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
         let r = match (dst, src) {
-            (Register(Reg::A), IndirectExpression(e)) => return self.emit_instr(None, xpqz!(0, 3, 1, 2), e,false),
+            (Register(Reg::A), IndirectExpression(e)) => return self.emit_instr(None, xpqz!(0, 3, 1, 2), e, false),
             _ => if let Some(n) = dst.reg_value() { n } else {
                 return Err(self.context.error(ErrorType::SyntaxError));
             }
@@ -438,8 +467,8 @@ impl InstructionEncoder for Assembler {
             } else {
                 return Err(self.context.error(ErrorType::IntegerOutOfRange));
             }
-            (IndirectExpression(l), RegisterPair(Sp)) => return self.emit_instr(Some(0xED), 0x73, l.as_slice(),false),
-            (RegisterPair(Sp), IndirectExpression(l)) => return self.emit_instr(Some(0xED), 0x7B, l.as_slice(),false),
+            (IndirectExpression(l), RegisterPair(Sp)) => return self.emit_instr(Some(0xED), 0x73, l.as_slice(), false),
+            (RegisterPair(Sp), IndirectExpression(l)) => return self.emit_instr(Some(0xED), 0x7B, l.as_slice(), false),
             (RegisterPair(Sp), RegisterPair(Hl)) => return self.emit(&[xpqz!(3, 3, 1, 1)]),
             (RegisterPair(Sp), RegisterPair(Ix)) => return self.emit(&[xpqz!(3, 3, 1, 1)]),
             (RegisterPair(Sp), RegisterPair(Iy)) => return self.emit(&[xpqz!(3, 3, 1, 1)]),
