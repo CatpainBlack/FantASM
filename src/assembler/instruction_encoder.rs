@@ -361,7 +361,6 @@ impl InstructionEncoder for Assembler {
         Err(self.context.error(ErrorType::SyntaxError))
     }
 
-
     fn load_indirect(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
         // ToDo: Handle expressions
 
@@ -384,15 +383,7 @@ impl InstructionEncoder for Assembler {
                 let addr = self.context.try_resolve_label(l, 0, false) as isize;
                 self.emit_word(addr)
             }
-            (RegisterPair(Hl), IndirectExpression(tokens)) => {
-                self.emit_byte(xpqz!(0, 2, 1, 2))?;
-                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
-                    Ok(Some(addr)) => addr,
-                    Ok(None) => 0,
-                    Err(e) => return Err(self.context.error(e))
-                };
-                self.emit_word(a)
-            }
+            (RegisterPair(Hl), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 2, 1, 2), tokens.as_slice()),
 
             (RegisterPair(r), AddressIndirect(a)) => self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3), a.lo(), a.hi()]),
             (RegisterPair(r), ConstLabelIndirect(l)) => {
@@ -400,15 +391,7 @@ impl InstructionEncoder for Assembler {
                 let addr = self.context.try_resolve_label(l, 0, false) as isize;
                 self.emit_word(addr)
             }
-            (RegisterPair(r), IndirectExpression(tokens)) => {
-                self.emit(&[0xED, xpqz!(1, r.rp1().unwrap(), 1, 3)])?;
-                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
-                    Ok(Some(addr)) => addr,
-                    Ok(None) => 0,
-                    Err(e) => return Err(self.context.error(e))
-                };
-                self.emit_word(a)
-            }
+            (RegisterPair(r), IndirectExpression(tokens)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1().unwrap(), 1, 3), tokens.as_slice()),
 
             (RegisterIndirect(rp), Register(Reg::A)) => self.emit(&[xpqz!(0, rp.clone() as u8, 0, 2)]),
             (AddressIndirect(a), Register(Reg::A)) => self.emit(&[xpqz!(0, 3, 0, 2), a.lo(), a.hi()]),
@@ -417,15 +400,7 @@ impl InstructionEncoder for Assembler {
                 let a = self.context.try_resolve_label(l, 0, false) as isize;
                 self.emit_word(a)
             }
-            (IndirectExpression(tokens), Register(Reg::A)) => {
-                self.emit_byte(xpqz!(0, 3, 0, 2))?;
-                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
-                    Ok(Some(addr)) => addr,
-                    Ok(None) => 0,
-                    Err(e) => return Err(self.context.error(e))
-                };
-                self.emit_word(a)
-            }
+            (IndirectExpression(tokens), Register(Reg::A)) => self.emit_instr(None, xpqz!(0, 3, 0, 2), tokens.as_slice()),
 
             (Register(Reg::A), RegisterIndirect(r)) => self.emit(&[xpqz!(0, r.clone() as u8, 1, 2)]),
             (Register(Reg::A), AddressIndirect(a)) => self.emit(&[xpqz!(0, 3, 1, 2), a.lo(), a.hi()]),
@@ -434,27 +409,11 @@ impl InstructionEncoder for Assembler {
                 let a = self.context.try_resolve_label(s, 0, false) as isize;
                 self.emit_word(a)
             }
-            (Register(Reg::A), IndirectExpression(tokens)) => {
-                self.emit_byte(xpqz!(0, 3, 1, 2))?;
-                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
-                    Ok(Some(addr)) => addr,
-                    Ok(None) => 0,
-                    Err(e) => return Err(self.context.error(e))
-                };
-                self.emit_word(a)
-            }
+            (Register(Reg::A), IndirectExpression(tokens)) => self.emit_instr(None, xpqz!(0, 3, 1, 2), tokens.as_slice()),
 
             (AddressIndirect(a), RegisterPair(Hl)) => self.emit(&[xpqz!(0, 2, 0, 2), a.lo(), a.hi()]),
 
-            (IndirectExpression(tokens), RegisterPair(Hl)) => {
-                self.emit_byte(xpqz!(0, 2, 0, 2))?;
-                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
-                    Ok(Some(addr)) => addr,
-                    Ok(None) => 0,
-                    Err(e) => return Err(self.context.error(e))
-                };
-                self.emit_word(a)
-            }
+            (IndirectExpression(tokens), RegisterPair(Hl)) => self.emit_instr(None, xpqz!(0, 2, 0, 2), tokens.as_slice()),
 
             (ConstLabelIndirect(l), RegisterPair(Hl)) => {
                 self.emit_byte(xpqz!(0, 2, 0, 2))?;
@@ -468,15 +427,7 @@ impl InstructionEncoder for Assembler {
                 let a = self.context.try_resolve_label(l, 0, false) as isize;
                 self.emit_word(a)
             }
-            (IndirectExpression(tokens), RegisterPair(r)) => {
-                self.emit(&[0xED, xpqz!(1, r.rp1()?, 0, 3)])?;
-                let a = match self.expr.parse(&mut self.context, &mut tokens.clone(), 0, 2) {
-                    Ok(Some(addr)) => addr,
-                    Ok(None) => 0,
-                    Err(e) => return Err(self.context.error(e))
-                };
-                self.emit_word(a)
-            }
+            (IndirectExpression(tokens), RegisterPair(r)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1()?, 0, 3), tokens.as_slice()),
 
             (Register(r), IndexIndirect(_reg, o)) => self.emit(&[xyz!(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
 
@@ -515,24 +466,18 @@ impl InstructionEncoder for Assembler {
     }
 
     fn load_rp(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
-        //println!("{:04?}: load_rp {:?},{:?}", self.context.current_line_number(), dst, src);
-
         let rp = if let RegisterPair(rp) = dst { rp.rp1()? } else { 0 };
-
         self.tokens.push(src.clone());
-
         if src.is_indirect() {
             self.emit_byte(xpqz!(0, 2, 1, 2))?;
         } else {
             self.emit_byte(xpqz!(0, rp, 0, 1))?;
         }
-
         let addr = match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2) {
             Ok(Some(a)) => a,
             Ok(None) => 0,
             Err(e) => return Err(self.context.error(e))
         };
-
         self.emit_word(addr)
     }
 

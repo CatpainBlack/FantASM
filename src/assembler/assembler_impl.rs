@@ -247,6 +247,19 @@ impl Assembler {
         Ok(())
     }
 
+    pub(crate) fn emit_instr(&mut self, prefix: Option<u8>, instr: u8, expr: &[Token]) -> Result<(), Error> {
+        if prefix.is_some() {
+            self.emit_byte(prefix.unwrap())?;
+        }
+        self.emit_byte(instr)?;
+        let a = match self.expr.parse(&mut self.context, &mut expr.to_vec(), 0, 2) {
+            Ok(Some(addr)) => addr,
+            Ok(None) => 0,
+            Err(e) => return Err(self.context.error(e))
+        };
+        self.emit_word(a)
+    }
+
     fn handle_opcodes(&mut self, op: OpCode) -> Result<(), Error> {
         return match op {
             OpCode::Nop => self.emit_byte(0),
