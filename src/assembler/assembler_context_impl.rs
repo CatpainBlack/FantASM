@@ -52,10 +52,6 @@ impl AssemblerContext {
         self.file_name.last().unwrap_or(&"<none>".to_string()).to_string()
     }
 
-    pub fn current_pc(&mut self) -> isize {
-        self.current_pc
-    }
-
     pub fn offset_pc(&mut self, offset: isize) -> isize {
         self.current_pc + offset
     }
@@ -173,5 +169,11 @@ impl AssemblerContext {
 
     pub fn add_forward_ref(&mut self, fw: ForwardReference) {
         self.forward_references.push(fw);
+    }
+
+    pub fn dump(&mut self) {
+        magenta_ln!("Labels            : {:?}", self.labels);
+        magenta_ln!("Constants         : {:?}", self.constants);
+        magenta_ln!("Forward References: {:?}", self.forward_references);
     }
 }

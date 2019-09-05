@@ -57,6 +57,7 @@ impl Assembler {
             expr: ExpressionParser::new(),
             z80n_enabled: false,
             cspect_enabled: false,
+            debug: false,
         }
     }
 
@@ -75,15 +76,31 @@ impl Assembler {
         self
     }
 
+    pub fn enable_debug(&mut self, enabled: bool) -> &mut Assembler {
+        self.debug = enabled;
+        self
+    }
+
     pub fn assemble(&mut self, file_name: &str) -> Result<(), Error> {
         if self.console_output {
-            dark_green_ln!("First pass...");
+            dark_green!("First pass .... ");
         }
         self.first_pass(file_name)?;
         if self.console_output {
-            dark_green_ln!("Second pass...");
+            dark_green_ln!("Done");
+            if self.debug {
+                self.dump();
+            }
+            dark_green!("Second pass ... ");
         }
-        self.second_pass()
+        self.second_pass()?;
+        if self.console_output {
+            dark_green_ln!("Done");
+        }
+        if self.debug {
+            self.dump();
+        }
+        Ok(())
     }
 
 
@@ -442,10 +459,10 @@ impl Assembler {
     }
 
     pub fn dump(&mut self) {
-        println!();
         magenta_ln!("--=[ debug info ]=--");
-        magenta_ln!("Origin            : {:02X}", self.origin);
+        magenta_ln!("Origin            : {} [0x{:02X}]", self.origin,self.origin);
         magenta_ln!("Total Lines       : {}", self.total_lines);
-        magenta_ln!("Code Length       : {:02X}", self.context.current_pc() - self.origin);
+        magenta_ln!("Code Length       : {}", self.bank.as_slice().len());
+        self.context.dump();
     }
 }

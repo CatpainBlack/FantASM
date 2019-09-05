@@ -77,6 +77,7 @@ pub struct Assembler {
     expr: ExpressionParser,
     z80n_enabled: bool,
     cspect_enabled: bool,
+    debug: bool,
 }
 
 #[derive(Debug)]

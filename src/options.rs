@@ -30,6 +30,7 @@ either expressed or implied, of the FantASM project.
 extern crate argparse;
 
 use std::path::Path;
+use std::process::exit;
 
 use argparse::{ArgumentParser, Store, StoreTrue};
 
@@ -42,43 +43,63 @@ pub struct Options {
     pub debug: bool,
     pub no_logo: bool,
     pub c_spect: bool,
+    pub version: bool,
 }
 
 impl Options {
     pub fn parse() -> Result<Options, String> {
+        let description = format!("FantASM {} - (C)2019 Captain Black", version!());
         let mut options = Options::default();
         {
             let mut parser = ArgumentParser::new();
-            parser.set_description("phantasm - a Z80 assembler");
+            parser.set_description(&description);
 
             parser.refer(&mut options.source)
-                .add_argument("input", Store, "Source file")
-                .required();
+                .add_argument("input", Store, "Source file");
 
             parser.refer(&mut options.output)
-                .add_argument("output", Store, "Output file")
-                .required();
+                .add_argument("output", Store, "Output file");
 
             parser.refer(&mut options.z80n)
-                .add_option(&["--z80n"], StoreTrue, "Enable Z80n (ZX Next) cpu extensions");
+                .add_option(&["-N", "--z80n"], StoreTrue, "Enable Z80n (ZX Next) cpu extensions");
 
             parser.refer(&mut options.c_spect)
-                .add_option(&["--cspect"], StoreTrue, "Enable cspect \"exit\" and \"break\" instructions");
+                .add_option(&["-c", "--cspect"], StoreTrue, "Enable cspect \"exit\" and \"break\" instructions");
 
             parser.refer(&mut options.no_logo)
                 .add_option(&["-n", "--nologo"], StoreTrue, "Do no display the program name and version");
 
             parser.refer(&mut options.debug)
-                .add_option(&["--debug"], StoreTrue, "Enable assembler information dump");
+                .add_option(&["-D", "--debug"], StoreTrue, "Enable assembler information dump");
 
             parser.refer(&mut options.verbose)
                 .add_option(&["-v", "--verbose"], StoreTrue, "Enable verbose output");
 
+            parser.refer(&mut options.version)
+                .add_option(&["-V", "--version"], StoreTrue, "Displays the version and exits");
+
             parser.parse_args_or_exit();
         }
 
+        if options.version {
+            white_ln!("FantASM {}",version!());
+            exit(0);
+        }
+
+        if !options.no_logo {
+            white_ln!("{}",description);
+        }
+
+        if options.source.is_empty() {
+            return Err(String::from("<source> is required"));
+        }
+
+        if options.output.is_empty() {
+            return Err(String::from("<output> is required"));
+        }
+
         if !Path::new(&options.source).exists() {
-            return Err(format!("Source file: {} - does not exist", options.source));
+            return Err(format!("Source file: {}-does not exist", options.source));
         }
 
         Ok(options)

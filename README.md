@@ -6,11 +6,13 @@
 
 ## Commandline options
 
-* `--nologo` suppress the startup banner
-* `--z80n` enable z80n extended opcodes
-* `--cspect` enable CSpect pseudo ops, BREAK and QUIT
-* `--verbose` enable verbose output
-* `--help` display command line help
+* `-N, --z80n` enable z80n extended opcodes
+* `-c, --cspect` enable CSpect pseudo ops, BREAK and QUIT
+* `-n, --nologo` suppress the startup banner
+* `-v, --verbose` enable verbose output
+* `-h, --help` display command line help
+* `-V, --version` display the program version and exit
+* `-D, --debug` Dumps information about the assembly (only useful for FantASM devs)
 
 ## Overview
 
