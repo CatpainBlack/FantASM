@@ -51,6 +51,7 @@ It supports the extended op-codes of the ZX Next and additional pseudo opcodes u
 0.7.7
 * Implemented local labels (prefixed with a .)
 * Fixed an issue with labels that ended with a colon.
+* Added BSD license (see license.txt)
 
 0.7.6
 * Implemented expression parsing for Indirect load instructions
