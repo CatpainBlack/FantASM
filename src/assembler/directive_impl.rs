@@ -42,6 +42,7 @@ pub trait Directives {
     fn handle_bytes(&mut self) -> Result<(), Error>;
     fn handle_words(&mut self) -> Result<(), Error>;
     fn handle_block(&mut self) -> Result<(), Error>;
+    fn handle_hex(&mut self) -> Result<(), Error>;
     fn set_option(&mut self) -> Result<(), Error>;
     fn include_source_file(&mut self) -> Result<(), Error>;
     fn write_message(&mut self) -> Result<(), Error>;
@@ -117,6 +118,29 @@ impl Directives for Assembler {
         Ok(())
     }
 
+    fn handle_hex(&mut self) -> Result<(), Error> {
+        if let StringLiteral(s) = self.take_token()? {
+            let mut hex = s.as_str().as_bytes().to_vec();
+            let mut bytes = vec![];
+            while hex.len() > 0 {
+                let lo = hex.pop().unwrap() as char;
+                let mut hi = '0';
+                if hex.len() > 0 {
+                    hi = hex.pop().unwrap() as char;
+                }
+                let x = format!("{}{}", hi, lo);
+                if let Ok(s) = u8::from_str_radix(&x, 16) {
+                    bytes.insert(0, s);
+                } else {
+                    return Err(self.context.error(ErrorType::HexStringExpected));
+                }
+            }
+            self.emit(&bytes)
+        } else {
+            Err(self.context.error(ErrorType::HexStringExpected))
+        }
+    }
+
     fn set_option(&mut self) -> Result<(), Error> {
         let o = self.take_token()?;
         let b = self.take_token()?;
@@ -175,8 +199,8 @@ impl Directives for Assembler {
             Directive::Opt => self.set_option()?,
             Directive::Binary => self.include_binary()?,
             Directive::Block => self.handle_block()?,
-            Directive::Align => {}
-            //Directive::Hex => {}
+            //Directive::Align => {}
+            Directive::Hex => self.handle_hex()?,
             _ => {
                 let line_no = self.context.current_line_number();
                 return Err(Error::fatal(&format!("Unhandled directive: {:?}", directive), line_no));

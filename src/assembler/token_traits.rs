@@ -199,7 +199,7 @@ impl FromStr for Directive {
             "binary" | "incbin" => Ok(Directive::Binary),
             "!message" => Ok(Directive::Message),
             "db" | "defb" | "byte" => Ok(Directive::Byte),
-            "dw" | "word" => Ok(Directive::Word),
+            "dw" | "defw" | "word" => Ok(Directive::Word),
             "ds" | "block" => Ok(Directive::Block),
             "dh" | "hex" => Ok(Directive::Hex),
             "!opt" | "#pragma" => Ok(Directive::Opt),

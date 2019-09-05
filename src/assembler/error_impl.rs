@@ -59,6 +59,7 @@ pub enum ErrorType {
     CSpectDisabled,
     InvalidOption,
     BadExpression,
+    HexStringExpected,
 }
 
 impl ToString for ErrorType {
@@ -87,6 +88,7 @@ impl ToString for ErrorType {
             ErrorType::InvalidOption => String::from("Invalid assembler option"),
             ErrorType::BadExpression => String::from("Unable to parse expression"),
             ErrorType::WordTruncated => String::from("Integer has been truncated to 16 bits"),
+            ErrorType::HexStringExpected => String::from("Invalid Hexadecimal string")
         }
     }
 }

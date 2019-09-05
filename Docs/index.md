@@ -49,6 +49,7 @@ It supports the extended op-codes of the ZX Next and additional pseudo opcodes u
 
 ### History
 0.7.7
+* Implemented HEX/DH directive
 * Implemented local labels (prefixed with a .)
 * Fixed an issue with labels that ended with a colon.
 * Added BSD license (see license.txt)
