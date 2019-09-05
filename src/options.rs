@@ -26,8 +26,8 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
-
 extern crate argparse;
+extern crate chrono;
 
 use std::path::Path;
 use std::process::exit;
@@ -48,7 +48,7 @@ pub struct Options {
 
 impl Options {
     pub fn parse() -> Result<Options, String> {
-        let description = format!("FantASM {} - (C)2019 Captain Black", version!());
+        let description = format!("\nFantASM {} ({})\n\u{000A9}2019 Captain Black\n", version!(), env!("BUILD_DATE"));
         let mut options = Options::default();
         {
             let mut parser = ArgumentParser::new();
@@ -87,7 +87,7 @@ impl Options {
         }
 
         if !options.no_logo {
-            white_ln!("{}",description);
+            magenta_ln!("{}",description);
         }
 
         if options.source.is_empty() {

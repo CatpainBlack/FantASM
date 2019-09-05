@@ -160,6 +160,9 @@ impl Directives for Assembler {
             _ => return Err(self.context.error(ErrorType::FileNotFound))
         };
         self.info(format!("Including file from {}", file_name).as_str());
+        if self.context.is_included(&file_name) {
+            return Err(self.context.error(ErrorType::MultipleIncludes));
+        }
         self.first_pass(file_name.as_str())
     }
 
@@ -182,9 +185,9 @@ impl Directives for Assembler {
         self.info(format!("Including binary file from {}", file_name).as_str());
         let mut b: Vec<u8> = vec![];
         let mut f = File::open(&file_name)?;
-        let read = f.read_to_end(b.as_mut())? as isize;
+        let r = f.read_to_end(b.as_mut())? as isize;
         self.bank.append(&mut b);
-        let pc = self.context.offset_pc(read);
+        let pc = self.context.offset_pc(r);
         self.context.pc(pc);
         Ok(())
     }

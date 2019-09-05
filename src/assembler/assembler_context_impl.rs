@@ -52,6 +52,10 @@ impl AssemblerContext {
         self.file_name.last().unwrap_or(&"<none>".to_string()).to_string()
     }
 
+    pub fn is_included(&self, name: &String) -> bool {
+        self.file_name.contains(name)
+    }
+
     pub fn offset_pc(&mut self, offset: isize) -> isize {
         self.current_pc + offset
     }

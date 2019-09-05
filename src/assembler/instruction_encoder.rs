@@ -143,15 +143,8 @@ impl InstructionEncoder for Assembler {
             (RegisterPair(_), ConstLabel(_), false) => return Err(self.context.error(ErrorType::Z80NDisabled)),
 
             (RegisterPair(rp), Register(Reg::A), true) => return self.emit(&[0xED, 0x31 + rp.nrp()?]),
-            (RegisterPair(rp), Number(addr), true) => {
-                self.emit(&[0xED, 0x34 + rp.nrp()?])?;
-                return self.emit_word(*addr);
-            }
-            (RegisterPair(rp), ConstLabel(l), true) => {
-                self.emit(&[0xED, 0x34 + rp.nrp()?])?;
-                let addr = self.context.try_resolve_label(l, 0, false);
-                return self.emit_word(addr as isize);
-            }
+            (RegisterPair(rp), Number(_), true) |
+            (RegisterPair(rp), ConstLabel(_), true) => return self.emit_instr(Some(0xED), 0x34 + rp.nrp()?, &[rhs], false),
             _ => {}
         }
         return Err(self.context.error(ErrorType::InvalidInstruction));
@@ -161,12 +154,13 @@ impl InstructionEncoder for Assembler {
         // todo, fix if iX or Iy
 
         let bit = self.expect_byte(1)?;
+        if bit < 0 || bit > 7 {
+            self.warn(ErrorType::BitTruncated);
+        }
         self.expect_token(Delimiter(Comma))?;
 
         let tok = self.take_token()?;
         self.context.pc_add(self.bank.emit_prefix(&tok));
-
-        //println!("bit_res_set {:?},{:?}", bit, tok);
 
         match tok {
             IndexIndirect(_, n) => {
