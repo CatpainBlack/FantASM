@@ -434,6 +434,10 @@ impl Assembler {
                 Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
                 Err(e) => return Err(self.context.error(e))
             };
+            if !self.tokens.is_empty() {
+                self.tokens.clear();
+                self.warn(ErrorType::ExtraCharacters)
+            }
         } else {
             self.context.add_label(l.to_string())?
         }
@@ -444,15 +448,19 @@ impl Assembler {
         self.context.next_line();
         self.tokens = tokens.to_owned();
         self.tokens.reverse();
+
+        let mut previous_token = Token::None;
+
         while !self.tokens.is_empty() {
             if let Some(tok) = self.tokens.pop() {
-                match tok {
-                    Token::Directive(d) => self.process_directive(d)?,
-                    Token::ConstLabel(l) => self.handle_label(&l)?,
-                    Token::OpCode(op) => self.handle_opcodes(op)?,
-                    Token::Invalid => return Err(self.context.error(ErrorType::InvalidLabel)),
+                match (previous_token, &tok) {
+                    (Token::None, Token::Directive(d)) => self.process_directive(*d)?,
+                    (Token::None, Token::ConstLabel(l)) => self.handle_label(l)?,
+                    (_, Token::OpCode(op)) => self.handle_opcodes(op.clone())?,
+                    (_, Token::Invalid) => return Err(self.context.error(ErrorType::InvalidLabel)),
                     _ => return Err(self.context.error(ErrorType::SyntaxError))
                 }
+                previous_token = tok;
             }
         }
         Ok(())

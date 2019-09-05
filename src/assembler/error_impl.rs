@@ -62,6 +62,7 @@ pub enum ErrorType {
     HexStringExpected,
     BitTruncated,
     MultipleIncludes,
+    ExtraCharacters,
 }
 
 impl ToString for ErrorType {
@@ -92,7 +93,8 @@ impl ToString for ErrorType {
             ErrorType::WordTruncated => String::from("Integer has been truncated to 16 bits"),
             ErrorType::HexStringExpected => String::from("Invalid Hexadecimal string"),
             ErrorType::BitTruncated => String::from("Bit number is out of range will and will be truncated"),
-            ErrorType::MultipleIncludes => String::from("Source file previously included")
+            ErrorType::MultipleIncludes => String::from("Source file previously included"),
+            ErrorType::ExtraCharacters => String::from("Discarded extra characters at and of line")
         }
     }
 }
