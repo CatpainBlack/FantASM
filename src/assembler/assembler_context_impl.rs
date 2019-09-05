@@ -10,6 +10,7 @@ pub struct AssemblerContext {
     line_number: Vec<isize>,
     file_name: Vec<String>,
     current_pc: isize,
+    label_context: String,
 }
 
 impl AssemblerContext {
@@ -85,10 +86,20 @@ impl AssemblerContext {
     }
 
     pub fn add_label(&mut self, name: String) -> Result<(), Error> {
-        if self.is_label_defined(name.as_str()) {
+        let mut label_name = name.clone();
+        if label_name.ends_with(":") {
+            label_name = name.replace(":", "");
+        }
+        if !label_name.starts_with(".") {
+            self.label_context = label_name.clone();
+        } else {
+            label_name = self.label_context.clone() + &label_name.clone();
+        }
+
+        if self.is_label_defined(label_name.as_str()) {
             return Err(self.error(ErrorType::LabelOrConstantExists));
         }
-        self.labels.insert(name, self.current_pc);
+        self.labels.insert(label_name, self.current_pc);
         Ok(())
     }
 
@@ -101,12 +112,15 @@ impl AssemblerContext {
     }
 
     pub fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
-        let mut addr = 0;
-        let label_name = &*name.replace(":", "");
+        let mut addr = 0u16;
+        let mut label_name = name.to_string();
+        if label_name.starts_with(".") {
+            label_name = self.label_context.clone() + &label_name.clone();
+        }
 
-        if let Some(a) = self.constants.get(label_name) {
+        if let Some(a) = self.constants.get(&label_name) {
             addr = *a as u16;
-        } else if let Some(a) = self.labels.get(label_name) {
+        } else if let Some(a) = self.labels.get(&label_name) {
             addr = *a as u16;
         } else {
             self.forward_references.push(ForwardReference {
