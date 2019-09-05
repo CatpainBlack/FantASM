@@ -1,17 +1,48 @@
-use crate::assembler::{Assembler, Error};
-use crate::assembler::error_impl::ErrorType;
-use crate::assembler::tokens::Del::Comma;
-use crate::assembler::tokens::{Directive, OptionType, Token};
-use crate::assembler::tokens::Token::{Delimiter, ConstLabel, StringLiteral, Opt};
-use std::path::Path;
+/*
+Copyright (c) 2019, Guy Black
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The views and conclusions contained in the software and documentation are those
+of the authors and should not be interpreted as representing official policies,
+either expressed or implied, of the FantASM project.
+*/
+
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
+
+use crate::assembler::{Assembler, Error};
+use crate::assembler::error_impl::ErrorType;
+use crate::assembler::tokens::{Directive, OptionType, Token};
+use crate::assembler::tokens::Del::Comma;
+use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral};
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
     fn handle_bytes(&mut self) -> Result<(), Error>;
     fn handle_words(&mut self) -> Result<(), Error>;
     fn handle_block(&mut self) -> Result<(), Error>;
+    fn handle_hex(&mut self) -> Result<(), Error>;
     fn set_option(&mut self) -> Result<(), Error>;
     fn include_source_file(&mut self) -> Result<(), Error>;
     fn write_message(&mut self) -> Result<(), Error>;
@@ -87,6 +118,29 @@ impl Directives for Assembler {
         Ok(())
     }
 
+    fn handle_hex(&mut self) -> Result<(), Error> {
+        if let StringLiteral(s) = self.take_token()? {
+            let mut hex = s.as_str().as_bytes().to_vec();
+            let mut bytes = vec![];
+            while hex.len() > 0 {
+                let lo = hex.pop().unwrap() as char;
+                let mut hi = '0';
+                if hex.len() > 0 {
+                    hi = hex.pop().unwrap() as char;
+                }
+                let x = format!("{}{}", hi, lo);
+                if let Ok(s) = u8::from_str_radix(&x, 16) {
+                    bytes.insert(0, s);
+                } else {
+                    return Err(self.context.error(ErrorType::HexStringExpected));
+                }
+            }
+            self.emit(&bytes)
+        } else {
+            Err(self.context.error(ErrorType::HexStringExpected))
+        }
+    }
+
     fn set_option(&mut self) -> Result<(), Error> {
         let o = self.take_token()?;
         let b = self.take_token()?;
@@ -106,6 +160,9 @@ impl Directives for Assembler {
             _ => return Err(self.context.error(ErrorType::FileNotFound))
         };
         self.info(format!("Including file from {}", file_name).as_str());
+        if self.context.is_included(&file_name) {
+            return Err(self.context.error(ErrorType::MultipleIncludes));
+        }
         self.first_pass(file_name.as_str())
     }
 
@@ -128,9 +185,9 @@ impl Directives for Assembler {
         self.info(format!("Including binary file from {}", file_name).as_str());
         let mut b: Vec<u8> = vec![];
         let mut f = File::open(&file_name)?;
-        let read = f.read_to_end(b.as_mut())? as isize;
+        let r = f.read_to_end(b.as_mut())? as isize;
         self.bank.append(&mut b);
-        let pc = self.context.offset_pc(read);
+        let pc = self.context.offset_pc(r);
         self.context.pc(pc);
         Ok(())
     }
@@ -145,8 +202,8 @@ impl Directives for Assembler {
             Directive::Opt => self.set_option()?,
             Directive::Binary => self.include_binary()?,
             Directive::Block => self.handle_block()?,
-            Directive::Align => {}
-            //Directive::Hex => {}
+            //Directive::Align => {}
+            Directive::Hex => self.handle_hex()?,
             _ => {
                 let line_no = self.context.current_line_number();
                 return Err(Error::fatal(&format!("Unhandled directive: {:?}", directive), line_no));

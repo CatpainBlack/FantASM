@@ -1,19 +1,48 @@
+/*
+Copyright (c) 2019, Guy Black
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The views and conclusions contained in the software and documentation are those
+of the authors and should not be interpreted as representing official policies,
+either expressed or implied, of the FantASM project.
+*/
+
 use std::fs::File;
 use std::io::{BufReader, Write};
 use std::ops::Range;
 
 use crate::assembler::{Assembler, Error, ErrorLevel, TokenReader};
+use crate::assembler::bank_impl::Bank;
 use crate::assembler::directive_impl::Directives;
 use crate::assembler::error_impl::ErrorType;
+use crate::assembler::error_impl::ErrorType::SyntaxError;
 use crate::assembler::expression_impl::ExpressionParser;
 use crate::assembler::instruction_encoder::InstructionEncoder;
+use crate::assembler::reg_pair::HighLow;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{ConstLabel, Number, Operator};
-use crate::assembler::error_impl::ErrorType::SyntaxError;
-use crate::assembler::bank_impl::Bank;
-use crate::assembler::reg_pair::HighLow;
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -28,6 +57,7 @@ impl Assembler {
             expr: ExpressionParser::new(),
             z80n_enabled: false,
             cspect_enabled: false,
+            debug: false,
         }
     }
 
@@ -46,15 +76,31 @@ impl Assembler {
         self
     }
 
+    pub fn enable_debug(&mut self, enabled: bool) -> &mut Assembler {
+        self.debug = enabled;
+        self
+    }
+
     pub fn assemble(&mut self, file_name: &str) -> Result<(), Error> {
         if self.console_output {
-            dark_green_ln!("First pass...");
+            dark_green!("First pass .... ");
         }
         self.first_pass(file_name)?;
         if self.console_output {
-            dark_green_ln!("Second pass...");
+            dark_green_ln!("Done");
+            if self.debug {
+                self.dump();
+            }
+            dark_green!("Second pass ... ");
         }
-        self.second_pass()
+        self.second_pass()?;
+        if self.console_output {
+            dark_green_ln!("Done");
+        }
+        if self.debug {
+            self.dump();
+        }
+        Ok(())
     }
 
 
@@ -388,6 +434,10 @@ impl Assembler {
                 Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
                 Err(e) => return Err(self.context.error(e))
             };
+            if !self.tokens.is_empty() {
+                self.tokens.clear();
+                self.warn(ErrorType::ExtraCharacters)
+            }
         } else {
             self.context.add_label(l.to_string())?
         }
@@ -398,25 +448,29 @@ impl Assembler {
         self.context.next_line();
         self.tokens = tokens.to_owned();
         self.tokens.reverse();
+
+        let mut previous_token = Token::None;
+
         while !self.tokens.is_empty() {
             if let Some(tok) = self.tokens.pop() {
-                match tok {
-                    Token::Directive(d) => self.process_directive(d)?,
-                    Token::ConstLabel(l) => self.handle_label(&l)?,
-                    Token::OpCode(op) => self.handle_opcodes(op)?,
-                    Token::Invalid => return Err(self.context.error(ErrorType::InvalidLabel)),
+                match (previous_token, &tok) {
+                    (Token::None, Token::Directive(d)) => self.process_directive(*d)?,
+                    (Token::None, Token::ConstLabel(l)) => self.handle_label(l)?,
+                    (_, Token::OpCode(op)) => self.handle_opcodes(op.clone())?,
+                    (_, Token::Invalid) => return Err(self.context.error(ErrorType::InvalidLabel)),
                     _ => return Err(self.context.error(ErrorType::SyntaxError))
                 }
+                previous_token = tok;
             }
         }
         Ok(())
     }
 
     pub fn dump(&mut self) {
-        println!();
         magenta_ln!("--=[ debug info ]=--");
-        magenta_ln!("Origin            : {:02X}", self.origin);
+        magenta_ln!("Origin            : {} [0x{:02X}]", self.origin,self.origin);
         magenta_ln!("Total Lines       : {}", self.total_lines);
-        magenta_ln!("Code Length       : {:02X}", self.context.current_pc() - self.origin);
+        magenta_ln!("Code Length       : {}", self.bank.as_slice().len());
+        self.context.dump();
     }
 }

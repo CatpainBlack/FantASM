@@ -1,6 +1,36 @@
+/*
+Copyright (c) 2019, Guy Black
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The views and conclusions contained in the software and documentation are those
+of the authors and should not be interpreted as representing official policies,
+either expressed or implied, of the FantASM project.
+*/
+
+use std::collections::HashMap;
+
 use crate::assembler::{Error, ErrorLevel, ForwardReference};
 use crate::assembler::error_impl::ErrorType;
-use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct AssemblerContext {
@@ -10,6 +40,7 @@ pub struct AssemblerContext {
     line_number: Vec<isize>,
     file_name: Vec<String>,
     current_pc: isize,
+    label_context: String,
 }
 
 impl AssemblerContext {
@@ -21,8 +52,8 @@ impl AssemblerContext {
         self.file_name.last().unwrap_or(&"<none>".to_string()).to_string()
     }
 
-    pub fn current_pc(&mut self) -> isize {
-        self.current_pc
+    pub fn is_included(&self, name: &String) -> bool {
+        self.file_name.contains(name)
     }
 
     pub fn offset_pc(&mut self, offset: isize) -> isize {
@@ -85,10 +116,20 @@ impl AssemblerContext {
     }
 
     pub fn add_label(&mut self, name: String) -> Result<(), Error> {
-        if self.is_label_defined(name.as_str()) {
+        let mut label_name = name.clone();
+        if label_name.ends_with(":") {
+            label_name = name.replace(":", "");
+        }
+        if !label_name.starts_with(".") {
+            self.label_context = label_name.clone();
+        } else {
+            label_name = self.label_context.clone() + &label_name.clone();
+        }
+
+        if self.is_label_defined(label_name.as_str()) {
             return Err(self.error(ErrorType::LabelOrConstantExists));
         }
-        self.labels.insert(name, self.current_pc);
+        self.labels.insert(label_name, self.current_pc);
         Ok(())
     }
 
@@ -101,12 +142,15 @@ impl AssemblerContext {
     }
 
     pub fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
-        let mut addr = 0;
-        let label_name = &*name.replace(":", "");
+        let mut addr = 0u16;
+        let mut label_name = name.to_string();
+        if label_name.starts_with(".") {
+            label_name = self.label_context.clone() + &label_name.clone();
+        }
 
-        if let Some(a) = self.constants.get(label_name) {
+        if let Some(a) = self.constants.get(&label_name) {
             addr = *a as u16;
-        } else if let Some(a) = self.labels.get(label_name) {
+        } else if let Some(a) = self.labels.get(&label_name) {
             addr = *a as u16;
         } else {
             self.forward_references.push(ForwardReference {
@@ -129,5 +173,11 @@ impl AssemblerContext {
 
     pub fn add_forward_ref(&mut self, fw: ForwardReference) {
         self.forward_references.push(fw);
+    }
+
+    pub fn dump(&mut self) {
+        magenta_ln!("Labels            : {:?}", self.labels);
+        magenta_ln!("Constants         : {:?}", self.constants);
+        magenta_ln!("Forward References: {:?}", self.forward_references);
     }
 }
