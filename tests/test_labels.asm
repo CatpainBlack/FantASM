@@ -4,11 +4,11 @@
 
 start:
 	ld	hl,start
-	ld	de,end-start
+	ld	de,finish-start
 	ld	b,10
 .loop
 	djnz	.loop
-end:
+finish:
 	ret
 
 block_a:

@@ -40,14 +40,14 @@ start
 	SETAE
 
 	test	register
-	test	end
+	test	finish
 	test	register-register+2
 	TEST	0x22
 
     ret
 
 data
-	db	end-data,0,0,0
-	dw	end
+	db	finish-data,0,0,0
+	dw	finish
 
-end
+finish

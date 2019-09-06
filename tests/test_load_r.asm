@@ -20,7 +20,7 @@ start
 	ld	a,(0x1234)
 	ld	a,(wibble)
 	ld	a,(start)
-	ld	a,(end)
+	ld	a,(finish)
 	ld	a,(hl)
 	ld	a,(de)
 	ld	a,(bc)
@@ -34,7 +34,7 @@ start
 	ld	(0x1234),a
 	ld	(wibble),a
 	ld	(start),a
-	ld	(end),a
+	ld	(finish),a
 
 	ld	r,a
 	ld	i,a
@@ -83,7 +83,7 @@ start
 	ld	l,wibble
 	ld	l,a
 
-end
+finish
 	ret
 
 data

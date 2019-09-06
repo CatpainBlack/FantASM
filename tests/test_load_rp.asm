@@ -20,8 +20,8 @@ start
 	ld	a,(0x1234)
 	ld	a,(wibble)
 	ld	a,(start)
-	ld	a,(end)
-	ld	a,(end-start)
+	ld	a,(finish)
+	ld	a,(finish-start)
 	ld	a,(hl)
 	ld	a,(de)
 	ld	a,(bc)
@@ -35,8 +35,8 @@ start
 	ld	(0x1234),a
 	ld	(wibble),a
 	ld	(start),a
-	ld	(end),a
-	ld	(end-start),a
+	ld	(finish),a
+	ld	(finish-start),a
 
 	ld	r,a
 	ld	i,a
@@ -85,8 +85,7 @@ start
 	ld	l,wibble
 	ld	l,a
 
-end
-	ret
+finish	ret
 
 data
 	db	0,0,0,0,0,0,0,0
