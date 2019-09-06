@@ -194,21 +194,20 @@ impl Directives for Assembler {
 
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error> {
         match directive {
-            Directive::Org => self.set_origin()?,
-            Directive::Include => self.include_source_file()?,
-            Directive::Message => self.write_message()?,
-            Directive::Byte => self.handle_bytes()?,
-            Directive::Word => self.handle_words()?,
-            Directive::Opt => self.set_option()?,
-            Directive::Binary => self.include_binary()?,
-            Directive::Block => self.handle_block()?,
+            Directive::Org => self.set_origin(),
+            Directive::Include => self.include_source_file(),
+            Directive::Message => self.write_message(),
+            Directive::Byte => self.handle_bytes(),
+            Directive::Word => self.handle_words(),
+            Directive::Opt => self.set_option(),
+            Directive::Binary => self.include_binary(),
+            Directive::Block => self.handle_block(),
+            Directive::Macro => self.macro_handler.begin_collect(&mut self.context, &mut self.tokens),
+            Directive::End => self.macro_handler.end_collect(&mut self.context),
             //Directive::Align => {}
-            Directive::Hex => self.handle_hex()?,
-            _ => {
-                let line_no = self.context.current_line_number();
-                return Err(Error::fatal(&format!("Unhandled directive: {:?}", directive), line_no));
-            }
+            Directive::Hex => self.handle_hex(),
+            _ => Err(self.context.error_text(ErrorType::UnhandledDirective, &format!("{:?}", directive)))
         }
-        Ok(())
+        //Ok(())
     }
 }

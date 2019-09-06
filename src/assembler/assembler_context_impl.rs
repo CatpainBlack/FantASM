@@ -115,6 +115,16 @@ impl AssemblerContext {
         }
     }
 
+    pub fn error_text(&mut self, t: ErrorType, text: &str) -> Error {
+        let message = format!("{} - {}", t.to_string(), text);
+        Error {
+            line_no: self.current_line_number(),
+            message,
+            level: ErrorLevel::Fatal,
+            file_name: self.current_file_name(),
+        }
+    }
+
     pub fn add_label(&mut self, name: String) -> Result<(), Error> {
         let mut label_name = name.clone();
         if label_name.ends_with(":") {

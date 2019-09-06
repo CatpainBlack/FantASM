@@ -26,9 +26,11 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
+
 use crate::assembler::assembler_context_impl::AssemblerContext;
 use crate::assembler::bank_impl::Bank;
 use crate::assembler::expression_impl::ExpressionParser;
+use crate::assembler::macro_impl::MacroHandler;
 use crate::assembler::tokens::Token;
 
 mod token_reader_impl;
@@ -43,6 +45,7 @@ mod directive_impl;
 mod expression_impl;
 mod assembler_context_impl;
 mod bank_impl;
+mod macro_impl;
 
 struct TokenReader<R> {
     reader: R,
@@ -69,6 +72,7 @@ pub struct ForwardReference {
 
 pub struct Assembler {
     context: AssemblerContext,
+    macro_handler: MacroHandler,
     tokens: Vec<Token>,
     origin: isize,
     bank: Bank,
@@ -78,6 +82,7 @@ pub struct Assembler {
     z80n_enabled: bool,
     cspect_enabled: bool,
     debug: bool,
+    collect_macro: bool,
 }
 
 #[derive(Debug)]

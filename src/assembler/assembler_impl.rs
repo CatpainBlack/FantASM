@@ -38,8 +38,10 @@ use crate::assembler::error_impl::ErrorType;
 use crate::assembler::error_impl::ErrorType::SyntaxError;
 use crate::assembler::expression_impl::ExpressionParser;
 use crate::assembler::instruction_encoder::InstructionEncoder;
+use crate::assembler::macro_impl::MacroHandler;
 use crate::assembler::reg_pair::HighLow;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
+use crate::assembler::tokens::Directive::End;
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{ConstLabel, Number, Operator};
@@ -49,6 +51,7 @@ impl Assembler {
         let context = Default::default();
         Assembler {
             context,
+            macro_handler: MacroHandler::new(),
             tokens: vec![],
             origin: 0,
             bank: Bank::new(),
@@ -58,6 +61,7 @@ impl Assembler {
             z80n_enabled: false,
             cspect_enabled: false,
             debug: false,
+            collect_macro: false,
         }
     }
 
@@ -99,12 +103,14 @@ impl Assembler {
         }
         if self.debug {
             self.dump();
+            self.macro_handler.dump();
         }
         Ok(())
     }
 
 
     pub(crate) fn first_pass(&mut self, file_name: &str) -> Result<(), Error> {
+        self.collect_macro = false;
         self.context.enter(file_name);
         let file = File::open(file_name)?;
         let buf = BufReader::new(file);
@@ -114,9 +120,13 @@ impl Assembler {
         loop {
             let tokens = &mut reader.read_line()?;
             self.total_lines += 1;
-            match tokens.first() {
-                Some(Token::EndOfFile) => break,
-                _ => self.translate(tokens)?
+            if tokens.first() == Some(&Token::EndOfFile) {
+                break;
+            }
+            if self.macro_handler.collecting() && tokens.first() != Some(&Token::Directive(End)) {
+                self.macro_handler.collect(&mut self.context, tokens)?;
+            } else {
+                self.translate(tokens)?;
             }
         }
         self.context.leave();
@@ -449,18 +459,24 @@ impl Assembler {
         self.tokens = tokens.to_owned();
         self.tokens.reverse();
 
-        let mut previous_token = Token::None;
-
         while !self.tokens.is_empty() {
             if let Some(tok) = self.tokens.pop() {
-                match (previous_token, &tok) {
-                    (Token::None, Token::Directive(d)) => self.process_directive(*d)?,
-                    (Token::None, Token::ConstLabel(l)) => self.handle_label(l)?,
-                    (_, Token::OpCode(op)) => self.handle_opcodes(op.clone())?,
-                    (_, Token::Invalid) => return Err(self.context.error(ErrorType::InvalidLabel)),
-                    _ => return Err(self.context.error(ErrorType::SyntaxError))
+                match &tok {
+                    Token::ConstLabel(l) => if self.macro_handler.is_macro(l) {
+                        self.macro_handler.parse_macro(&mut self.context, l, &mut self.tokens)?;
+                        while let Some(line) = self.macro_handler.expand_macro() {
+                            self.translate(&mut line.clone())?
+                        }
+                    } else {
+                        self.handle_label(l)?
+                    }
+                    Token::Directive(d) => self.process_directive(*d)?,
+                    Token::OpCode(op) => self.handle_opcodes(op.clone())?,
+                    Token::Invalid => return Err(self.context.error(ErrorType::InvalidLabel)),
+                    _ => {
+                        return Err(self.context.error(ErrorType::SyntaxError));
+                    }
                 }
-                previous_token = tok;
             }
         }
         Ok(())
