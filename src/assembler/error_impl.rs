@@ -71,6 +71,7 @@ pub enum ErrorType {
     BadMacroParam,
     NestedMacro,
     MacroParamCount,
+    MacroLabel,
 }
 
 impl ToString for ErrorType {
@@ -109,7 +110,8 @@ impl ToString for ErrorType {
             ErrorType::CommaExpected => String::from("Comma expected"),
             ErrorType::BadMacroParam => String::from("Invalid or missing macro parameter name"),
             ErrorType::NestedMacro => String::from("Macros may not be nested"),
-            ErrorType::MacroParamCount => String::from("Incorrect number of macro parameters")
+            ErrorType::MacroParamCount => String::from("Incorrect number of macro parameters"),
+            ErrorType::MacroLabel => String::from("Only local labels are permitted inside macros")
         }
     }
 }

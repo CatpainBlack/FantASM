@@ -203,7 +203,13 @@ impl Directives for Assembler {
             Directive::Binary => self.include_binary(),
             Directive::Block => self.handle_block(),
             Directive::Macro => self.macro_handler.begin_collect(&mut self.context, &mut self.tokens),
-            Directive::End => self.macro_handler.end_collect(&mut self.context),
+            Directive::End => {
+                if self.macro_handler.collecting() {
+                    self.macro_handler.end_collect(&mut self.context)
+                } else {
+                    return Err(self.context.error(ErrorType::DanglingEnd));
+                }
+            }
             //Directive::Align => {}
             Directive::Hex => self.handle_hex(),
             _ => Err(self.context.error_text(ErrorType::UnhandledDirective, &format!("{:?}", directive)))

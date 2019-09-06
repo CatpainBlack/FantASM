@@ -462,9 +462,9 @@ impl Assembler {
         while !self.tokens.is_empty() {
             if let Some(tok) = self.tokens.pop() {
                 match &tok {
-                    Token::ConstLabel(l) => if self.macro_handler.is_macro(l) {
-                        self.macro_handler.parse_macro(&mut self.context, l, &mut self.tokens)?;
-                        while let Some(line) = self.macro_handler.expand_macro() {
+                    Token::ConstLabel(l) => if self.macro_handler.macro_defined(l) {
+                        self.macro_handler.begin_expand(&mut self.context, l, &mut self.tokens)?;
+                        while let Some(line) = self.macro_handler.expand() {
                             self.translate(&mut line.clone())?
                         }
                     } else {
