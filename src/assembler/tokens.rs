@@ -135,6 +135,8 @@ pub enum Directive {
     Block,
     Hex,
     Align,
+    Macro,
+    End,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -289,4 +291,5 @@ pub enum Token {
     Opt(OptionType),
     Boolean(bool),
     IndirectExpression(Vec<Token>),
+    MacroParam(String),
 }

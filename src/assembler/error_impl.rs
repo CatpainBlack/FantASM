@@ -63,6 +63,15 @@ pub enum ErrorType {
     BitTruncated,
     MultipleIncludes,
     ExtraCharacters,
+    UnhandledDirective,
+    DanglingEnd,
+
+    BadMacroName,
+    CommaExpected,
+    BadMacroParam,
+    NestedMacro,
+    MacroParamCount,
+    MacroLabel,
 }
 
 impl ToString for ErrorType {
@@ -94,7 +103,15 @@ impl ToString for ErrorType {
             ErrorType::HexStringExpected => String::from("Invalid Hexadecimal string"),
             ErrorType::BitTruncated => String::from("Bit number is out of range will and will be truncated"),
             ErrorType::MultipleIncludes => String::from("Source file previously included"),
-            ErrorType::ExtraCharacters => String::from("Discarded extra characters at and of line")
+            ErrorType::ExtraCharacters => String::from("Discarded extra characters at and of line"),
+            ErrorType::UnhandledDirective => String::from("Unhandled directive"),
+            ErrorType::DanglingEnd => String::from("Encountered END without MACRO directive "),
+            ErrorType::BadMacroName => String::from("Invalid or missing macro name"),
+            ErrorType::CommaExpected => String::from("Comma expected"),
+            ErrorType::BadMacroParam => String::from("Invalid or missing macro parameter name"),
+            ErrorType::NestedMacro => String::from("Macros may not be nested"),
+            ErrorType::MacroParamCount => String::from("Incorrect number of macro parameters"),
+            ErrorType::MacroLabel => String::from("Only local labels are permitted inside macros")
         }
     }
 }

@@ -71,8 +71,12 @@ Binary numbers may be in any of the following formats
 
 ### Expressions
 
+### Macros
 
 ### History
+0.8.0
+* Implemented MACRO/ENDM/END directives
+
 0.7.7
 * Added check for recursive include files
 * Implemented HEX/DH directive

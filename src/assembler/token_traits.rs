@@ -204,6 +204,8 @@ impl FromStr for Directive {
             "dh" | "hex" => Ok(Directive::Hex),
             "!opt" | "#pragma" => Ok(Directive::Opt),
             "align" => Ok(Directive::Align),
+            "macro" => Ok(Directive::Macro),
+            "end" | "endm" => Ok(Directive::End),
             _ => Err(())
         }
     }
