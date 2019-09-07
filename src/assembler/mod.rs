@@ -72,7 +72,7 @@ pub struct ForwardReference {
 
 pub struct Assembler {
     context: AssemblerContext,
-    macro_handler: MacroHandler,
+    macros: MacroHandler,
     tokens: Vec<Token>,
     origin: isize,
     bank: Bank,

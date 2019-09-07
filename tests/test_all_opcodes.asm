@@ -2,7 +2,7 @@
 
 set0
     nop
-    ld  bc,0xbcbc
+    ld  bc,0xbcbd
     ld  (bc),a
     inc bc
     inc b
@@ -20,7 +20,7 @@ set0
 
 set1
     djnz    set1
-    ld  de,0xdede
+    ld  de,0xdedf
     ld  (de),a
     inc de
     inc d
@@ -38,7 +38,7 @@ set1
 
 set2
     jr  nz,set2
-    ld  hl,0x7171
+    ld  hl,0x7172
     ld  (0x1234),hl
     inc hl
     inc h
@@ -47,7 +47,7 @@ set2
     daa
     jr  z,set2
     add hl,hl
-    ld  hl,(0x3131)
+    ld  hl,(0x3132)
     dec hl
     inc l
     dec l
@@ -56,8 +56,8 @@ set2
 
 set3
     jr  nc,set3
-    ld  sp,0x0000
-    ld  (0x0000),a
+    ld  sp,0x0001
+    ld  (0x0001),a
     inc sp
     inc (hl)
     dec (hl)
@@ -65,7 +65,7 @@ set3
     scf
     jr  c,set3
     add hl,sp
-    ld  a,(0xffff)
+    ld  a,(0xffee)
     dec sp
     inc a
     dec a
@@ -292,7 +292,7 @@ edset4
 	in b,(c)
 	out (c),b
 	sbc hl,bc
-	ld (0xbcbc),bc
+	ld (0xbcbd),bc
 	neg
 	retn
 	im 0
@@ -300,7 +300,7 @@ edset4
 	in c,(c)
 	out (c),c
 	adc hl,bc
-	ld bc,(0xbcbc)
+	ld bc,(0xbcbd)
 	reti
 	;im 0/1
 	ld r,a
@@ -309,7 +309,7 @@ edset5
 	in d,(c)
 	out (c),d
 	sbc hl,de
-	ld (0xdede),de
+	ld (0xdedf),de
 	neg
 	retn
 	im 1
@@ -317,7 +317,7 @@ edset5
 	in e,(c)
 	out (c),e
 	adc hl,de
-	ld de,(0xdede)
+	ld de,(0xdedf)
 	neg
 	retn
 	im 2
@@ -668,14 +668,14 @@ cbsetf
 ixinstr
 	add ix,bc
 	add ix,de
-	ld ix,0x0101
-	ld (0x0202),ix
+	ld ix,0x0102
+	ld (0x0203),ix
 	inc ix
 	inc ixh
 	dec ixh
 	ld ixh,0x3
 	add ix,ix
-	ld ix,(0x0303)
+	ld ix,(0x0304)
 	dec ix
 	inc ixl
 	dec ixl
@@ -755,14 +755,14 @@ ixinstr
 iyinstr
 	add iy,bc
 	add iy,de
-	ld iy,0x0101
-	ld (0x0202),iy
+	ld iy,0x0102
+	ld (0x0203),iy
 	inc iy
 	inc iyh
 	dec iyh
 	ld iyh,0x3
 	add iy,iy
-	ld iy,(0x0303)
+	ld iy,(0x0304)
 	dec iy
 	inc iyl
 	dec iyl

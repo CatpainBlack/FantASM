@@ -202,10 +202,10 @@ impl Directives for Assembler {
             Directive::Opt => self.set_option(),
             Directive::Binary => self.include_binary(),
             Directive::Block => self.handle_block(),
-            Directive::Macro => self.macro_handler.begin_collect(&mut self.context, &mut self.tokens),
+            Directive::Macro => self.macros.begin_collect(&mut self.context, &mut self.tokens),
             Directive::End => {
-                if self.macro_handler.collecting() {
-                    self.macro_handler.end_collect(&mut self.context)
+                if self.macros.collecting() {
+                    self.macros.end_collect(&mut self.context)
                 } else {
                     return Err(self.context.error(ErrorType::DanglingEnd));
                 }
