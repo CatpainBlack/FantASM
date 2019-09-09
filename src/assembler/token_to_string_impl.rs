@@ -107,6 +107,7 @@ impl ToString for Directive {
             Directive::Align => "ALIGN",
             Directive::Macro => "MACRO",
             Directive::End => "END",
+            Directive::StringZero => "DZ"
         }.to_string()
     }
 }

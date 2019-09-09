@@ -137,6 +137,7 @@ pub enum Directive {
     Align,
     Macro,
     End,
+    StringZero,
 }
 
 #[derive(Debug, Clone, PartialEq)]

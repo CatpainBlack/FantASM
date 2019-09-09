@@ -75,40 +75,40 @@ Binary numbers may be in any of the following formats
 
 ### History
 0.9.0
-* Added a much better expression parser. Brackets and operator precedence are now properly implemented
+* Added a much better expression parser. Brackets and operator precedence are now properly implemented.
 * Reworked how warnings are handled and displayed.
+* Improved string handling, now checks are performed to determine if a string has non ASCII characters.
 
 0.8.0
-* Implemented MACRO/ENDM/END directives
+* Implemented MACRO/ENDM/END directives.
 
 0.7.7
-* Added check for recursive include files
-* Implemented HEX/DH directive
-* Implemented local labels (prefixed with a .)
+* Added check for recursive include files.
+* Implemented HEX/DH directive.
+* Implemented local labels (prefixed with a .).
 * Fixed an issue with labels that ended with a colon.
 * Warning when bit operations specify an illegal bit number.
-* Added BSD license (see license.txt)
+* Added BSD license (see license.txt).
 
 0.7.6
-* Implemented expression parsing for Indirect load instructions
-* Added undocumented bit/res/set/rotate opcodes using the index registers, all undocumented instructions are now handled
-
-* Refactored the instruction encoder, reduced the amount of spaghetti logic
+* Implemented expression parsing for Indirect load instructions.
+* Added undocumented bit/res/set/rotate opcodes using the index registers, all undocumented instructions are now handled.
+* Refactored the instruction encoder, reduced the amount of spaghetti logic.
 
 0.7.5
-* Big code refactoring in order to better implement future expression parser improvements
+* Big code refactoring in order to better implement future expression parser improvements.
 
 0.7.4
-* Implemented "Incbin" directive
-* Internal code refactoring to remove some "unsafe" code
+* Implemented "Incbin" directive.
+* Internal code refactoring to remove some "unsafe" code.
 
 0.7.3 
-* Better handling of expressions when referencing labels that have not yet been defined
+* Better handling of expressions when referencing labels that have not yet been defined.
 
 0.7.2
-* Improved assembly speed
-* Implemented CSpect pseudo opcodes
-* Implemented z80n extended opcodes
+* Improved assembly speed.
+* Implemented CSpect pseudo opcodes.
+* Implemented z80n extended opcodes.
 
 0.7.1
-* First public release
+* First public release.

@@ -26,5 +26,7 @@ The assembler supports all Z80 opcodes and most undocumented ones, except for un
 
 ## ToDo
 
+* $/ASMPC constant
 * Implement DZ zero terminated string
 * Optionally treat warnings as errors
+* Source linter

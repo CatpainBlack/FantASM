@@ -46,7 +46,7 @@ mod expression_impl;
 mod assembler_context_impl;
 mod bank_impl;
 mod macro_impl;
-mod implt_token_to_string;
+mod token_to_string_impl;
 
 struct TokenReader<R> {
     reader: R,

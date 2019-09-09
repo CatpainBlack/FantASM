@@ -13,6 +13,7 @@ regex = "1"
 lazy_static = "1.3.0"
 version = "3.0.0"
 rand = "0.7.0"
+ascii = "1.0"
 
 [build-dependencies]
 chrono = "0.4.9"

@@ -6,5 +6,6 @@ start	ld	hl, start-10*100+50/2
 
 		call	start / 2 * ((2 << 2) >> 2)
 
-		db	"Captain Black",0
+		dz	"Captain Black"
+		db	"(c)2019 Captain Black",0
 finish

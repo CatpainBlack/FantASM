@@ -185,9 +185,6 @@ impl Assembler {
 
     pub fn warn(&mut self, t: ErrorType) {
         self.warnings.push(format!("[{} : {}] Warning: {}", self.context.current_file_name(), self.context.current_line_number(), t.to_string()))
-//		if self.console_output {
-//			cyan_ln!("[{} : {}] Warning: {}", self.context.current_file_name(), self.context.current_line_number(), t.to_string());
-//		}
     }
 
     pub fn num_warnings(&self) -> usize {
@@ -274,9 +271,10 @@ impl Assembler {
 
     pub fn next_token_is(&mut self, tok: &Token) -> bool {
         if let Some(t) = self.tokens.last() {
-            return t == tok;
+            t == tok
+        } else {
+            false
         }
-        return false;
     }
 
     pub fn expect_token(&mut self, tok: Token) -> Result<(), Error> {

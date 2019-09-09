@@ -206,6 +206,7 @@ impl FromStr for Directive {
             "align" => Ok(Directive::Align),
             "macro" => Ok(Directive::Macro),
             "end" | "endm" => Ok(Directive::End),
+            "dz" => Ok(Directive::StringZero),
             _ => Err(())
         }
     }
@@ -321,7 +322,7 @@ impl Tokens for Token {
             return Token::ConstLabel(word);
         }
 
-        return Token::Invalid;
+        Token::Invalid
     }
 
     fn is_index_prefix(&self) -> Option<u8> {
@@ -350,10 +351,10 @@ impl Tokens for Token {
     }
 
     fn is_reg_pair(&self) -> bool {
-        return match self {
+        match self {
             RegisterPair(_) => true,
             _ => false
-        };
+        }
     }
 
     fn is_special_reg(&self) -> bool {
