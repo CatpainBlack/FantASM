@@ -69,10 +69,17 @@ impl Directives for Assembler {
 
     fn handle_bytes(&mut self) -> Result<(), Error> {
         let mut expect_comma = false;
-        while !self.tokens.is_empty() {
+        while !&self.tokens.is_empty() {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
+                let t = self.take_token()?;
+                if let StringLiteral(s) = t {
+                    self.tokens.pop();
+                    self.emit(s.into_bytes().as_slice())?;
+                    continue;
+                }
+                self.tokens.push(t);
                 match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1) {
                     Ok(Some(n)) => {
                         if !(0..256).contains(&n) {
@@ -81,11 +88,16 @@ impl Directives for Assembler {
                         self.emit(&[n as u8])?
                     }
                     Ok(None) => if let StringLiteral(s) = self.take_token()? {
+                        println!("Ok(None)");
                         self.emit(s.into_bytes().as_slice())?;
                     } else {
+                        println!("Hmm");
                         return Err(self.context.error(ErrorType::SyntaxError));
                     }
-                    Err(e) => return Err(self.context.error(e))
+                    Err(e) => {
+                        println!("Err({:?})", e.to_string());
+                        return Err(self.context.error(e));
+                    }
                 }
             }
             expect_comma = !expect_comma;

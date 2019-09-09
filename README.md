@@ -23,3 +23,11 @@ The assembler supports all Z80 opcodes and most undocumented ones, except for un
 ## Building
 
 `cargo build --release` currently builds with rust >= 1.35.0
+
+## ToDo
+
+* Expression Parser
+* Fix db,ds strings
+* Implement DZ zero terminated string
+* Collect warnings and display at end
+* Optionally treat warnings as errors

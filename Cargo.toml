@@ -6,7 +6,8 @@ authors = ["Guy Black <captainblack@zx-spectrum.org.uk>"]
 edition = "2018"
 
 [dependencies]
-chrono = "0.4.9"
+evalexpr = "5"
+#chrono = "0.4.9"
 argparse = "0.2.2"
 colour = "0.3.0"
 regex = "1"
