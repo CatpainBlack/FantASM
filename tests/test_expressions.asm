@@ -1,7 +1,7 @@
 	org	32768+1024-1024
 
 start
-	call	start / 2 * 2 << 2 >> 2
+	call	(start / 2) * ((2 << 2) >> 2) + start
 	ret
 
 data

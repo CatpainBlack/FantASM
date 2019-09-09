@@ -77,7 +77,6 @@ impl ExpressionParser {
                         return Err(ErrorType::BadConstant);
                     }
                 }
-                //Operator(Op::AsmPc) => strings.push(format!("{}", context.asm_pc())),
                 Operator(Op::Shl) => strings.push("*2^".to_string()),
                 Operator(Op::Shr) => strings.push("/2^".to_string()),
                 Number(_) | Operator(_) => strings.push(token.to_string()),
