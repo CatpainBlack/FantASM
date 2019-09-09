@@ -1,4 +1,4 @@
-cargo build --release
+#cargo build --release
 rm -f fantasm.bin sjasmplus.bin
 for i in expressions.asm ; do
   printf "%-22s ... " "$i"

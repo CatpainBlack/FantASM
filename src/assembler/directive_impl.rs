@@ -55,7 +55,7 @@ pub trait Directives {
 
 impl Directives for Assembler {
     fn set_origin(&mut self) -> Result<(), Error> {
-        match self.expr.parse(&mut self.context, &mut self.tokens, 0, -1) {
+        match self.expr.parse(&mut self.context, &mut self.tokens, 0, -1, false) {
             Ok(Some(mut o)) => {
                 if o > 65535 {
                     o = o & 0xFFFF;
@@ -95,7 +95,7 @@ impl Directives for Assembler {
                     continue;
                 } else {}
                 self.tokens.push(t);
-                match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1) {
+                match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1, false) {
                     Ok(Some(n)) => {
                         if !(0..256).contains(&n) {
                             self.warn(ErrorType::IntegerOutOfRange);
@@ -126,7 +126,7 @@ impl Directives for Assembler {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1) {
+                match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2, false) {
                     Ok(Some(n)) => {
                         if !(0..65536).contains(&n) {
                             self.warn(ErrorType::IntegerOutOfRange);

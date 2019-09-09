@@ -32,7 +32,7 @@ use crate::assembler::error_impl::ErrorType;
 use crate::assembler::reg_pair::HighLow;
 use crate::assembler::reg_pair::RegPairValue;
 use crate::assembler::token_traits::Tokens;
-use crate::assembler::tokens::{AluOp, Cnd, Ir, Reg, RegPairInd, RotOp, Token};
+use crate::assembler::tokens::{AluOp, Cnd, Ir, Op, Reg, RegPairInd, RotOp, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Op::{LParens, RParens};
 use crate::assembler::tokens::Reg::_HL_;
@@ -298,7 +298,7 @@ impl InstructionEncoder for Assembler {
     fn jr(&mut self, djnz: bool) -> Result<(), Error> {
         let token = self.tokens.last().unwrap_or(&Token::EndOfFile).clone();
         match token {
-            Number(_) | ConstLabel(_) => {
+            Operator(Op::AsmPc) | Number(_) | ConstLabel(_) => {
                 let offset = self.relative()?;
                 if djnz {
                     return self.emit(&[0x10, offset]);
@@ -474,7 +474,7 @@ impl InstructionEncoder for Assembler {
         } else {
             self.emit_byte(xpqz!(0, rp, 0, 1))?;
         }
-        let addr = match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2) {
+        let addr = match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2, false) {
             Ok(Some(a)) => a,
             Ok(None) => 0,
             Err(e) => return Err(self.context.error(e))

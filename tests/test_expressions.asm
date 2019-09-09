@@ -2,6 +2,7 @@
 
 start
 	call	(start / 2) * ((2 << 2) >> 2) + start
+	call	$+2
 	ret
 
 data

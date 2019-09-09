@@ -72,11 +72,13 @@ pub enum ErrorType {
     MacroLabel,
 
     NonAscii,
+    //NotImplemented,
 }
 
 impl ToString for ErrorType {
     fn to_string(&self) -> String {
         match self {
+            //ErrorType::NotImplemented => String::from("Not implemented"),
             ErrorType::PCOverflow => String::from("Address overflow, PC > 65535"),
             ErrorType::InvalidLabel => String::from("Invalid character in label"),
             ErrorType::SyntaxError => String::from("Syntax error"),

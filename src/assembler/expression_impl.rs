@@ -60,8 +60,7 @@ impl ExpressionParser {
                 if l.to_lowercase().eq(&"asmpc".to_string()) {
                     expr.pop();
                     expr.push(Number(context.asm_pc()));
-                }
-                else if !context.is_constant_defined(&l) && !context.is_label_defined(&l) {
+                } else if !context.is_constant_defined(&l) && !context.is_label_defined(&l) {
                     has_forward_ref = true;
                 }
             }
@@ -91,14 +90,13 @@ impl ExpressionParser {
         let string_expr = strings.join("");
         match eval(&string_expr) {
             Ok(r) => {
-                //println!("{} = {}", string_expr, r);
                 Ok(r.as_number().unwrap() as isize)
             }
             Err(_e) => return Err(ErrorType::BadExpression),
         }
     }
 
-    pub fn parse(&mut self, context: &mut AssemblerContext, tokens: &mut Vec<Token>, offset: isize, count: isize) -> Result<Option<isize>, ErrorType> {
+    pub fn parse(&mut self, context: &mut AssemblerContext, tokens: &mut Vec<Token>, offset: isize, count: isize, is_relative: bool) -> Result<Option<isize>, ErrorType> {
         let (has_forward_ref, mut expr) = self.get_expression(context, tokens);
         if has_forward_ref && count < 0 {
             return Err(ErrorType::BadConstant);
@@ -109,7 +107,7 @@ impl ExpressionParser {
                 pc: context.offset_pc(offset),
                 label: "".to_string(),
                 expression: expr,
-                is_relative: false,
+                is_relative,
                 byte_count: count,
                 line_no: context.current_line_number(),
                 file_name: context.current_file_name().to_string(),

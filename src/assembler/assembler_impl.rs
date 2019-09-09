@@ -215,18 +215,13 @@ impl Assembler {
     }
 
     pub fn relative(&mut self) -> Result<u8, Error> {
-        match self.take_token()? {
-            Number(n) => Ok((n - (self.context.offset_pc(2))) as u8),
-            ConstLabel(s) => {
-                let mut addr = self.context.try_resolve_label(&s, 1, true) as isize;
-                let pc = (self.context.offset_pc(2)) as isize;
-                if addr == 0 {
-                    addr = pc;
-                }
-                Ok(((addr - pc) as u16) as u8)
-            }
-            _ => Err(self.context.error(ErrorType::SyntaxError))
-        }
+        let addr = match self.expr.parse(&mut self.context, &mut self.tokens, 1, 1, true) {
+            Ok(Some(n)) => n,
+            Ok(None) => 0,
+            Err(e) => return Err(self.context.error(e)),
+        };
+        let pc = (self.context.offset_pc(2)) as isize;
+        Ok((addr - pc) as u8)
     }
 
     pub(crate) fn expect_byte(&mut self, instr_size: isize) -> Result<isize, Error> {
@@ -238,7 +233,7 @@ impl Assembler {
     }
 
     fn expect_number_in_range(&mut self, range: Range<isize>, count: isize, error_type: ErrorType, instr_size: isize) -> Result<isize, Error> {
-        match self.expr.parse(&mut self.context, &mut self.tokens, instr_size, count) {
+        match self.expr.parse(&mut self.context, &mut self.tokens, instr_size, count, false) {
             Ok(Some(n)) => {
                 if !range.contains(&n) {
                     self.warn(error_type);
@@ -325,7 +320,7 @@ impl Assembler {
             self.emit_byte(prefix.unwrap())?;
         }
         self.emit_byte(instr)?;
-        let a = match self.expr.parse(&mut self.context, &mut expr.to_vec(), 0, 2) {
+        let a = match self.expr.parse(&mut self.context, &mut expr.to_vec(), 0, 2, false) {
             Ok(Some(addr)) => addr,
             Ok(None) => 0,
             Err(e) => return Err(self.context.error(e))
@@ -460,7 +455,7 @@ impl Assembler {
     fn handle_label(&mut self, l: &str) -> Result<(), Error> {
         if self.next_token_is(&Operator(Equals)) {
             self.tokens.pop();
-            match self.expr.parse(&mut self.context, &mut self.tokens, 0, -1) {
+            match self.expr.parse(&mut self.context, &mut self.tokens, 0, -1, false) {
                 Ok(Some(n)) => self.context.add_constant(l.to_string(), n)?,
                 Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
                 Err(e) => return Err(self.context.error(e))
