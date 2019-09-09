@@ -105,7 +105,7 @@ impl ExpressionParser {
             let fw = ForwardReference {
                 is_expression: true,
                 pc: context.offset_pc(offset),
-                label: "".to_string(),
+                label: context.label_context.clone(),
                 expression: expr,
                 is_relative,
                 byte_count: count,

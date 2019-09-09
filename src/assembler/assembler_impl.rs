@@ -147,6 +147,7 @@ impl Assembler {
         while let Some(mut fwd_ref) = self.context.next_forward_ref() {
             let mut data: isize;
             if fwd_ref.is_expression {
+                self.context.label_context = fwd_ref.label;
                 data = match self.expr.eval(&mut self.context, fwd_ref.expression.as_mut()) {
                     Ok(n) => n,
                     Err(e) => return Err(self.error_second_pass(e, fwd_ref.line_no, &fwd_ref.file_name)),

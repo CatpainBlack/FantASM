@@ -40,7 +40,7 @@ pub struct AssemblerContext {
     line_number: Vec<isize>,
     file_name: Vec<String>,
     current_pc: isize,
-    label_context: String,
+    pub(crate)label_context: String,
     asm_pc: isize,
 }
 
