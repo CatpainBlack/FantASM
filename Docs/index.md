@@ -74,6 +74,10 @@ Binary numbers may be in any of the following formats
 ### Macros
 
 ### History
+0.9.0
+* Added a much better expression parser. Brackets and operator precedence are now properly implemented
+* Reworked how warnings are handled and displayed.
+
 0.8.0
 * Implemented MACRO/ENDM/END directives
 

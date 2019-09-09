@@ -26,8 +26,5 @@ The assembler supports all Z80 opcodes and most undocumented ones, except for un
 
 ## ToDo
 
-* Expression Parser
-* Fix db,ds strings
 * Implement DZ zero terminated string
-* Collect warnings and display at end
 * Optionally treat warnings as errors

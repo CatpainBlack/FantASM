@@ -86,38 +86,35 @@ impl Assembler {
         self
     }
 
+    fn write_status(&self) {
+        if self.console_output {
+            if self.num_warnings() > 0 {
+                cyan_ln!("Completed with {} warning(s)",self.num_warnings());
+            } else {
+                dark_green_ln!("Done");
+            }
+            self.display_warnings();
+        }
+    }
+
     pub fn assemble(&mut self, file_name: &str) -> Result<(), Error> {
         self.warnings.clear();
-        if self.console_output {
-            green!("First pass .... ");
-        }
+        if self.console_output { green!("First pass .... "); }
+
         self.first_pass(file_name)?;
-        if self.console_output {
-            if self.num_warnings() > 0 {
-                cyan_ln!("Completed with {} warning(s)",self.num_warnings());
-            } else {
-                dark_green_ln!("Done");
-            }
-            if self.debug {
-                self.dump();
-            }
-            self.display_warnings();
-            self.warnings.clear();
-            green!("Second pass ... ");
-        }
+        self.write_status();
+
+        self.warnings.clear();
+        if self.console_output { green!("Second pass ... "); }
+
         self.second_pass()?;
-        if self.console_output {
-            if self.num_warnings() > 0 {
-                cyan_ln!("Completed with {} warning(s)",self.num_warnings());
-            } else {
-                dark_green_ln!("Done");
-            }
-            self.display_warnings();
-        }
+        self.write_status();
+
         if self.debug {
             self.dump();
             self.macros.dump();
         }
+
         Ok(())
     }
 
