@@ -82,12 +82,12 @@ impl Options {
         }
 
         if options.version {
-            println!("FantASM {}", version!());
+            white_ln!("FantASM {}", version!());
             exit(0);
         }
 
         if !options.no_logo {
-            magenta_ln!("{}",description);
+            white_ln!("{}",description);
         }
 
         if options.source.is_empty() {

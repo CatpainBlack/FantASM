@@ -83,6 +83,7 @@ pub struct Assembler {
     cspect_enabled: bool,
     debug: bool,
     collect_macro: bool,
+    warnings: Vec<String>,
 }
 
 #[derive(Debug)]
