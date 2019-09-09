@@ -126,8 +126,19 @@ impl Directives for Assembler {
             if expect_comma {
                 self.expect_token(Delimiter(Comma))?
             } else {
-                let word = self.expect_word(0)?;
-                self.emit_word(word)?;
+                match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1) {
+                    Ok(Some(n)) => {
+                        if !(0..65536).contains(&n) {
+                            self.warn(ErrorType::IntegerOutOfRange);
+                        }
+                        self.emit_word(n)?
+                    }
+                    Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
+                    Err(e) => {
+                        println!("Err({:?})", e.to_string());
+                        return Err(self.context.error(e));
+                    }
+                }
             }
             expect_comma = !expect_comma;
         }

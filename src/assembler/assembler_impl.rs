@@ -481,8 +481,8 @@ impl Assembler {
         }
         self.tokens = tokens.to_owned();
         self.tokens.reverse();
-        self.context.init_asm_pc();
         while !self.tokens.is_empty() {
+            self.context.init_asm_pc();
             if let Some(tok) = self.tokens.pop() {
                 match &tok {
                     Token::ConstLabel(l) => if self.macros.macro_defined(l) {

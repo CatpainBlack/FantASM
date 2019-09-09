@@ -53,10 +53,15 @@ impl ExpressionParser {
                 if t == Operator(Op::AsmPc) {
                     t = Number(context.asm_pc())
                 }
-                expr.push(t);
+                expr.push(t.clone());
             }
-            if let Some(ConstLabel(l)) = expr.last() {
-                if !context.is_constant_defined(l) && !context.is_label_defined(l) {
+            let last = expr.last().unwrap_or(&Token::None).clone();
+            if let ConstLabel(l) = last {
+                if l.to_lowercase().eq(&"asmpc".to_string()) {
+                    expr.pop();
+                    expr.push(Number(context.asm_pc()));
+                }
+                else if !context.is_constant_defined(&l) && !context.is_label_defined(&l) {
                     has_forward_ref = true;
                 }
             }
@@ -112,6 +117,7 @@ impl ExpressionParser {
             context.add_forward_ref(fw);
             return Ok(Some(0));
         }
+
 
         match self.eval(context, expr.as_mut()) {
             Ok(n) => Ok(Some(n)),

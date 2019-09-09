@@ -100,6 +100,10 @@ impl<R> TokenReader<R> where R: BufRead {
                 }
                 _ => {}
             }
+            if c == ':' && self.words.len() > 0 {
+                self.store_token_string();
+                continue;
+            }
             let is_operator = self.operators.find(c).is_some();
             let is_delimiter = self.delimiters.find(c).is_some();
             let is_whitespace = c.is_whitespace();
@@ -115,6 +119,7 @@ impl<R> TokenReader<R> where R: BufRead {
         }
         self.store_token_string();
         self.words.reverse();
+//        println!("{:?}", self.words);
     }
 
     fn next_token(&mut self) -> Option<Token> {
