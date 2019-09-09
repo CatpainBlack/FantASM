@@ -41,6 +41,7 @@ pub struct AssemblerContext {
     file_name: Vec<String>,
     current_pc: isize,
     label_context: String,
+    asm_pc: isize,
 }
 
 impl AssemblerContext {
@@ -67,6 +68,9 @@ impl AssemblerContext {
     pub fn pc_add(&mut self, value: isize) {
         self.current_pc += value;
     }
+
+    pub fn asm_pc(&self) -> isize { self.asm_pc }
+    pub fn init_asm_pc(&mut self) { self.asm_pc = self.current_pc; }
 
     pub fn enter(&mut self, name: &str) {
         self.file_name.push(name.to_string());

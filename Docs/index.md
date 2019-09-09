@@ -78,6 +78,8 @@ Binary numbers may be in any of the following formats
 * Added a much better expression parser. Brackets and operator precedence are now properly implemented.
 * Reworked how warnings are handled and displayed.
 * Improved string handling, now checks are performed to determine if a string has non ASCII characters.
+* Added DZ directive, zero terminated strings
+* Implemented $/ASMPC psuedo operator, returns the current PC
 
 0.8.0
 * Implemented MACRO/ENDM/END directives.

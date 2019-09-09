@@ -49,7 +49,12 @@ impl ExpressionParser {
         let mut expr = vec![];
         let mut has_forward_ref = false;
         while tokens.last().unwrap_or(&Token::None).is_expression() {
-            expr.push(tokens.pop().unwrap());
+            if let Some(mut t) = tokens.pop() {
+                if t == Operator(Op::AsmPc) {
+                    t = Number(context.asm_pc())
+                }
+                expr.push(t);
+            }
             if let Some(ConstLabel(l)) = expr.last() {
                 if !context.is_constant_defined(l) && !context.is_label_defined(l) {
                     has_forward_ref = true;
@@ -72,6 +77,7 @@ impl ExpressionParser {
                         return Err(ErrorType::BadConstant);
                     }
                 }
+                //Operator(Op::AsmPc) => strings.push(format!("{}", context.asm_pc())),
                 Operator(Op::Shl) => strings.push("*2^".to_string()),
                 Operator(Op::Shr) => strings.push("/2^".to_string()),
                 Number(_) | Operator(_) => strings.push(token.to_string()),
@@ -79,9 +85,11 @@ impl ExpressionParser {
             }
         }
         let string_expr = strings.join("");
-        //println!("{}", string_expr);
         match eval(&string_expr) {
-            Ok(r) => Ok(r.as_number().unwrap() as isize),
+            Ok(r) => {
+                //println!("{} = {}", string_expr, r);
+                Ok(r.as_number().unwrap() as isize)
+            }
             Err(_e) => return Err(ErrorType::BadExpression),
         }
     }

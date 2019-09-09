@@ -409,7 +409,7 @@ impl Assembler {
             _ => {
                 self.encode_z80n(&op)?;
                 self.encode_cspect(&op)?;
-                return Ok(());
+                Ok(())
             }
         };
     }
@@ -481,7 +481,7 @@ impl Assembler {
         }
         self.tokens = tokens.to_owned();
         self.tokens.reverse();
-
+        self.context.init_asm_pc();
         while !self.tokens.is_empty() {
             if let Some(tok) = self.tokens.pop() {
                 match &tok {

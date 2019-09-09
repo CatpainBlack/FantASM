@@ -107,7 +107,7 @@ impl ToString for Directive {
             Directive::Align => "ALIGN",
             Directive::Macro => "MACRO",
             Directive::End => "END",
-            Directive::StringZero => "DZ"
+            Directive::StringZero => "DZ",
         }.to_string()
     }
 }
@@ -193,6 +193,7 @@ impl ToString for Op {
             Op::Equals => "=",
             Op::Ampersand => "&",
             Op::Pipe => "|",
+            Op::AsmPc => "$"
         }.to_string()
     }
 }

@@ -9,7 +9,8 @@ start:
 	ld	de,meaning_of_life
 	ret
 
-	db	"Captain Black",0
+	dz	"Captain Black"
+	db	"(c)2019 Captain Black",0
 
 hex_string:
 	hex	"0123456789ABCDEF00"

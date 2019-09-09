@@ -225,7 +225,7 @@ impl FromStr for Del {
 impl FromStr for Op {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
+        match s.to_lowercase().as_str() {
             "+" => Ok(Op::Add),
             "-" => Ok(Op::Sub),
             "*" => Ok(Op::Mul),
@@ -239,6 +239,7 @@ impl FromStr for Op {
             "=" => Ok(Op::Equals),
             "&" => Ok(Op::Ampersand),
             "|" => Ok(Op::Pipe),
+            "$" | "asmpc" => Ok(Op::AsmPc),
             _ => Err(())
         }
     }
