@@ -23,3 +23,9 @@ The assembler supports all Z80 opcodes and most undocumented ones, except for un
 ## Building
 
 `cargo build --release` currently builds with rust >= 1.35.0
+
+## ToDo
+
+* Optionally treat warnings as errors
+* Source linter?
+* Warn rather than error when converting string to ASCII?

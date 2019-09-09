@@ -40,7 +40,8 @@ pub struct AssemblerContext {
     line_number: Vec<isize>,
     file_name: Vec<String>,
     current_pc: isize,
-    label_context: String,
+    pub(crate)label_context: String,
+    asm_pc: isize,
 }
 
 impl AssemblerContext {
@@ -68,6 +69,9 @@ impl AssemblerContext {
         self.current_pc += value;
     }
 
+    pub fn asm_pc(&self) -> isize { self.asm_pc }
+    pub fn init_asm_pc(&mut self) { self.asm_pc = self.current_pc; }
+
     pub fn enter(&mut self, name: &str) {
         self.file_name.push(name.to_string());
         self.line_number.push(0);
@@ -84,12 +88,18 @@ impl AssemblerContext {
     }
 
     pub fn is_label_defined(&self, name: &str) -> bool {
-        self.labels.contains_key(name)
+        let mut label_name = name.to_string();
+        if label_name.starts_with(".") {
+            label_name = self.label_context.clone() + &label_name.clone();
+        }
+        self.labels.contains_key(&label_name)
     }
-    pub fn is_constant_defined(&self, name: &str) -> bool { self.constants.contains_key(name) }
+    pub fn is_constant_defined(&self, name: &str) -> bool {
+        self.constants.contains_key(name)
+    }
 
     pub fn get_label_or_constant_value(&mut self, name: &str) -> Result<isize, Error> {
-        if let Some(&address) = self.labels.get(name) {
+        if let Some(address) = self.get_label(name) {
             return Ok(address);
         }
         if let Some(&address) = self.constants.get(name) {
@@ -103,7 +113,11 @@ impl AssemblerContext {
     }
 
     pub fn get_label(&mut self, name: &str) -> Option<isize> {
-        self.labels.get(name).cloned()
+        let mut label_name = name.to_string();
+        if label_name.starts_with(".") {
+            label_name = self.label_context.clone() + &label_name.clone();
+        }
+        self.labels.get(&label_name).cloned()
     }
 
     pub fn error(&mut self, t: ErrorType) -> Error {
@@ -151,31 +165,31 @@ impl AssemblerContext {
         Ok(())
     }
 
-    pub fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
-        let mut addr = 0u16;
-        let mut label_name = name.to_string();
-        if label_name.starts_with(".") {
-            label_name = self.label_context.clone() + &label_name.clone();
-        }
-
-        if let Some(a) = self.constants.get(&label_name) {
-            addr = *a as u16;
-        } else if let Some(a) = self.labels.get(&label_name) {
-            addr = *a as u16;
-        } else {
-            self.forward_references.push(ForwardReference {
-                is_expression: false,
-                pc: self.current_pc + pc_offset,
-                label: label_name.to_string(),
-                expression: vec![],
-                is_relative: relative,
-                byte_count: 2,
-                line_no: self.current_line_number(),
-                file_name: self.current_file_name(),
-            });
-        }
-        return addr;
-    }
+//    pub fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
+//        let mut addr = 0u16;
+//        let mut label_name = name.to_string();
+//        if label_name.starts_with(".") {
+//            label_name = self.label_context.clone() + &label_name.clone();
+//        }
+//
+//        if let Some(a) = self.constants.get(&label_name) {
+//            addr = *a as u16;
+//        } else if let Some(a) = self.labels.get(&label_name) {
+//            addr = *a as u16;
+//        } else {
+//            self.forward_references.push(ForwardReference {
+//                is_expression: false,
+//                pc: self.current_pc + pc_offset,
+//                label: label_name.to_string(),
+//                expression: vec![],
+//                is_relative: relative,
+//                byte_count: 2,
+//                line_no: self.current_line_number(),
+//                file_name: self.current_file_name(),
+//            });
+//        }
+//        return addr;
+//    }
 
     pub fn next_forward_ref(&mut self) -> Option<ForwardReference> {
         self.forward_references.pop()

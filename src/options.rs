@@ -27,7 +27,7 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
 extern crate argparse;
-extern crate chrono;
+//extern crate chrono;
 
 use std::path::Path;
 use std::process::exit;
@@ -82,12 +82,12 @@ impl Options {
         }
 
         if options.version {
-            white_ln!("FantASM {}",version!());
+            white_ln!("FantASM {}", version!());
             exit(0);
         }
 
         if !options.no_logo {
-            magenta_ln!("{}",description);
+            white_ln!("{}",description);
         }
 
         if options.source.is_empty() {

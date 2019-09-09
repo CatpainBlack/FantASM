@@ -54,7 +54,7 @@ fn main() -> Result<(), Error> {
 
     let now = Instant::now();
     if options.verbose {
-        cyan_ln!("Assembling: {}",options.source);
+        white_ln!("Assembling: {}",options.source);
     }
     match assembler.assemble(options.source.as_str()) {
         Ok(_) => assembler.save_raw(&options.output)?,
@@ -64,7 +64,7 @@ fn main() -> Result<(), Error> {
     }
 
     if options.verbose {
-        cyan_ln!("Assembly complete [{}s]", (now.elapsed().as_millis() as f64)/1000f64);
+        white_ln!("Assembly complete [{}s]", (now.elapsed().as_millis() as f64)/1000f64);
     }
 
     Ok(())

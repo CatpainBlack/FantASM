@@ -137,6 +137,7 @@ pub enum Directive {
     Align,
     Macro,
     End,
+    StringZero,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -159,6 +160,7 @@ pub enum Op {
     Equals,
     Ampersand,
     Pipe,
+    AsmPc,
 }
 
 #[derive(Debug, Clone, PartialEq)]

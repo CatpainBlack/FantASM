@@ -206,6 +206,7 @@ impl FromStr for Directive {
             "align" => Ok(Directive::Align),
             "macro" => Ok(Directive::Macro),
             "end" | "endm" => Ok(Directive::End),
+            "dz" => Ok(Directive::StringZero),
             _ => Err(())
         }
     }
@@ -224,7 +225,7 @@ impl FromStr for Del {
 impl FromStr for Op {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
+        match s.to_lowercase().as_str() {
             "+" => Ok(Op::Add),
             "-" => Ok(Op::Sub),
             "*" => Ok(Op::Mul),
@@ -238,6 +239,7 @@ impl FromStr for Op {
             "=" => Ok(Op::Equals),
             "&" => Ok(Op::Ampersand),
             "|" => Ok(Op::Pipe),
+            "$" | "asmpc" => Ok(Op::AsmPc),
             _ => Err(())
         }
     }
@@ -321,7 +323,7 @@ impl Tokens for Token {
             return Token::ConstLabel(word);
         }
 
-        return Token::Invalid;
+        Token::Invalid
     }
 
     fn is_index_prefix(&self) -> Option<u8> {
@@ -350,10 +352,10 @@ impl Tokens for Token {
     }
 
     fn is_reg_pair(&self) -> bool {
-        return match self {
+        match self {
             RegisterPair(_) => true,
             _ => false
-        };
+        }
     }
 
     fn is_special_reg(&self) -> bool {
@@ -504,3 +506,4 @@ impl FromStr for OpCode {
         }
     }
 }
+

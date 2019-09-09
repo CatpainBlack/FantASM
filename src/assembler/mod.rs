@@ -46,6 +46,7 @@ mod expression_impl;
 mod assembler_context_impl;
 mod bank_impl;
 mod macro_impl;
+mod token_to_string_impl;
 
 struct TokenReader<R> {
     reader: R,
@@ -83,6 +84,7 @@ pub struct Assembler {
     cspect_enabled: bool,
     debug: bool,
     collect_macro: bool,
+    warnings: Vec<String>,
 }
 
 #[derive(Debug)]
