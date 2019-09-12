@@ -27,7 +27,7 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
 
-extern crate evalexpr;
+extern crate asciimath;
 
 use crate::assembler::assembler_context_impl::AssemblerContext;
 use crate::assembler::error_impl::ErrorType;
@@ -36,7 +36,7 @@ use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Op, Token};
 use crate::assembler::tokens::Token::{ConstLabel, Number, Operator};
 
-use self::evalexpr::eval;
+use self::asciimath::{eval, scope};
 
 pub struct ExpressionParser {}
 
@@ -88,9 +88,9 @@ impl ExpressionParser {
             }
         }
         let string_expr = strings.join("");
-        match eval(&string_expr) {
+        match eval(&string_expr, &scope! {}) {
             Ok(r) => {
-                Ok(r.as_number().unwrap() as isize)
+                Ok(r as isize)
             }
             Err(_e) => return Err(ErrorType::BadExpression),
         }

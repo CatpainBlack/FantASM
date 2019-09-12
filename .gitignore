@@ -99,4 +99,4 @@ Cargo.lock
 
 /*.bin
 /tests/*.bin
-
+/asm/

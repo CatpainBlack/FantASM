@@ -254,7 +254,9 @@ impl Tokens for Token {
         let w = word.to_lowercase();
 
         // string literals
-        if word.starts_with("\"") & &word.ends_with("\"") {
+        let is_double_quoted = word.starts_with("\"") & &word.ends_with("\"");
+        let is_single_quoted = word.starts_with("\'") & &word.ends_with("\'");
+        if is_single_quoted || is_double_quoted {
             if let Some(s) = word.get(1..word.len() - 1) {
                 return Token::StringLiteral(s.to_string());
             }

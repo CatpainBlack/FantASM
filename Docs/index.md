@@ -32,11 +32,13 @@ Constants must start with a letter and may contain letters, numbers or underscor
 ### None Decimal Number Formats
 
 Hexadecimal numbers may be in any of the following formats
+
 * 0x12EF
 * $12EF
 * 012EFh (must have leading zero, which is not included in the final value)
 
 Binary numbers may be in any of the following formats
+
 * %10101010
 * 010101010b (must have leading zero, which is not included in the final value)  
 
@@ -74,7 +76,14 @@ Binary numbers may be in any of the following formats
 ### Macros
 
 ### History
+
+0.9.1
+* Changed the expression parser, now correctly handles OR/AND ( | & )
+* Fixed expression parsing on certain opcodes
+* Fixed error expanding macros with no parameters
+
 0.9.0
+
 * Added a much better expression parser. Brackets and operator precedence are now properly implemented.
 * Reworked how warnings are handled and displayed.
 * Improved string handling, now checks are performed to determine if a string has non ASCII characters.
@@ -83,9 +92,11 @@ Binary numbers may be in any of the following formats
 * Allow multiple instructions per line separated by colon
 
 0.8.0
+
 * Implemented MACRO/ENDM/END directives.
 
 0.7.7
+
 * Added check for recursive include files.
 * Implemented HEX/DH directive.
 * Implemented local labels (prefixed with a .).
@@ -94,24 +105,30 @@ Binary numbers may be in any of the following formats
 * Added BSD license (see license.txt).
 
 0.7.6
+
 * Implemented expression parsing for Indirect load instructions.
 * Added undocumented bit/res/set/rotate opcodes using the index registers, all undocumented instructions are now handled.
 * Refactored the instruction encoder, reduced the amount of spaghetti logic.
 
 0.7.5
+
 * Big code refactoring in order to better implement future expression parser improvements.
 
 0.7.4
+
 * Implemented "Incbin" directive.
 * Internal code refactoring to remove some "unsafe" code.
 
-0.7.3 
+0.7.3
+ 
 * Better handling of expressions when referencing labels that have not yet been defined.
 
 0.7.2
+
 * Improved assembly speed.
 * Implemented CSpect pseudo opcodes.
 * Implemented z80n extended opcodes.
 
 0.7.1
+
 * First public release.

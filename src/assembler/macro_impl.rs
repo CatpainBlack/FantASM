@@ -51,7 +51,7 @@ impl MacroHandler {
     fn parse_params(&mut self, context: &mut AssemblerContext, name: &str, tokens: &mut Vec<Token>) -> Result<(), Error> {
         let mac = &self.macros[name];
         let mut param_count = 0;
-        let mut param_name = &mac.params[param_count];
+        let mut param_name = if mac.params.len() > 0 { &mac.params[param_count] } else { "" };
         let mut expr = vec![];
         while let Some(t) = tokens.pop() {
             if t == Delimiter(Del::Comma) {
@@ -66,7 +66,7 @@ impl MacroHandler {
             }
         }
         param_count += 1;
-        if param_count != mac.params.len() {
+        if mac.params.len() > 0 && param_count != mac.params.len() {
             return Err(context.error(ErrorType::MacroParamCount));
         }
         self.expanding.params.insert(param_name.to_string(), expr.clone());

@@ -44,7 +44,7 @@ use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Directive::End;
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
-use crate::assembler::tokens::Token::{ConstLabel, Number, Operator};
+use crate::assembler::tokens::Token::Operator;
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -90,22 +90,23 @@ impl Assembler {
         if self.console_output {
             if self.num_warnings() > 0 {
                 cyan_ln!("Completed with {} warning(s)",self.num_warnings());
-            } else {
-                dark_green_ln!("Done");
             }
+            // else {
+//                dark_green_ln!("Done");
+//            }
             self.display_warnings();
         }
     }
 
     pub fn assemble(&mut self, file_name: &str) -> Result<(), Error> {
         self.warnings.clear();
-        if self.console_output { green!("First pass .... "); }
+        if self.console_output { green_ln!("First pass .... "); }
 
         self.first_pass(file_name)?;
         self.write_status();
 
         self.warnings.clear();
-        if self.console_output { green!("Second pass ... "); }
+        if self.console_output { green_ln!("Second pass ... "); }
 
         self.second_pass()?;
         self.write_status();
@@ -202,7 +203,7 @@ impl Assembler {
 
     pub fn info(&mut self, m: &str) {
         if self.console_output {
-            yellow_ln!("[{} : {}] {}",  self.context.current_file_name(), self.context.current_line_number(), m);
+            yellow_ln!("[{}:{}] {}",  self.context.current_file_name(), self.context.current_line_number(), m);
         }
     }
 
@@ -243,18 +244,6 @@ impl Assembler {
             }
             Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
             Err(e) => return Err(self.context.error(e))
-        }
-    }
-
-    pub(crate) fn decode_number(&mut self, token: &Token) -> Result<Option<isize>, Error> {
-        match &token {
-            Number(n) => Ok(Some(*n)),
-            ConstLabel(l) => if let Some(n) = self.context.get_constant(l) {
-                Ok(Some(n))
-            } else {
-                Err(self.context.error(ErrorType::BadConstant))
-            }
-            _ => Ok(None)
         }
     }
 

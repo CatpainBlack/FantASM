@@ -264,7 +264,8 @@ setE
 	ret pe
 	jp (hl)
 	jp pe,setE
-	ex de,hl
+	ex  de,hl
+	ex  hl,de
 	call pe,setE
     ;EXTD
     xor 0x12

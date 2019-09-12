@@ -74,7 +74,7 @@ impl<R> TokenReader<R> where R: BufRead {
         for c in line.chars() {
             if in_quotes {
                 self.token_string.push(c);
-                if c == '\"' && !self.token_string.ends_with("\\\"") {
+                if (c == '\"' || c == '\'') && !self.token_string.ends_with("\\\"") {
                     in_quotes = false;
                     self.store_token_string();
                 }
@@ -85,9 +85,11 @@ impl<R> TokenReader<R> where R: BufRead {
                 // if we hit a comment
                 ';' => break,
                 // if we are at the start of a string literal
-                '\"' => {
-                    in_quotes = true;
-                    self.store_token_string();
+                '\"' | '\'' => {
+                    if !self.token_string.to_lowercase().ends_with("af") {
+                        in_quotes = true;
+                        self.store_token_string();
+                    }
                     self.token_string.push(c);
                     continue;
                 }

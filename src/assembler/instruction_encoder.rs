@@ -143,8 +143,17 @@ impl InstructionEncoder for Assembler {
             (RegisterPair(_), ConstLabel(_), false) => return Err(self.context.error(ErrorType::Z80NDisabled)),
 
             (RegisterPair(rp), Register(Reg::A), true) => return self.emit(&[0xED, 0x31 + rp.nrp()?]),
-            (RegisterPair(rp), Number(_), true) |
-            (RegisterPair(rp), ConstLabel(_), true) => return self.emit_instr(Some(0xED), 0x34 + rp.nrp()?, &[rhs], false),
+            (RegisterPair(rp), _, true) => {
+                if rhs.is_expression() {
+                    self.tokens.push(rhs.clone());
+                    self.emit(&[0xED, 0x34 + rp.nrp()?])?;
+                    match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2, false) {
+                        Ok(Some(n)) => return self.emit_word(n),
+                        Ok(None) => return self.emit_word(0),
+                        Err(e) => return Err(self.context.error(e)),
+                    }
+                }
+            }
             _ => {}
         }
         return Err(self.context.error(ErrorType::InvalidInstruction));
@@ -224,7 +233,8 @@ impl InstructionEncoder for Assembler {
 
         match (lhs, rhs) {
             (RegisterPair(Af), RegisterPair(_Af)) => self.emit_byte(0x08),
-            (RegisterPair(De), RegisterPair(Hl)) => self.emit_byte(0xEB),
+            (RegisterPair(De), RegisterPair(Hl)) |
+            (RegisterPair(Hl), RegisterPair(De)) => self.emit_byte(0xEB),
             (RegisterIndirect(RegPairInd::Sp), RegisterPair(Hl)) |
             (RegisterIndirect(RegPairInd::Sp), RegisterPair(Ix)) |
             (RegisterIndirect(RegPairInd::Sp), RegisterPair(Iy)) => self.emit_byte(0xE3),
@@ -453,17 +463,18 @@ impl InstructionEncoder for Assembler {
                 return Err(self.context.error(ErrorType::SyntaxError));
             }
         };
-
-        if let Some(n) = self.decode_number(src)? {
-            if n < 0 || n > 255 {
-                self.warn(ErrorType::ByteTruncated);
-            }
-            return self.emit(&[xyz!(0, r, 6), n as u8]);
-        } else if let Some(rr) = src.reg_value() {
+        if let Some(rr) = src.reg_value() {
             return self.emit_byte(xyz!(1, r, rr));
-        } else {
-            return Err(self.context.error(ErrorType::SyntaxError));
+        } else if src.is_expression() {
+            self.tokens.push(src.clone());
+            self.emit_byte(xyz!(0, r, 6))?;
+            return match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1, false) {
+                Ok(Some(n)) => self.emit_byte(n as u8),
+                Ok(None) => self.emit_byte(0),
+                Err(e) => Err(self.context.error(e))
+            };
         }
+        Err(self.context.error(ErrorType::SyntaxError))
     }
 
     fn load_rp(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
@@ -519,6 +530,12 @@ impl InstructionEncoder for Assembler {
         if !self.z80n_enabled {
             return Err(self.context.error(ErrorType::Z80NDisabled));
         }
+
+        if self.next_token_is(&RegisterPair(De)) {
+            self.take_token()?;
+            return self.emit(&[0xED, 0x30]);
+        }
+
         self.expect_token(Register(Reg::D))?;
         self.expect_token(Delimiter(Comma))?;
         self.expect_token(Register(Reg::E))?;

@@ -12,6 +12,7 @@ start
 	LDPIRX
 	OUTINB
 	MUL		D,E
+	MUL     de
 	ADD		HL,A
 	ADD		DE,A
 	ADD		BC,A
@@ -20,7 +21,7 @@ start
 	ADD		DE,49152
 	ADD		BC,49152
 	add		hl,wibble
-	add		de,start
+	add		de,start+20-20
 	add		bc,data
 
 	SWAPNIB
