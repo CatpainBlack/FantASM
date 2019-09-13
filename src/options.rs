@@ -99,7 +99,8 @@ impl Options {
         }
 
         if !Path::new(&options.source).exists() {
-            return Err(format!("Source file: {}-does not exist", options.source));
+            red_ln!("Source file: {}-does not exist", options.source);
+            exit(1);
         }
 
         Ok(options)

@@ -78,9 +78,10 @@ Binary numbers may be in any of the following formats
 ### History
 
 0.9.1
+
+* Fixed error expanding macros with no parameters
 * Changed the expression parser, now correctly handles OR/AND ( | & )
 * Fixed expression parsing on certain opcodes
-* Fixed error expanding macros with no parameters
 
 0.9.0
 

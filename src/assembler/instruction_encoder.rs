@@ -147,11 +147,8 @@ impl InstructionEncoder for Assembler {
                 if rhs.is_expression() {
                     self.tokens.push(rhs.clone());
                     self.emit(&[0xED, 0x34 + rp.nrp()?])?;
-                    match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2, false) {
-                        Ok(Some(n)) => return self.emit_word(n),
-                        Ok(None) => return self.emit_word(0),
-                        Err(e) => return Err(self.context.error(e)),
-                    }
+                    let addr = self.expect_word(0)?;
+                    return self.emit_word(addr);
                 }
             }
             _ => {}
@@ -246,6 +243,7 @@ impl InstructionEncoder for Assembler {
 
     fn im(&mut self) -> Result<(), Error> {
         // ToDo: Allow constants?
+        //let a=self.expect_byte(0)?;
         if let Number(mut n) = self.take_token()? {
             if (0..3).contains(&n) {
                 if n > 0 {
@@ -468,11 +466,8 @@ impl InstructionEncoder for Assembler {
         } else if src.is_expression() {
             self.tokens.push(src.clone());
             self.emit_byte(xyz!(0, r, 6))?;
-            return match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1, false) {
-                Ok(Some(n)) => self.emit_byte(n as u8),
-                Ok(None) => self.emit_byte(0),
-                Err(e) => Err(self.context.error(e))
-            };
+            let addr = self.expect_word(0)?;
+            return self.emit_byte(addr as u8);
         }
         Err(self.context.error(ErrorType::SyntaxError))
     }
@@ -485,11 +480,7 @@ impl InstructionEncoder for Assembler {
         } else {
             self.emit_byte(xpqz!(0, rp, 0, 1))?;
         }
-        let addr = match self.expr.parse(&mut self.context, &mut self.tokens, 0, 2, false) {
-            Ok(Some(a)) => a,
-            Ok(None) => 0,
-            Err(e) => return Err(self.context.error(e))
-        };
+        let addr = self.expect_word(0)?;
         self.emit_word(addr)
     }
 

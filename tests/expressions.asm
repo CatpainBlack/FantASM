@@ -5,6 +5,9 @@
     endm
 
 start:	no_params
+
+        add a,start/2
+
         ld	hl, start-10*100+50/2
 		ld	de,finish*40
 		ret

@@ -206,7 +206,7 @@ impl Directives for Assembler {
 
     fn write_message(&mut self) -> Result<(), Error> {
         if let StringLiteral(s) = self.take_token()? {
-            println!("{}", s);
+            dark_yellow_ln!("{}", s);
         }
         Ok(())
     }
