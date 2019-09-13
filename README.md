@@ -1,4 +1,18 @@
-# FantASM - A Z80 assembler
+## FantASM
+
+FantASM is a two pass non optimising assembler for the Z80 processor.
+
+It supports all undocumented op-codes and the extended instruction set of the ZX Next and additional pseudo opcodes used by the CSpect emulator to control debugging.
+
+[Documentation](https://catpainblack.github.io/FantASM/)
+
+## Build
+
+To build from source (requires rust 1.35+):
+
+`cargo build --release` 
+
+and copy the binary somewhere in your path.
 
 ## Usage
 
@@ -14,18 +28,4 @@
 * `-V, --version` display the program version and exit
 * `-D, --debug` Dumps information about the assembly (only useful for FantASM devs)
 
-## Overview
 
-FantASM is a Z80 assembler written in Rust started as a way for me to learn the Rust language. The project can be considered alpha, as there are many bugs, and many features left to implement.
-
-The assembler supports all Z80 opcodes and most undocumented ones, except for undocumented indexed shft instructions (DDCB).
-
-## Building
-
-`cargo build --release` currently builds with rust >= 1.35.0
-
-## ToDo
-
-* Optionally treat warnings as errors
-* Source linter?
-* Warn rather than error when converting string to ASCII?
