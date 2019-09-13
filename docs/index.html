@@ -1,8 +1,14 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/markdowncss/retro/master/css/retro.css">
+</head>
+<body>
 <h2>FantASM</h2>
 
 <p>FantASM is a two pass non optimising assembler for the Z80 processor.</p>
 
-<p>It supports all undocumented op-codes and the extended instruction set of the ZX Next and additional pseudo opcodes used by the CSpect emulator to control debugging.</p>
+<p>It supports all undocumented op-codes and the extended instruction set of the ZX Next and additional pseudo opcodes
+    used by the CSpect emulator to control debugging.</p>
 
 <h2>Usage</h2>
 
@@ -11,41 +17,42 @@
 <h2>Commandline options</h2>
 
 <ul>
-<li><code>-N, --z80n</code> enable z80n extended opcodes</li>
-<li><code>-c, --cspect</code> enable CSpect pseudo ops, BREAK and QUIT</li>
-<li><code>-n, --nologo</code> suppress the startup banner</li>
-<li><code>-v, --verbose</code> enable verbose output</li>
-<li><code>-h, --help</code> display command line help</li>
-<li><code>-V, --version</code> display the program version and exit</li>
-<li><code>-D, --debug</code> Dumps information about the assembly (only useful for FantASM devs)</li>
+    <li><code>-N, --z80n</code> enable z80n extended opcodes</li>
+    <li><code>-c, --cspect</code> enable CSpect pseudo ops, BREAK and QUIT</li>
+    <li><code>-n, --nologo</code> suppress the startup banner</li>
+    <li><code>-v, --verbose</code> enable verbose output</li>
+    <li><code>-h, --help</code> display command line help</li>
+    <li><code>-V, --version</code> display the program version and exit</li>
+    <li><code>-D, --debug</code> Dumps information about the assembly (only useful for FantASM devs)</li>
 </ul>
 
 <h3>Labels &amp; Constants</h3>
 
 <p>Labels must start with a letter and may contain letters, numbers or underscores and optionally end with a semi colon.
-Local labels start with a period (.) and are only valid until the next none local label is defined.</p>
+    Local labels start with a period (.) and are only valid until the next none local label is defined.</p>
 
-<p>Constants must start with a letter and may contain letters, numbers or underscores, but not semi-colons. Constants are defined using the following syntax:</p>
+<p>Constants must start with a letter and may contain letters, numbers or underscores, but not semi-colons. Constants
+    are defined using the following syntax:</p>
 
 <p><code>&lt;name&gt; = &lt;expression&gt;</code> (the = may be substituted with 'equ')</p>
 
-<p><code>&lt;expression&gt;</code> may only reference other constants or labels that have previously defined.  </p>
+<p><code>&lt;expression&gt;</code> may only reference other constants or labels that have previously defined. </p>
 
 <h3>None Decimal Number Formats</h3>
 
 <p>Hexadecimal numbers may be in any of the following formats</p>
 
 <ul>
-<li>0x12EF</li>
-<li>$12EF</li>
-<li>012EFh (must have leading zero, which is not included in the final value)</li>
+    <li>0x12EF</li>
+    <li>$12EF</li>
+    <li>012EFh (must have leading zero, which is not included in the final value)</li>
 </ul>
 
 <p>Binary numbers may be in any of the following formats</p>
 
 <ul>
-<li>%10101010</li>
-<li>010101010b (must have leading zero, which is not included in the final value)  </li>
+    <li>%10101010</li>
+    <li>010101010b (must have leading zero, which is not included in the final value)</li>
 </ul>
 
 <h3>Directives</h3>
@@ -69,7 +76,8 @@ Local labels start with a period (.) and are only valid until the next none loca
     outputs one or mor strings</p>
 
 <p><code>DH,HEX "0-F.."</code>
-    Outputs a sequence of 8 bit values by converting each 2 characters at a time, so "12FF" would be output as 0x12,0xFF</p>
+    Outputs a sequence of 8 bit values by converting each 2 characters at a time, so "12FF" would be output as 0x12,0xFF
+</p>
 
 <p><code>include &lt;filename&gt;</code>
     Includes another source file to be assembled.</p>
@@ -83,76 +91,85 @@ Local labels start with a period (.) and are only valid until the next none loca
 
 <h3>History</h3>
 
-<p>0.9.1
-* Changed the expression parser, now correctly handles OR/AND ( | &amp; )
-* Fixed expression parsing on certain opcodes
-* Fixed error expanding macros with no parameters</p>
+<p>0.9.1</p>
+
+<ul>
+    <li>Fixed error expanding macros with no parameters</li>
+    <li>Changed the expression parser, now correctly handles OR/AND ( | &amp; )</li>
+    <li>Fixed expression parsing on certain opcodes</li>
+</ul>
 
 <p>0.9.0</p>
 
 <ul>
-<li>Added a much better expression parser. Brackets and operator precedence are now properly implemented.</li>
-<li>Reworked how warnings are handled and displayed.</li>
-<li>Improved string handling, now checks are performed to determine if a string has non ASCII characters.</li>
-<li>Added DZ directive, zero terminated strings</li>
-<li>Implemented $/ASMPC psuedo operator, returns the current PC</li>
-<li>Allow multiple instructions per line separated by colon</li>
+    <li>Added a much better expression parser. Brackets and operator precedence are now properly implemented.</li>
+    <li>Reworked how warnings are handled and displayed.</li>
+    <li>Improved string handling, now checks are performed to determine if a string has non ASCII characters.</li>
+    <li>Added DZ directive, zero terminated strings</li>
+    <li>Implemented $/ASMPC psuedo operator, returns the current PC</li>
+    <li>Allow multiple instructions per line separated by colon</li>
 </ul>
 
 <p>0.8.0</p>
 
 <ul>
-<li>Implemented MACRO/ENDM/END directives.</li>
+    <li>Implemented MACRO/ENDM/END directives.</li>
 </ul>
 
 <p>0.7.7</p>
 
 <ul>
-<li>Added check for recursive include files.</li>
-<li>Implemented HEX/DH directive.</li>
-<li>Implemented local labels (prefixed with a .).</li>
-<li>Fixed an issue with labels that ended with a colon.</li>
-<li>Warning when bit operations specify an illegal bit number.</li>
-<li>Added BSD license (see license.txt).</li>
+    <li>Added check for recursive include files.</li>
+    <li>Implemented HEX/DH directive.</li>
+    <li>Implemented local labels (prefixed with a .).</li>
+    <li>Fixed an issue with labels that ended with a colon.</li>
+    <li>Warning when bit operations specify an illegal bit number.</li>
+    <li>Added BSD license (see license.txt).</li>
 </ul>
 
 <p>0.7.6</p>
 
 <ul>
-<li>Implemented expression parsing for Indirect load instructions.</li>
-<li>Added undocumented bit/res/set/rotate opcodes using the index registers, all undocumented instructions are now handled.</li>
-<li>Refactored the instruction encoder, reduced the amount of spaghetti logic.</li>
+    <li>Implemented expression parsing for Indirect load instructions.</li>
+    <li>Added undocumented bit/res/set/rotate opcodes using the index registers, all undocumented instructions are now
+        handled.
+    </li>
+    <li>Refactored the instruction encoder, reduced the amount of spaghetti logic.</li>
 </ul>
 
 <p>0.7.5</p>
 
 <ul>
-<li>Big code refactoring in order to better implement future expression parser improvements.</li>
+    <li>Big code refactoring in order to better implement future expression parser improvements.</li>
 </ul>
 
 <p>0.7.4</p>
 
 <ul>
-<li>Implemented "Incbin" directive.</li>
-<li>Internal code refactoring to remove some "unsafe" code.</li>
+    <li>Implemented "Incbin" directive.</li>
+    <li>Internal code refactoring to remove some "unsafe" code.</li>
 </ul>
 
 <p>0.7.3</p>
 
 <ul>
-<li>Better handling of expressions when referencing labels that have not yet been defined.</li>
+    <li>Better handling of expressions when referencing labels that have not yet been defined.</li>
 </ul>
 
 <p>0.7.2</p>
 
 <ul>
-<li>Improved assembly speed.</li>
-<li>Implemented CSpect pseudo opcodes.</li>
-<li>Implemented z80n extended opcodes.</li>
+    <li>Improved assembly speed.</li>
+    <li>Implemented CSpect pseudo opcodes.</li>
+    <li>Implemented z80n extended opcodes.</li>
 </ul>
 
 <p>0.7.1</p>
 
 <ul>
-<li>First public release.</li>
+    <li>First public release.</li>
 </ul>
+
+</body>
+</html>
+
