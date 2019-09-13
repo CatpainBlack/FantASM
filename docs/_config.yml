@@ -1,1 +1,4 @@
+name: FantASM Z80 Assembler
+highlighter: rogue
+markdown: kramdown
 theme: jekyll-theme-minimal
