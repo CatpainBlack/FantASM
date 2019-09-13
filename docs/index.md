@@ -17,6 +17,7 @@ It supports all undocumented op-codes and the extended instruction set of the ZX
 * `-h, --help` display command line help
 * `-V, --version` display the program version and exit
 * `-D, --debug` Dumps information about the assembly (only useful for FantASM devs)
+* `-I, --include` Add a directory to search when looking for includes. This can be used mor than once to add multiple directories.
 
 ### Labels & Constants
 
@@ -75,6 +76,21 @@ Binary numbers may be in any of the following formats
 
 ### Macros
 
+Macros may have 0 or more parameters, and may only declare local labels (labels that start with a .)
+
+#### Simple Macro Example
+```
+    org 0x8000
+
+    MACRO   border colour
+        out (0xfe),colour
+    ENDM
+
+start
+    border  0
+    ret
+```
+
 ### History
 
 0.9.1
@@ -82,6 +98,7 @@ Binary numbers may be in any of the following formats
 * Fixed error expanding macros with no parameters
 * Changed the expression parser, now correctly handles OR/AND ( | & )
 * Fixed expression parsing on certain opcodes
+* Added -I,--include commandline option
 
 0.9.0
 

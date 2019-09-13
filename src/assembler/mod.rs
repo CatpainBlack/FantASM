@@ -85,6 +85,7 @@ pub struct Assembler {
     debug: bool,
     collect_macro: bool,
     warnings: Vec<String>,
+    include_dirs: Vec<String>,
 }
 
 #[derive(Debug)]

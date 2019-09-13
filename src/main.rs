@@ -50,7 +50,8 @@ fn main() -> Result<(), Error> {
         .enable_cspect(options.c_spect)
         .enable_z80n(options.z80n)
         .enable_console(options.verbose)
-        .enable_debug(options.debug);
+        .enable_debug(options.debug)
+        .add_include_dirs(options.include_dirs);
 
     let now = Instant::now();
     if options.verbose {

@@ -1,5 +1,7 @@
 	org	$8000
 
+    include "include.asm"
+
     macro   no_params
     ret
     endm

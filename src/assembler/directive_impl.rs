@@ -47,6 +47,7 @@ pub trait Directives {
     fn handle_block(&mut self) -> Result<(), Error>;
     fn handle_hex(&mut self) -> Result<(), Error>;
     fn set_option(&mut self) -> Result<(), Error>;
+    fn locate_file(&mut self, file_name: &str) -> Result<String, Error>;
     fn include_source_file(&mut self) -> Result<(), Error>;
     fn write_message(&mut self) -> Result<(), Error>;
     fn include_binary(&mut self) -> Result<(), Error>;
@@ -191,17 +192,33 @@ impl Directives for Assembler {
         Ok(())
     }
 
+    fn locate_file(&mut self, file_name: &str) -> Result<String, Error> {
+        let mut dirs = self.include_dirs.clone();
+        if !dirs.contains(&String::from(".")) {
+            dirs.insert(0, String::from("."));
+        }
+        dirs.reverse();
+        while let Some(s) = dirs.pop() {
+            let path = Path::new(&s).join(file_name);
+            if path.exists() {
+                return Ok(path.to_str().unwrap_or("").to_string());
+            }
+        }
+        Err(self.context.error_text(ErrorType::FileNotFound, &file_name))
+    }
+
     fn include_source_file(&mut self) -> Result<(), Error> {
         let file_name = match self.take_token()? {
             StringLiteral(s) => s,
             ConstLabel(l) => l,
             _ => return Err(self.context.error(ErrorType::FileNotFound))
         };
-        self.info(format!("Including file from {}", file_name).as_str());
+        let file_path = self.locate_file(&file_name)?;
         if self.context.is_included(&file_name) {
             return Err(self.context.error(ErrorType::MultipleIncludes));
         }
-        self.first_pass(file_name.as_str())
+        self.info(&format!("Including file from {}", file_path));
+        self.first_pass(&file_path)
     }
 
     fn write_message(&mut self) -> Result<(), Error> {

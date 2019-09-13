@@ -63,6 +63,7 @@ impl Assembler {
             debug: false,
             collect_macro: false,
             warnings: vec![],
+            include_dirs: vec![],
         }
     }
 
@@ -86,14 +87,16 @@ impl Assembler {
         self
     }
 
+    pub fn add_include_dirs(&mut self, dirs: Vec<String>) -> &mut Assembler {
+        self.include_dirs = dirs.clone();
+        self
+    }
+
     fn write_status(&self) {
         if self.console_output {
             if self.num_warnings() > 0 {
                 cyan_ln!("Completed with {} warning(s)",self.num_warnings());
             }
-            // else {
-//                dark_green_ln!("Done");
-//            }
             self.display_warnings();
         }
     }

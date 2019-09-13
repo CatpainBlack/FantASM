@@ -33,6 +33,7 @@ use std::path::Path;
 use std::process::exit;
 
 use argparse::{ArgumentParser, Store, StoreTrue};
+use self::argparse::List;
 
 #[derive(Default, Debug)]
 pub struct Options {
@@ -44,6 +45,7 @@ pub struct Options {
     pub no_logo: bool,
     pub c_spect: bool,
     pub version: bool,
+    pub include_dirs: Vec<String>,
 }
 
 impl Options {
@@ -69,14 +71,18 @@ impl Options {
             parser.refer(&mut options.no_logo)
                 .add_option(&["-n", "--nologo"], StoreTrue, "Do no display the program name and version");
 
-            parser.refer(&mut options.debug)
-                .add_option(&["-D", "--debug"], StoreTrue, "Enable assembler information dump");
+//            parser.refer(&mut options.debug)
+//                .add_option(&["-D", "--debug"], StoreTrue, "Enable assembler information dump");
 
             parser.refer(&mut options.verbose)
                 .add_option(&["-v", "--verbose"], StoreTrue, "Enable verbose output");
 
             parser.refer(&mut options.version)
                 .add_option(&["-V", "--version"], StoreTrue, "Displays the version and exits");
+
+            parser.refer(&mut options.include_dirs)
+                .add_option(&["-I", "--include"], List, "Add a directory to search for include files");
+
 
             parser.parse_args_or_exit();
         }

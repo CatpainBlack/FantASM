@@ -1,3 +1,3 @@
-_include
+include_label
 	ld	a,0
 	ret
