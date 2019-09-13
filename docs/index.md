@@ -30,7 +30,7 @@ Constants must start with a letter and may contain letters, numbers or underscor
 
 `<expression>` may only reference other constants or labels that have previously defined.  
 
-### None Decimal Number Formats
+### Non-Decimal Number Formats
 
 Hexadecimal numbers may be in any of the following formats
 
@@ -93,12 +93,15 @@ start
 
 ### History
 
+1.0.0-rc1
+
+* Added -I,--include commandline option
+
 0.9.1
 
 * Fixed error expanding macros with no parameters
 * Changed the expression parser, now correctly handles OR/AND ( | & )
 * Fixed expression parsing on certain opcodes
-* Added -I,--include commandline option
 
 0.9.0
 
