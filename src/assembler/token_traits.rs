@@ -236,7 +236,7 @@ impl FromStr for Op {
             ">" => Ok(Op::Gt),
             "(" => Ok(Op::LParens),
             ")" => Ok(Op::RParens),
-            "=" => Ok(Op::Equals),
+            "equ" | "=" => Ok(Op::Equals),
             "&" => Ok(Op::Ampersand),
             "|" => Ok(Op::Pipe),
             "$" | "asmpc" => Ok(Op::AsmPc),
