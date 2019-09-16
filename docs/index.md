@@ -93,6 +93,10 @@ start
 ```
 
 ### History
+1.0.0-rc2
+
+* Fixed issue with ```equ``` causing syntax error
+* Added ```--export-labels``` commandline switch
 
 1.0.0-rc1
 
