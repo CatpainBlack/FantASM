@@ -28,6 +28,5 @@ and copy the binary somewhere in your path.
 * `-V, --version` display the program version and exit
 * `-D, --debug` Dumps information about the assembly (only useful for FantASM devs)
 * `-I, --include` Add a directory to search when looking for includes. This can be used mor than once to add multiple directories.
-
-
+* `-e, --export-labels=<file>` exports labels to a text file.
 
