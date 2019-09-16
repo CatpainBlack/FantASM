@@ -31,6 +31,11 @@ use std::collections::HashMap;
 
 use crate::assembler::{Error, ErrorLevel, ForwardReference};
 use crate::assembler::error_impl::ErrorType;
+use std::cmp::max;
+use pad::PadStr;
+use std::path::Path;
+use std::fs::File;
+use std::io::{BufWriter, Write};
 
 #[derive(Default)]
 pub struct AssemblerContext {
@@ -165,32 +170,6 @@ impl AssemblerContext {
         Ok(())
     }
 
-//    pub fn try_resolve_label(&mut self, name: &str, pc_offset: isize, relative: bool) -> u16 {
-//        let mut addr = 0u16;
-//        let mut label_name = name.to_string();
-//        if label_name.starts_with(".") {
-//            label_name = self.label_context.clone() + &label_name.clone();
-//        }
-//
-//        if let Some(a) = self.constants.get(&label_name) {
-//            addr = *a as u16;
-//        } else if let Some(a) = self.labels.get(&label_name) {
-//            addr = *a as u16;
-//        } else {
-//            self.forward_references.push(ForwardReference {
-//                is_expression: false,
-//                pc: self.current_pc + pc_offset,
-//                label: label_name.to_string(),
-//                expression: vec![],
-//                is_relative: relative,
-//                byte_count: 2,
-//                line_no: self.current_line_number(),
-//                file_name: self.current_file_name(),
-//            });
-//        }
-//        return addr;
-//    }
-
     pub fn next_forward_ref(&mut self) -> Option<ForwardReference> {
         self.forward_references.pop()
     }
@@ -199,9 +178,26 @@ impl AssemblerContext {
         self.forward_references.push(fw);
     }
 
-    pub fn dump(&mut self) {
-        magenta_ln!("Labels            : {:?}", self.labels);
-        magenta_ln!("Constants         : {:?}", self.constants);
-        magenta_ln!("Forward References: {:?}", self.forward_references);
+    pub fn export_labels(&mut self, file_name: &str) -> Result<(), Error> {
+        if file_name.len() > 0 {
+            let path = Path::new(file_name);
+            let mut file = BufWriter::new(File::create(&path)?);
+
+            let mut m = 0;
+            for (l, _) in &self.labels {
+                m = max(m, l.len() + 1);
+            }
+            for (l, s) in &self.labels {
+                let line = format!("{} = 0x{:x}\n", l.pad_to_width(m), s);
+                file.write(line.as_bytes())?;
+            }
+        }
+        Ok(())
     }
+
+//    pub fn dump(&mut self) {
+//        magenta_ln!("Labels            : {:?}", self.labels);
+//        magenta_ln!("Constants         : {:?}", self.constants);
+//        magenta_ln!("Forward References: {:?}", self.forward_references);
+//    }
 }

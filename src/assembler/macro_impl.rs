@@ -178,15 +178,15 @@ impl MacroHandler {
         Ok(())
     }
 
-    pub fn dump(&mut self) {
-        println!("-=[ Macros ]=-");
-        for (key, val) in &self.macros {
-            println!("{}({:?})", key, val.params);
-            for l in &val.tokens {
-                let mut ll = l.clone();
-                ll.reverse();
-                println!("\t{:?}", ll);
-            }
-        }
-    }
+//    pub fn dump(&mut self) {
+//        println!("-=[ Macros ]=-");
+//        for (key, val) in &self.macros {
+//            println!("{}({:?})", key, val.params);
+//            for l in &val.tokens {
+//                let mut ll = l.clone();
+//                ll.reverse();
+//                println!("\t{:?}", ll);
+//            }
+//        }
+//    }
 }

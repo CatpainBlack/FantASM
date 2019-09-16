@@ -46,6 +46,7 @@ pub struct Options {
     pub c_spect: bool,
     pub version: bool,
     pub include_dirs: Vec<String>,
+    pub export_labels: String,
 }
 
 impl Options {
@@ -83,6 +84,8 @@ impl Options {
             parser.refer(&mut options.include_dirs)
                 .add_option(&["-I", "--include"], List, "Add a directory to search for include files");
 
+            parser.refer(&mut options.export_labels)
+                .add_option(&["-e", "--export-labels"], Store, "Export labels to a file");
 
             parser.parse_args_or_exit();
         }

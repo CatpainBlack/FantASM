@@ -51,7 +51,8 @@ fn main() -> Result<(), Error> {
         .enable_z80n(options.z80n)
         .enable_console(options.verbose)
         .enable_debug(options.debug)
-        .add_include_dirs(options.include_dirs);
+        .add_include_dirs(options.include_dirs)
+        .export_labels(&options.export_labels);
 
     let now = Instant::now();
     if options.verbose {

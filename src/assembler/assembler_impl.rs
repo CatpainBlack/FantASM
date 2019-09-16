@@ -64,6 +64,7 @@ impl Assembler {
             collect_macro: false,
             warnings: vec![],
             include_dirs: vec![],
+            labels_file: String::new(),
         }
     }
 
@@ -92,6 +93,11 @@ impl Assembler {
         self
     }
 
+    pub fn export_labels(&mut self, file_name: &str) -> &mut Assembler {
+        self.labels_file = file_name.to_string();
+        self
+    }
+
     fn write_status(&self) {
         if self.console_output {
             if self.num_warnings() > 0 {
@@ -109,15 +115,13 @@ impl Assembler {
         self.write_status();
 
         self.warnings.clear();
+
         if self.console_output { green_ln!("Second pass ... "); }
 
         self.second_pass()?;
         self.write_status();
 
-        if self.debug {
-            self.dump();
-            self.macros.dump();
-        }
+        self.context.export_labels(&self.labels_file)?;
 
         Ok(())
     }
@@ -493,11 +497,11 @@ impl Assembler {
         Ok(())
     }
 
-    pub fn dump(&mut self) {
-        magenta_ln!("--=[ debug info ]=--");
-        magenta_ln!("Origin            : {} [0x{:02X}]", self.origin,self.origin);
-        magenta_ln!("Total Lines       : {}", self.total_lines);
-        magenta_ln!("Code Length       : {}", self.bank.as_slice().len());
-        self.context.dump();
-    }
+//    pub fn dump(&mut self) {
+//        magenta_ln!("--=[ debug info ]=--");
+//        magenta_ln!("Origin            : {} [0x{:02X}]", self.origin,self.origin);
+//        magenta_ln!("Total Lines       : {}", self.total_lines);
+//        magenta_ln!("Code Length       : {}", self.bank.as_slice().len());
+//        self.context.dump();
+//    }
 }
