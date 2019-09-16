@@ -42,7 +42,7 @@
 disk_filemap   equ 0x85 ; $85 (133) obtain file allocation map
 
 ; ***************************************************************************
-; * DISK_STRMSTART ($86)                                                    *
+; * DISK_STRMSTART $86
 ; ***************************************************************************
 ; Start reading from the card in streaming mode.
 ; Entry: IXDE [HLDE from dot command]=card address
