@@ -14,7 +14,7 @@ It supports all undocumented op-codes and the extended instruction set of the ZX
 -N, --z80n                Enable z80n extended opcodes.
 -c, --cspect              Enable CSpect pseudo ops, BREAK and QUIT.
 -I, --include             Add a directory to search when looking for includes. 
-                          This can be used mor than once to add multiple directories.
+                          May be used more than once to add multiple directories.
 -e, --export-labels       Exports labels to the given text file.
 -O, --origin              Address at which to start assembling code.
 -M, --max-code-size       Limit the size of assembled code to nnnn bytes.
@@ -84,8 +84,7 @@ Binary numbers may be in any of the following formats
 Macros may have 0 or more parameters, and may only declare local labels (labels that start with a .)
 
 #### Simple Macro Example
-```
-    org 0x8000
+```    org 0x8000
 
     MACRO   border colour
         out (0xfe),colour
@@ -96,7 +95,13 @@ start
     ret
 ```
 
+
 ### History
+1.1.0
+
+* Added ```--max-code-size``` commandline switch
+* Added ```--origin``` commandline switch
+
 1.0.0-rc2
 
 * Fixed issue with ```equ``` causing syntax error
