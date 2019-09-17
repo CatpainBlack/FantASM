@@ -26,7 +26,7 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
-use crate::{unwrap_error_type, alu, alu_imm, xpqz, xyz, rot_encode};
+use crate::{alu, alu_imm, xpqz, xyz, rot_encode};
 
 use crate::assembler::{Assembler, Error};
 use crate::assembler::error_impl::ErrorType;
@@ -69,12 +69,7 @@ impl InstructionEncoder for Assembler {
     fn alu_op(&mut self, a: AluOp) -> Result<(), Error> {
         let tok = self.take_token()?;
 
-//        let size = match self.bank.emit_prefix(&tok) {
-//            Ok(s) => s,
-//            Err(e) => return Err(self.context.error(e)),
-//        };
-
-        let size = unwrap_error_type!(self,self.bank.emit_prefix(&tok));
+        let size = self.context.result(self.bank.emit_prefix(&tok))?;
 
         self.context.pc_add(size);
 
@@ -101,7 +96,8 @@ impl InstructionEncoder for Assembler {
 
         let rhs = self.take_token()?;
 
-        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&lhs)));
+        let n = self.context.result(self.bank.emit_prefix(&lhs))?;
+        self.context.pc_add(n);
 
         match (&lhs, &rhs, self.z80n_enabled) {
             (RegisterPair(Hl), RegisterPair(reg), _) => match a {
@@ -145,7 +141,8 @@ impl InstructionEncoder for Assembler {
         self.expect_token(Delimiter(Comma))?;
 
         let tok = self.take_token()?;
-        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
+        let n = self.context.result(self.bank.emit_prefix(&tok))?;
+        self.context.pc_add(n);
 
         match tok {
             IndexIndirect(_, n) => {
@@ -204,8 +201,8 @@ impl InstructionEncoder for Assembler {
         let lhs = &self.take_token()?;
         self.expect_token(Delimiter(Comma))?;
         let rhs = &self.take_token()?;
-
-        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&rhs)));
+        let n = self.context.result(self.bank.emit_prefix(&rhs))?;
+        self.context.pc_add(n);
 
         match (lhs, rhs) {
             (RegisterPair(Af), RegisterPair(_Af)) => self.emit_byte(0x08),
@@ -237,7 +234,8 @@ impl InstructionEncoder for Assembler {
 
     fn inc_dec(&mut self, q: u8) -> Result<(), Error> {
         let tok = self.take_token()?;
-        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
+        let n=self.context.result(self.bank.emit_prefix(&tok))?;
+        self.context.pc_add(n);
 
         match tok {
             IndexIndirect(_reg, n) => self.emit(&[xyz!(0, _HL_ as u8, q + 4), n]),
@@ -307,7 +305,8 @@ impl InstructionEncoder for Assembler {
 
     fn push_pop(&mut self, z: u8) -> Result<(), Error> {
         let tok = self.take_token()?;
-        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
+        let n=self.context.result(self.bank.emit_prefix(&tok))?;
+        self.context.pc_add(n);
         match tok {
             RegisterPair(r) => self.emit_byte(xpqz!(3, r.rp2()?, 0, z)),
             _ => if self.z80n_enabled {
@@ -333,7 +332,8 @@ impl InstructionEncoder for Assembler {
 
     fn rot(&mut self, a: RotOp) -> Result<(), Error> {
         let tok = self.take_token()?;
-        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
+        let n=self.context.result(self.bank.emit_prefix(&tok))?;
+        self.context.pc_add(n);
         match tok {
             IndexIndirect(_, n) => {
                 if self.next_token_is(&Delimiter(Comma)) {
@@ -368,9 +368,9 @@ impl InstructionEncoder for Assembler {
         self.expect_token(Delimiter(Comma))?;
         let rhs = self.indirect_expression()?;
 
-        if unwrap_error_type!(self,self.bank.emit_prefix(&lhs)) == 1 {
+        if self.context.result(self.bank.emit_prefix(&lhs))? == 1 {
             self.context.pc_add(1);
-        } else if unwrap_error_type!(self,self.bank.emit_prefix(&rhs)) == 1 {
+        } else if self.context.result(self.bank.emit_prefix(&rhs))? == 1 {
             self.context.pc_add(1);
         }
 

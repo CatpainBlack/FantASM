@@ -12,7 +12,9 @@ start   tm_clip 0,159,0,255
         ld      c,l
         ret
 
+;
 ; Hl = address of string
+;
 strlen: ld      bc,256
         xor     a
         cpir

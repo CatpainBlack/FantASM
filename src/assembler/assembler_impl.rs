@@ -26,8 +26,6 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
-use crate::unwrap_error_type;
-
 use std::fs::File;
 use std::io::{BufReader, Write};
 use std::ops::Range;
@@ -151,6 +149,7 @@ impl Assembler {
         let buf = BufReader::new(file);
         let mut reader = TokenReader::new(buf);
         reader.delimiters(",").operators("()*/+-<>=^&|");
+        reader.file_name(file_name);
         self.tokens.clear();
         loop {
             let tokens = &mut reader.read_line()?;
@@ -300,8 +299,7 @@ impl Assembler {
             self.warn(ErrorType::PCOverflow)
         }
         self.context.pc(pc);
-        unwrap_error_type!(self,self.bank.append(&mut b.to_vec()));
-        Ok(())
+        self.context.result(self.bank.append(&mut b.to_vec()))
     }
 
     pub(crate) fn emit_byte(&mut self, b: u8) -> Result<(), Error> {
@@ -310,7 +308,7 @@ impl Assembler {
             self.warn(ErrorType::PCOverflow)
         }
         self.context.pc(pc);
-        unwrap_error_type!(self,self.bank.push(b));
+        self.context.result(self.bank.push(b))?;
         Ok(())
     }
 
@@ -324,9 +322,8 @@ impl Assembler {
             self.warn(ErrorType::PCOverflow)
         }
         self.context.pc(pc);
-        unwrap_error_type!(self,self.bank.push(w.lo()));
-        unwrap_error_type!(self,self.bank.push(w.hi()));
-        Ok(())
+        self.context.result(self.bank.push(w.lo()))?;
+        self.context.result(self.bank.push(w.hi()))
     }
 
     pub(crate) fn emit_instr(&mut self, prefix: Option<u8>, instr: u8, expr: &[Token], byte: bool) -> Result<(), Error> {

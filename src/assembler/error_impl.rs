@@ -121,19 +121,23 @@ impl ToString for ErrorType {
 }
 
 impl Error {
-    pub fn fatal(message: &str, line_no: isize) -> Error {
+    pub fn fatal(message: &str, line_no: isize, file_name: &str) -> Error {
         Error {
             line_no,
             message: message.to_string(),
             level: ErrorLevel::Fatal,
-            file_name: "replace me".to_string(),
+            file_name: file_name.to_string(),
         }
     }
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{:?}: line {} - {}", self.level, self.line_no, self.message)
+        if self.line_no > -1 {
+            write!(f, "{:?}: line {} - {}", self.level, self.line_no, self.message)
+        } else {
+            write!(f, "{:?} - {}", self.level, self.message)
+        }
     }
 }
 
@@ -146,10 +150,10 @@ impl fmt::Debug for Error {
 impl std::convert::From<std::string::String> for Error {
     fn from(s: String) -> Self {
         Error {
-            line_no: 0,
+            line_no: -1,
             message: s,
             level: ErrorLevel::Fatal,
-            file_name: "fantasm".to_string(),
+            file_name: "FantASM".to_string(),
         }
     }
 }
@@ -157,10 +161,10 @@ impl std::convert::From<std::string::String> for Error {
 impl std::convert::From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
         Error {
-            line_no: 0,
+            line_no: -1,
             message: e.description().to_string(),
             level: ErrorLevel::Fatal,
-            file_name: "fantasm".to_string(),
+            file_name: "FantASM".to_string(),
         }
     }
 }

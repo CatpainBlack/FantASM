@@ -47,6 +47,7 @@ impl<R> TokenReader<R> where R: BufRead {
             words: vec![],
             tokens: vec![],
             preceding_token: Token::EndOfFile,
+            file_name: String::default(),
         }
     }
 
@@ -57,6 +58,11 @@ impl<R> TokenReader<R> where R: BufRead {
 
     pub fn operators(&mut self, ops: &str) -> &mut TokenReader<R> {
         self.operators = ops.to_string();
+        self
+    }
+
+    pub fn file_name(&mut self, file_name: &str) -> &mut TokenReader<R> {
+        self.file_name = file_name.to_string();
         self
     }
 
@@ -143,7 +149,7 @@ impl<R> TokenReader<R> where R: BufRead {
         {
             if let Some(Number(n)) = tokens.pop() {
                 if n > 255 {
-                    return Err(Error::fatal("Integer out of range", self.line_number));
+                    return Err(Error::fatal("Integer out of range", self.line_number, &self.file_name));
                 }
                 index = n as u8;
             }
@@ -205,7 +211,7 @@ impl<R> TokenReader<R> where R: BufRead {
                         self.handle_parentheses(s, pos + 1)?;
                         continue;
                     } else {
-                        return Err(Error::fatal(&ErrorType::UnexpectedClose.to_string(), self.line_number));
+                        return Err(Error::fatal(&ErrorType::UnexpectedClose.to_string(), self.line_number, &self.file_name));
                     }
                 }
                 _ => {}
@@ -214,7 +220,7 @@ impl<R> TokenReader<R> where R: BufRead {
             pos += 1;
         }
         if !parens.is_empty() {
-            return Err(Error::fatal(&ErrorType::UnclosedParentheses.to_string(), self.line_number));
+            return Err(Error::fatal(&ErrorType::UnclosedParentheses.to_string(), self.line_number, &self.file_name));
         }
         Ok(self.tokens.to_owned())
     }

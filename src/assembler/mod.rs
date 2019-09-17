@@ -57,6 +57,7 @@ struct TokenReader<R> {
     token_string: String,
     tokens: Vec<Token>,
     preceding_token: Token,
+    file_name: String,
 }
 
 #[derive(Debug)]

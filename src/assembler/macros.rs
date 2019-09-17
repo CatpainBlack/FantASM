@@ -1,14 +1,4 @@
 #[macro_export]
-macro_rules! unwrap_error_type {
-    ($self:expr,$op:expr) => {
-        match $op {
-            Ok(s) => s,
-            Err(e) => return Err($self.context.error(e)),
-        }
-    }
-}
-
-#[macro_export]
 macro_rules! xyz {
     ($x: expr, $y: expr, $z: expr) => {
         (($x & 3) << 6) | (($y & 7) << 3) | ($z & 7)

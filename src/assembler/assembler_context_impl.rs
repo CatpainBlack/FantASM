@@ -77,6 +77,13 @@ impl AssemblerContext {
     pub fn asm_pc(&self) -> isize { self.asm_pc }
     pub fn init_asm_pc(&mut self) { self.asm_pc = self.current_pc; }
 
+    pub fn result<T>(&mut self, r: Result<T, ErrorType>) -> Result<T, Error> {
+        match r {
+            Ok(r) => Ok(r),
+            Err(e) => Err(self.error(e)),
+        }
+    }
+
     pub fn enter(&mut self, name: &str) {
         self.file_name.push(name.to_string());
         self.line_number.push(0);
