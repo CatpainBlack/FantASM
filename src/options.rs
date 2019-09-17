@@ -48,6 +48,7 @@ pub struct Options {
     pub include_dirs: Vec<String>,
     pub export_labels: String,
     pub origin: u16,
+    pub max_code_size: isize,
 }
 
 impl Options {
@@ -87,6 +88,9 @@ impl Options {
 
             parser.refer(&mut options.origin)
                 .add_option(&["-O", "--origin"], Store, "Address to start assembling code");
+
+            parser.refer(&mut options.max_code_size)
+                .add_option(&["-M", "--max-code-size"], Store, "Limit the size of assembled code");
 
             parser.parse_args_or_exit();
         }

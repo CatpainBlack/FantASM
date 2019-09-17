@@ -26,7 +26,6 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
-
 use crate::assembler::assembler_context_impl::AssemblerContext;
 use crate::assembler::bank_impl::Bank;
 use crate::assembler::expression_impl::ExpressionParser;
@@ -47,6 +46,7 @@ mod assembler_context_impl;
 mod bank_impl;
 mod macro_impl;
 mod token_to_string_impl;
+mod macros;
 
 struct TokenReader<R> {
     reader: R,

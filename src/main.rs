@@ -53,12 +53,14 @@ fn main() -> Result<(), Error> {
         .enable_debug(options.debug)
         .add_include_dirs(options.include_dirs)
         .export_labels(&options.export_labels)
-        .origin(options.origin);
+        .origin(options.origin)
+        .max_code_size(options.max_code_size as usize);
 
     let now = Instant::now();
     if options.verbose {
         white_ln!("Assembling: {}",options.source);
     }
+
     match assembler.assemble(options.source.as_str()) {
         Ok(_) => assembler.save_raw(&options.output)?,
         Err(e) => {

@@ -71,6 +71,8 @@ pub enum ErrorType {
     MacroParamCount,
     MacroLabel,
 
+    CodeSize,
+
     NonAscii,
     //NotImplemented,
 }
@@ -112,7 +114,8 @@ impl ToString for ErrorType {
             ErrorType::NestedMacro => String::from("Macros may not be nested"),
             ErrorType::MacroParamCount => String::from("Incorrect number of macro parameters"),
             ErrorType::MacroLabel => String::from("Only local labels are permitted inside macros"),
-            ErrorType::NonAscii => String::from("Bad string")
+            ErrorType::NonAscii => String::from("Bad string"),
+            ErrorType::CodeSize => String::from("Maximum code size exceeded")
         }
     }
 }

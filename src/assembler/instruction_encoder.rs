@@ -26,6 +26,7 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
+use crate::{unwrap_error_type, alu, alu_imm, xpqz, xyz, rot_encode};
 
 use crate::assembler::{Assembler, Error};
 use crate::assembler::error_impl::ErrorType;
@@ -38,35 +39,6 @@ use crate::assembler::tokens::Op::{LParens, RParens};
 use crate::assembler::tokens::Reg::_HL_;
 use crate::assembler::tokens::RegPair::{_Af, Af, De, Hl, Ix, Iy, Sp};
 use crate::assembler::tokens::Token::{Condition, ConstLabel, Delimiter, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair};
-
-macro_rules! xyz {
-    ($x: expr, $y: expr, $z: expr) => {
-        (($x & 3) << 6) | (($y & 7) << 3) | ($z & 7)
-    }
-}
-
-macro_rules! xpqz {
-    ($x: expr, $p: expr, $q: expr, $z: expr) => {
-        (($x & 3) << 6) | (($p & 3) << 4) | (($q & 1) << 3) | ($z & 7)
-    }
-}
-
-macro_rules! alu {
-    ($op: expr, $r: expr) => {
-        (2 << 6) | ((($op as u8 & 7) << 3) | $r & 7)
-    }
-}
-macro_rules! rot_encode {
-    ($op: expr, $r: expr) => {
-        ($op as u8 & 7) << 3 | ($r & 7)
-    }
-}
-
-macro_rules! alu_imm {
-    ($op: expr) => {
-        (3 << 6) | ((($op as u8) << 3) | 6)
-    }
-}
 
 pub(crate) trait InstructionEncoder {
     fn alu_op(&mut self, a: AluOp) -> Result<(), Error>;
@@ -97,7 +69,14 @@ impl InstructionEncoder for Assembler {
     fn alu_op(&mut self, a: AluOp) -> Result<(), Error> {
         let tok = self.take_token()?;
 
-        self.context.pc_add(self.bank.emit_prefix(&tok));
+//        let size = match self.bank.emit_prefix(&tok) {
+//            Ok(s) => s,
+//            Err(e) => return Err(self.context.error(e)),
+//        };
+
+        let size = unwrap_error_type!(self,self.bank.emit_prefix(&tok));
+
+        self.context.pc_add(size);
 
         match tok {
             IndexIndirect(_, n) => self.emit(&[alu!(a, Reg::_HL_ as u8), n]),
@@ -122,7 +101,7 @@ impl InstructionEncoder for Assembler {
 
         let rhs = self.take_token()?;
 
-        self.context.pc_add(self.bank.emit_prefix(&lhs));
+        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&lhs)));
 
         match (&lhs, &rhs, self.z80n_enabled) {
             (RegisterPair(Hl), RegisterPair(reg), _) => match a {
@@ -166,7 +145,7 @@ impl InstructionEncoder for Assembler {
         self.expect_token(Delimiter(Comma))?;
 
         let tok = self.take_token()?;
-        self.context.pc_add(self.bank.emit_prefix(&tok));
+        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
 
         match tok {
             IndexIndirect(_, n) => {
@@ -226,7 +205,7 @@ impl InstructionEncoder for Assembler {
         self.expect_token(Delimiter(Comma))?;
         let rhs = &self.take_token()?;
 
-        self.context.pc_add(self.bank.emit_prefix(&rhs));
+        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&rhs)));
 
         match (lhs, rhs) {
             (RegisterPair(Af), RegisterPair(_Af)) => self.emit_byte(0x08),
@@ -258,7 +237,7 @@ impl InstructionEncoder for Assembler {
 
     fn inc_dec(&mut self, q: u8) -> Result<(), Error> {
         let tok = self.take_token()?;
-        self.context.pc_add(self.bank.emit_prefix(&tok));
+        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
 
         match tok {
             IndexIndirect(_reg, n) => self.emit(&[xyz!(0, _HL_ as u8, q + 4), n]),
@@ -328,7 +307,7 @@ impl InstructionEncoder for Assembler {
 
     fn push_pop(&mut self, z: u8) -> Result<(), Error> {
         let tok = self.take_token()?;
-        self.context.pc_add(self.bank.emit_prefix(&tok));
+        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
         match tok {
             RegisterPair(r) => self.emit_byte(xpqz!(3, r.rp2()?, 0, z)),
             _ => if self.z80n_enabled {
@@ -354,7 +333,7 @@ impl InstructionEncoder for Assembler {
 
     fn rot(&mut self, a: RotOp) -> Result<(), Error> {
         let tok = self.take_token()?;
-        self.context.pc_add(self.bank.emit_prefix(&tok));
+        self.context.pc_add(unwrap_error_type!(self,self.bank.emit_prefix(&tok)));
         match tok {
             IndexIndirect(_, n) => {
                 if self.next_token_is(&Delimiter(Comma)) {
@@ -389,9 +368,9 @@ impl InstructionEncoder for Assembler {
         self.expect_token(Delimiter(Comma))?;
         let rhs = self.indirect_expression()?;
 
-        if self.bank.emit_prefix(&lhs) == 1 {
+        if unwrap_error_type!(self,self.bank.emit_prefix(&lhs)) == 1 {
             self.context.pc_add(1);
-        } else if self.bank.emit_prefix(&rhs) == 1 {
+        } else if unwrap_error_type!(self,self.bank.emit_prefix(&rhs)) == 1 {
             self.context.pc_add(1);
         }
 

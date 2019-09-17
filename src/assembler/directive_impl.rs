@@ -26,13 +26,13 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
+use crate::unwrap_error_type;
 
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
 use ascii::AsAsciiStr;
-
 use crate::assembler::{Assembler, Error};
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::tokens::{Directive, OptionType, Token};
@@ -241,7 +241,7 @@ impl Directives for Assembler {
         let mut b: Vec<u8> = vec![];
         let mut f = File::open(&file_name)?;
         let r = f.read_to_end(b.as_mut())? as isize;
-        self.bank.append(&mut b);
+        unwrap_error_type!(self,self.bank.append(&mut b));
         let pc = self.context.offset_pc(r);
         self.context.pc(pc);
         Ok(())

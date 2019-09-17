@@ -26,6 +26,7 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FantASM project.
 */
+use crate::unwrap_error_type;
 
 use std::fs::File;
 use std::io::{BufReader, Write};
@@ -45,6 +46,7 @@ use crate::assembler::tokens::Directive::End;
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::Operator;
+
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -101,6 +103,15 @@ impl Assembler {
     pub fn origin(&mut self, address: u16) -> &mut Assembler {
         self.origin = address as isize;
         self.context.pc(self.origin);
+        self
+    }
+
+    pub fn max_code_size(&mut self, size: usize) -> &mut Assembler {
+        if size > 0 {
+            self.bank.max_code_size(size);
+        } else {
+            self.bank.max_code_size(65536);
+        }
         self
     }
 
@@ -289,7 +300,7 @@ impl Assembler {
             self.warn(ErrorType::PCOverflow)
         }
         self.context.pc(pc);
-        self.bank.append(&mut b.to_vec());
+        unwrap_error_type!(self,self.bank.append(&mut b.to_vec()));
         Ok(())
     }
 
@@ -299,7 +310,7 @@ impl Assembler {
             self.warn(ErrorType::PCOverflow)
         }
         self.context.pc(pc);
-        self.bank.push(b);
+        unwrap_error_type!(self,self.bank.push(b));
         Ok(())
     }
 
@@ -313,8 +324,8 @@ impl Assembler {
             self.warn(ErrorType::PCOverflow)
         }
         self.context.pc(pc);
-        self.bank.push(w.lo());
-        self.bank.push(w.hi());
+        unwrap_error_type!(self,self.bank.push(w.lo()));
+        unwrap_error_type!(self,self.bank.push(w.hi()));
         Ok(())
     }
 
