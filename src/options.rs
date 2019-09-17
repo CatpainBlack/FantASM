@@ -47,6 +47,7 @@ pub struct Options {
     pub version: bool,
     pub include_dirs: Vec<String>,
     pub export_labels: String,
+    pub origin: u16,
 }
 
 impl Options {
@@ -72,9 +73,6 @@ impl Options {
             parser.refer(&mut options.no_logo)
                 .add_option(&["-n", "--nologo"], StoreTrue, "Do no display the program name and version");
 
-//            parser.refer(&mut options.debug)
-//                .add_option(&["-D", "--debug"], StoreTrue, "Enable assembler information dump");
-
             parser.refer(&mut options.verbose)
                 .add_option(&["-v", "--verbose"], StoreTrue, "Enable verbose output");
 
@@ -86,6 +84,9 @@ impl Options {
 
             parser.refer(&mut options.export_labels)
                 .add_option(&["-e", "--export-labels"], Store, "Export labels to a file");
+
+            parser.refer(&mut options.origin)
+                .add_option(&["-O", "--origin"], Store, "Address to start assembling code");
 
             parser.parse_args_or_exit();
         }

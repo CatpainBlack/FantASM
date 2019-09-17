@@ -6,19 +6,22 @@ It supports all undocumented op-codes and the extended instruction set of the ZX
 
 ## Usage
 
-`fantasm <source> <output> [options]`
+```fantasm <source> <output> [options]```
 
 ## Commandline options
-
-* ```-N, --z80n         ``` enable z80n extended opcodes
-* ```-c, --cspect       ``` enable CSpect pseudo ops, BREAK and QUIT
-* ```-n, --nologo       ``` suppress the startup banner
-* ```-v, --verbose      ``` enable verbose output
-* ```-h, --help         ``` display command line help
-* ```-V, --version      ``` display the program version and exit
-* ```-D, --debug        ``` Dumps information about the assembly (only useful for FantASM devs)
-* ```-I, --include      ``` Add a directory to search when looking for includes. This can be used mor than once to add multiple directories.
-* ```-e, --export-labels``` Exports labels to a text file in the form ```<label> = <value>```
+<pre>
+-N, --z80n           Enable z80n extended opcodes
+-c, --cspect         Enable CSpect pseudo ops, BREAK and QUIT
+-n, --nologo         Suppress the startup banner
+-v, --verbose        Enable verbose output
+-h, --help           Display command line help
+-V, --version        Display the program version and exit
+-D, --debug          Dumps information about the assembly (only useful for FantASM devs)
+-I, --include        Add a directory to search when looking for includes. 
+                     This can be used mor than once to add multiple directories.
+-e, --export-labels  Exports labels to a text file in the form label = value
+-O, --origin         Address at which to start assembling code
+</pre>
 
 ### Labels & Constants
 

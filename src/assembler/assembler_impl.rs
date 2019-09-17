@@ -98,6 +98,12 @@ impl Assembler {
         self
     }
 
+    pub fn origin(&mut self, address: u16) -> &mut Assembler {
+        self.origin = address as isize;
+        self.context.pc(self.origin);
+        self
+    }
+
     fn write_status(&self) {
         if self.console_output {
             if self.num_warnings() > 0 {

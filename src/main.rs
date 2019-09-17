@@ -52,7 +52,8 @@ fn main() -> Result<(), Error> {
         .enable_console(options.verbose)
         .enable_debug(options.debug)
         .add_include_dirs(options.include_dirs)
-        .export_labels(&options.export_labels);
+        .export_labels(&options.export_labels)
+        .origin(options.origin);
 
     let now = Instant::now();
     if options.verbose {

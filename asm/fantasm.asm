@@ -1,5 +1,3 @@
-    org 0xC000
-
     include "include/p3dos.asm"
     include "include/esx_dos.asm"
     include "include/zxnext.asm"
