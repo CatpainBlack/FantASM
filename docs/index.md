@@ -97,6 +97,10 @@ start
 
 
 ### History
+1.1.1
+
+* Fixed ```ld r8,constant``` emitted an extra byte
+
 1.1.0
 
 * Added ```--max-code-size``` commandline switch

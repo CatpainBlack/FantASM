@@ -445,7 +445,7 @@ impl InstructionEncoder for Assembler {
         } else if src.is_expression() {
             self.tokens.push(src.clone());
             self.emit_byte(xyz!(0, r, 6))?;
-            let addr = self.expect_word(0)?;
+            let addr = self.expect_byte(0)?;
             return self.emit_byte(addr as u8);
         }
         Err(self.context.error(ErrorType::SyntaxError))
