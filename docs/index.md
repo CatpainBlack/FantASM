@@ -101,6 +101,8 @@ start
 
 * Fixed: ```ld r8,constant``` emitted an extra byte
 * Fixed: Labels with the characters "0x" would be incorrectly parsed as a number
+* Fixed: Error when using single quoted character as eight bit value
+* Fixed: Encoding strings that contained £, ↑, or © (UTF-8)
 
 1.1.0
 

@@ -19,6 +19,7 @@ mod bank_impl;
 mod macro_impl;
 mod token_to_string_impl;
 mod macros;
+mod zx_ascii;
 
 struct TokenReader<R> {
     reader: R,
