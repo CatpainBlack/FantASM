@@ -8,4 +8,8 @@
 	or	c
 	ld	(cmd_flags),a
 
+    ld  a,''
+
 cmd_flags    db  0
+
+cack    dz  "Wibble",12,"Abc"

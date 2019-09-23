@@ -6,6 +6,8 @@ use crate::assembler::number_parser::NumberParser;
 use crate::assembler::tokens::{AluOp, Bool, OptionType, RegPair, RotOp, Token};
 use crate::assembler::tokens::{Cnd, Del, Directive, Ir, IxU, IyU, Op, OpCode, Reg};
 use crate::assembler::tokens::Token::{ConstLabel, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair};
+use crate::assembler::zx_ascii::ZXAscii;
+use ascii::AsAsciiStr;
 
 pub trait Tokens {
     fn from_string(word: String) -> Token;
@@ -217,16 +219,28 @@ impl FromStr for Op {
 }
 
 lazy_static! {
-static ref LABEL: Regex = Regex::new(r"^\.?[a-zA-Z]+[a-zA-Z0-9_]*:?$").unwrap();
+    static ref LABEL: Regex = Regex::new(r"^\.?[a-zA-Z]+[a-zA-Z0-9_]*:?$").unwrap();
 }
 
 impl Tokens for Token {
     fn from_string(word: String) -> Token {
         let w = word.to_lowercase();
 
+
+
         // string literals
         let is_double_quoted = word.starts_with("\"") & &word.ends_with("\"");
         let is_single_quoted = word.starts_with("\'") & &word.ends_with("\'");
+
+        if is_single_quoted && word.chars().count() == 3 {
+            let zx_string = ZXAscii::zx_safe(&word);
+            let zx_ascii = match zx_string.as_ascii_str() {
+                Ok(s) => s,
+                Err(_e) => "   ".as_ascii_str().unwrap(),
+            };
+            return Token::Number(zx_ascii.as_bytes()[1] as isize);
+        }
+
         if is_single_quoted || is_double_quoted {
             if let Some(s) = word.get(1..word.len() - 1) {
                 return Token::StringLiteral(s.to_string());

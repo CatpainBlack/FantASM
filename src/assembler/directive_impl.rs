@@ -8,11 +8,12 @@ use crate::assembler::error_impl::ErrorType;
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral};
+use crate::assembler::zx_ascii::ZXAscii;
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
     fn handle_string(&mut self, s: &str, terminator: Option<u8>) -> Result<(), Error>;
-    fn handle_bytes(&mut self) -> Result<(), Error>;
+    fn handle_bytes(&mut self, terminator: Option<u8>) -> Result<(), Error>;
     fn handle_words(&mut self) -> Result<(), Error>;
     fn handle_block(&mut self) -> Result<(), Error>;
     fn handle_hex(&mut self) -> Result<(), Error>;
@@ -42,7 +43,8 @@ impl Directives for Assembler {
     }
 
     fn handle_string(&mut self, s: &str, terminator: Option<u8>) -> Result<(), Error> {
-        let ascii_string = match s.as_ascii_str() {
+        let zx_safe = ZXAscii::zx_safe(s);
+        let ascii_string = match zx_safe.as_ascii_str() {
             Ok(a) => a,
             Err(e) => return Err(self.context.error_text(ErrorType::NonAscii, &e.to_string()))
         };
@@ -53,7 +55,7 @@ impl Directives for Assembler {
         Ok(())
     }
 
-    fn handle_bytes(&mut self) -> Result<(), Error> {
+    fn handle_bytes(&mut self, terminator: Option<u8>) -> Result<(), Error> {
         let mut expect_comma = false;
         while !&self.tokens.is_empty() {
             if expect_comma {
@@ -62,7 +64,7 @@ impl Directives for Assembler {
                 let t = self.take_token()?;
                 if let StringLiteral(s) = t {
                     self.tokens.pop();
-                    self.handle_string(&s, None)?;
+                    self.handle_string(&s, terminator)?;
                     continue;
                 } else {}
                 self.tokens.push(t);
@@ -74,14 +76,11 @@ impl Directives for Assembler {
                         self.emit(&[n as u8])?
                     }
                     Ok(None) => if let StringLiteral(s) = self.take_token()? {
-                        println!("Ok(None)");
-                        self.emit(s.into_bytes().as_slice())?;
+                        self.handle_string(&s, terminator)?
                     } else {
-                        println!("Hmm");
                         return Err(self.context.error(ErrorType::SyntaxError));
                     }
                     Err(e) => {
-                        println!("Err({:?})", e.to_string());
                         return Err(self.context.error(e));
                     }
                 }
@@ -222,17 +221,13 @@ impl Directives for Assembler {
             Directive::Org => self.set_origin(),
             Directive::Include => self.include_source_file(),
             Directive::Message => self.write_message(),
-            Directive::Byte => self.handle_bytes(),
+            Directive::Byte => self.handle_bytes(None),
             Directive::Word => self.handle_words(),
             Directive::Opt => self.set_option(),
             Directive::Binary => self.include_binary(),
             Directive::Block => self.handle_block(),
             Directive::Macro => self.macros.begin_collect(&mut self.context, &mut self.tokens),
-            Directive::StringZero => if let StringLiteral(s) = self.take_token()? {
-                self.handle_string(&s, Some(0))
-            } else {
-                return Err(self.context.error_text(ErrorType::SyntaxError, "String expected"));
-            }
+            Directive::StringZero => self.handle_bytes(Some(0)),
             Directive::End => {
                 if self.macros.collecting() {
                     self.macros.end_collect(&mut self.context)
