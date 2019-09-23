@@ -31,9 +31,9 @@ Local labels start with a period (.) and are only valid until the next none loca
 
 Constants must start with a letter and may contain letters, numbers or underscores, but not semi-colons. Constants are defined using the following syntax:
 
-`<name> = <expression>` (the = may be substituted with 'equ')
+```<name> = <expression>``` (the = may be substituted with 'equ')
 
-`<expression>` may only reference other constants or labels that have previously defined.  
+```<expression>``` may only reference other constants or labels that have previously defined.  
 
 ### Non-Decimal Number Formats
 
@@ -50,10 +50,10 @@ Binary numbers may be in any of the following formats
 
 ### Directives
 
-`ORG <addr>`
+```ORG <addr>```
     Tells the assembler at which address to start assembling code.
 
-`!opt` / `#pragma`
+```!opt / #pragma```
     Controls different assembly options.
 
 `!message <string>`
@@ -99,27 +99,28 @@ start
 ### History
 1.1.1
 
-* Fixed ```ld r8,constant``` emitted an extra byte
+* Fixed: ```ld r8,constant``` emitted an extra byte
+* Fixed: Labels with the characters "0x" would be incorrectly parsed as a number
 
 1.1.0
 
-* Added ```--max-code-size``` commandline switch
-* Added ```--origin``` commandline switch
+* Added: ```--max-code-size``` commandline switch
+* Added: ```--origin``` commandline switch
 
 1.0.0-rc2
 
-* Fixed issue with ```equ``` causing syntax error
-* Added ```--export-labels``` commandline switch
+* Fixed: Issue with ```equ``` causing syntax error
+* Added: ```--export-labels``` commandline switch
 
 1.0.0-rc1
 
-* Added -I,--include commandline option
+* Added: -I,--include commandline option
 
 0.9.1
 
-* Fixed error expanding macros with no parameters
+* Fixed: Error expanding macros with no parameters
 * Changed the expression parser, now correctly handles OR/AND ( | & )
-* Fixed expression parsing on certain opcodes
+* Fixed: expression parsing on certain opcodes
 
 0.9.0
 

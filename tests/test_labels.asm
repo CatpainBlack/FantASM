@@ -17,3 +17,5 @@ block_a:
 .loop
 	djnz	.loop
 	ret
+
+label0x40   ret
