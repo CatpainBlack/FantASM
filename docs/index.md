@@ -99,6 +99,7 @@ start
 ### History
 1.1.2
 
+* Fixed: ld sp,label
 * Fixed: (ix-n) would not assemble
 
 1.1.1

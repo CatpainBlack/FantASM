@@ -1,7 +1,8 @@
 	org 32768
 
+    ld  sp,nt_
     ld  a,(ix+1)
     ld  a,(ix-1)
     ret
 
-    db  0
+nt_    db  0

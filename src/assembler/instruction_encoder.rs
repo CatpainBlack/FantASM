@@ -436,6 +436,11 @@ impl InstructionEncoder for Assembler {
 
 	fn load_special(&mut self, dst: &Token, src: &Token) -> Result<(), Error> {
 		match (dst, src) {
+			(RegisterPair(Sp), ConstLabel(l)) => {
+				self.tokens.push(ConstLabel(l.to_string()));
+				let addr = self.expect_word(1)?;
+				return self.emit(&[xpqz!(0, 3, 0, 1), addr.lo(), addr.hi()]);
+			}
 			(RegisterPair(Sp), Number(n)) => if (0..65536).contains(n) {
 				let addr = n.clone() as u16;
 				return self.emit(&[xpqz!(0, 3, 0, 1), addr.lo(), addr.hi()]);
