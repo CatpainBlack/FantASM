@@ -97,6 +97,10 @@ start
 
 
 ### History
+1.1.2
+
+* Fixed: (ix-n) would not assemble
+
 1.1.1
 
 * Fixed: ```ld r8,constant``` emitted an extra byte
