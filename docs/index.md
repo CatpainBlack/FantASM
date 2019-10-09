@@ -99,6 +99,7 @@ start
 ### History
 1.1.2
 
+* Fixed: Exporting of labels should not include temp/local labels
 * Fixed: ld sp,label
 * Fixed: (ix-n) would not assemble
 

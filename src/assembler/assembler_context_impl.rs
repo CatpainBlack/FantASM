@@ -166,16 +166,12 @@ impl AssemblerContext {
                 m = max(m, l.len() + 1);
             }
             for (l, s) in &self.labels {
-                let line = format!("{} = 0x{:x}\n", l.pad_to_width(m), s);
-                file.write(line.as_bytes())?;
+                if !l.contains(".") {
+                    let line = format!("{} = 0x{:x}\n", l.pad_to_width(m), s);
+                    file.write(line.as_bytes())?;
+                }
             }
         }
         Ok(())
     }
-
-//    pub fn dump(&mut self) {
-//        magenta_ln!("Labels            : {:?}", self.labels);
-//        magenta_ln!("Constants         : {:?}", self.constants);
-//        magenta_ln!("Forward References: {:?}", self.forward_references);
-//    }
 }

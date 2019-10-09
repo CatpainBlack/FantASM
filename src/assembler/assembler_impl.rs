@@ -163,7 +163,6 @@ impl Assembler {
                     self.bank[index + d] = (data & 0xff) as u8;
                     data = data >> 8;
                 }
-                // fixup the z80n "push nnnn" endiannnessssss
                 if self.z80n_enabled && fwd_ref.byte_count == 2 && index > 1 && self.bank[index - 2] == 0xed && self.bank[index - 1] == 0x8a {
                     let b = self.bank[index + 1];
                     self.bank[index + 1] = self.bank[index];

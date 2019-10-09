@@ -2,7 +2,7 @@
 
     ld  sp,nt_
     ld  a,(ix+1)
-    ld  a,(ix-1)
+    ld  a,(ix-1+nt_+1)
     ret
 
 nt_    db  0

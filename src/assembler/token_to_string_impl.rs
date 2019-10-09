@@ -262,7 +262,8 @@ impl ToString for Token {
                 let t: Vec<String> = i.into_iter().map(|e| e.to_string()).collect();
                 t.join(" ")
             }
-            Token::MacroParam(mp) => mp.to_string()
+            Token::MacroParam(mp) => mp.to_string(),
+            Token::IndexIndirectExpression(_, _) => unimplemented!()
         }
     }
 }
