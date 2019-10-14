@@ -100,7 +100,8 @@ start
 
 1.1.3
 
-* Added IF/ELSE/ENDIF conditional assembly
+* Added: IF/ELSE/ENDIF conditional assembly
+* Added: -D --define command line option
 
 1.1.2
 

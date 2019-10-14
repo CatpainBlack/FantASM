@@ -4,7 +4,7 @@ const_x = 0
 const_y = 1
 const_z = 0
 
-if  const_x = 0
+if bibble = 0
     if const_y = 0
         ld hl,1
     else

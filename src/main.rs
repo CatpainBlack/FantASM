@@ -52,6 +52,7 @@ fn main() -> Result<(), Error> {
         .enable_console(options.verbose)
         .enable_debug(options.debug)
         .add_include_dirs(options.include_dirs)
+        .add_defines(options.defines)
         .export_labels(&options.export_labels)
         .origin(options.origin)
         .max_code_size(options.max_code_size as usize);

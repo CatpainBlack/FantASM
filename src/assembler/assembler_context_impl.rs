@@ -7,6 +7,7 @@ use pad::PadStr;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufWriter, Write};
+use asciimath::{eval, scope};
 
 #[derive(Default)]
 pub struct AssemblerContext {
@@ -55,7 +56,23 @@ impl AssemblerContext {
         }
     }
 
-    pub fn enter(&mut self, name: &str) {
+    pub fn enter(&mut self, name: &str, defines: &Vec<String>) {
+        for s in defines {
+            if s.contains("=") {
+                let t: Vec<&str> = s.split("=").collect();
+                let label = t[0];
+                let value = match eval(t[1], &scope! {}) {
+                    Ok(n) => n as isize,
+                    Err(e) => {
+                        println!("Error: {}", e);
+                        0
+                    }
+                };
+                self.constants.insert(label.to_string(), value);
+            } else {
+                println!("Invalid Define {}", s);
+            }
+        }
         self.file_name.push(name.to_string());
         self.line_number.push(0);
     }

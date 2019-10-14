@@ -17,7 +17,6 @@ use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Operator, Directive};
 
-
 impl Assembler {
     pub fn new() -> Assembler {
         let context = Default::default();
@@ -38,6 +37,7 @@ impl Assembler {
             include_dirs: vec![],
             labels_file: String::new(),
             if_level: vec![],
+            defines: vec![],
         }
     }
 
@@ -63,6 +63,11 @@ impl Assembler {
 
     pub fn add_include_dirs(&mut self, dirs: Vec<String>) -> &mut Assembler {
         self.include_dirs = dirs.clone();
+        self
+    }
+
+    pub fn add_defines(&mut self, defines: Vec<String>) -> &mut Assembler {
+        self.defines = defines.clone();
         self
     }
 
@@ -114,10 +119,9 @@ impl Assembler {
         Ok(())
     }
 
-
     pub(crate) fn first_pass(&mut self, file_name: &str) -> Result<(), Error> {
         self.collect_macro = false;
-        self.context.enter(file_name);
+        self.context.enter(file_name, &self.defines);
         let file = File::open(file_name)?;
         let buf = BufReader::new(file);
         let mut reader = TokenReader::new(buf);

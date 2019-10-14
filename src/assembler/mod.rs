@@ -70,6 +70,7 @@ pub struct Assembler {
     include_dirs: Vec<String>,
     labels_file: String,
     if_level: Vec<IfBlock>,
+    defines: Vec<(String)>,
 }
 
 #[derive(Debug)]

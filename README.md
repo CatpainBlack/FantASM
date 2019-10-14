@@ -35,8 +35,8 @@ and copy the binary somewhere in your path.
 -V, --version             Display the program version and exit.
 </pre>
 
-## ToDo
-- [ ] ```--define``` - Add commandline switch to define a constant.
+## To-Do
+- [x] ```--define``` - Add commandline switch to define a constant.
 - [ ] ```Expressions``` - Fix remaining opcodes that don't use expressions, eg: ```ld (ix+n)),r```.
 - [ ] ```SizeOf``` - Give the size of an included binary file.
 - [ ] ```Structs``` - Define data structures, similar to C.

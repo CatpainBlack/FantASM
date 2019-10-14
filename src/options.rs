@@ -49,6 +49,7 @@ pub struct Options {
     pub export_labels: String,
     pub origin: u16,
     pub max_code_size: isize,
+    pub defines: Vec<String>,
 }
 
 impl Options {
@@ -82,6 +83,9 @@ impl Options {
 
             parser.refer(&mut options.include_dirs)
                 .add_option(&["-I", "--include"], List, "Add a directory to search for include files");
+
+            parser.refer(&mut options.defines)
+                .add_option(&["-D", "--define"], List, "Define 1 more constants");
 
             parser.refer(&mut options.export_labels)
                 .add_option(&["-e", "--export-labels"], Store, "Export labels to a file");
