@@ -1,8 +1,20 @@
 	org 32768
 
-    ld  sp,nt_
-    ld  a,(ix+1)
-    ld  a,(ix-1+nt_+1)
-    ret
+const_x = 0
+const_y = 1
+const_z = 0
 
-nt_    db  0
+if  const_x = 0
+    if const_y = 0
+        ld hl,1
+    else
+        ld  hl,2
+    endif
+else
+    if const_z = 0
+        ld hl,3
+    else
+        ld  hl,4
+    endif
+endif
+

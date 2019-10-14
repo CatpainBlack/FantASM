@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::ops::Range;
 
-use crate::assembler::{Assembler, Error, ErrorLevel, TokenReader};
+use crate::assembler::{Assembler, Error, ErrorLevel, TokenReader, IfBlock};
 use crate::assembler::bank_impl::Bank;
 use crate::assembler::directive_impl::Directives;
 use crate::assembler::error_impl::ErrorType;
@@ -12,10 +12,10 @@ use crate::assembler::instruction_encoder::InstructionEncoder;
 use crate::assembler::macro_impl::MacroHandler;
 use crate::assembler::reg_pair::HighLow;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
-use crate::assembler::tokens::Directive::End;
+use crate::assembler::tokens::Directive::{End, EndIf, Else, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
-use crate::assembler::tokens::Token::Operator;
+use crate::assembler::tokens::Token::{Operator, Directive};
 
 
 impl Assembler {
@@ -31,12 +31,13 @@ impl Assembler {
             total_lines: 0,
             expr: ExpressionParser::new(),
             z80n_enabled: false,
-            cspect_enabled: false,
+            c_spect_enabled: false,
             debug: false,
             collect_macro: false,
             warnings: vec![],
             include_dirs: vec![],
             labels_file: String::new(),
+            if_level: vec![],
         }
     }
 
@@ -51,7 +52,7 @@ impl Assembler {
     }
 
     pub fn enable_cspect(&mut self, enabled: bool) -> &mut Assembler {
-        self.cspect_enabled = enabled;
+        self.c_spect_enabled = enabled;
         self
     }
 
@@ -398,7 +399,7 @@ impl Assembler {
             _ => None
         };
         if let Some(b) = code {
-            if !self.cspect_enabled {
+            if !self.c_spect_enabled {
                 return Err(self.context.error(ErrorType::CSpectDisabled));
             }
             self.emit(&b)?;
@@ -452,6 +453,32 @@ impl Assembler {
         Ok(())
     }
 
+    pub fn skip_translate(&mut self) -> Result<bool, Error> {
+        let skip = match self.if_level.last().unwrap_or(&IfBlock::None) {
+            IfBlock::SkipEnd => match self.tokens.last() {
+                Some(Directive(EndIf)) => false,
+                _ => true
+            }
+            IfBlock::If(false) => match self.tokens.last() {
+                Some(Directive(If)) => false,
+                Some(Directive(Else)) => false,
+                Some(Directive(EndIf)) => false,
+                _ => true
+            },
+            IfBlock::Else(false) => match self.tokens.last() {
+                Some(Directive(If)) => false,
+                Some(Directive(EndIf)) => false,
+                _ => true
+            },
+            _ => false
+        };
+
+        if skip {
+            self.take_token()?;
+        }
+        Ok(skip)
+    }
+
     pub fn translate(&mut self, tokens: &mut Vec<Token>) -> Result<(), Error> {
         if !self.macros.expanding() {
             self.context.next_line();
@@ -460,6 +487,9 @@ impl Assembler {
         self.tokens.reverse();
         while !self.tokens.is_empty() {
             self.context.init_asm_pc();
+            if self.skip_translate()? {
+                continue;
+            }
             if let Some(tok) = self.tokens.pop() {
                 match &tok {
                     Token::ConstLabel(l) => if self.macros.macro_defined(l) {

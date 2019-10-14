@@ -180,6 +180,9 @@ impl FromStr for Directive {
             "macro" => Ok(Directive::Macro),
             "end" | "endm" => Ok(Directive::End),
             "dz" => Ok(Directive::StringZero),
+            "if" => Ok(Directive::If),
+            "else" => Ok(Directive::Else),
+            "endif" => Ok(Directive::EndIf),
             _ => Err(())
         }
     }
@@ -225,7 +228,6 @@ lazy_static! {
 impl Tokens for Token {
     fn from_string(word: String) -> Token {
         let w = word.to_lowercase();
-
 
 
         // string literals

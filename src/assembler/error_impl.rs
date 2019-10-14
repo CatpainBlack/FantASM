@@ -34,6 +34,8 @@ pub enum ErrorType {
     ExtraCharacters,
     UnhandledDirective,
     DanglingEnd,
+    EndIfWithoutIf,
+    ElseWithoutIf,
 
     BadMacroName,
     CommaExpected,
@@ -86,7 +88,9 @@ impl ToString for ErrorType {
             ErrorType::MacroParamCount => String::from("Incorrect number of macro parameters"),
             ErrorType::MacroLabel => String::from("Only local labels are permitted inside macros"),
             ErrorType::NonAscii => String::from("Bad string"),
-            ErrorType::CodeSize => String::from("Maximum code size exceeded")
+            ErrorType::CodeSize => String::from("Maximum code size exceeded"),
+            ErrorType::EndIfWithoutIf => String::from("ENDIF without IF"),
+            ErrorType::ElseWithoutIf => String::from("ELSE without IF")
         }
     }
 }

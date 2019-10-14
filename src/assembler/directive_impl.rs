@@ -3,12 +3,14 @@ use std::io::Read;
 use std::path::Path;
 
 use ascii::AsAsciiStr;
-use crate::assembler::{Assembler, Error};
+use crate::assembler::{Assembler, Error, IfBlock};
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Del::Comma;
-use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral};
+use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral, Operator};
 use crate::assembler::zx_ascii::ZXAscii;
+use crate::assembler::tokens::Op::Equals;
+use crate::assembler::IfBlock::{Else, If, SkipEnd};
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
@@ -22,6 +24,9 @@ pub trait Directives {
     fn include_source_file(&mut self) -> Result<(), Error>;
     fn write_message(&mut self) -> Result<(), Error>;
     fn include_binary(&mut self) -> Result<(), Error>;
+    fn process_if(&mut self) -> Result<(), Error>;
+    fn process_endif(&mut self) -> Result<(), Error>;
+    fn process_else(&mut self) -> Result<(), Error>;
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error>;
 }
 
@@ -216,6 +221,51 @@ impl Directives for Assembler {
         Ok(())
     }
 
+    fn process_if(&mut self) -> Result<(), Error> {
+        let label_value: isize;
+        let const_value: isize;
+        if let ConstLabel(l) = self.take_token()? {
+            label_value = match self.context.get_constant(&l) {
+                None => return Err(self.context.error(ErrorType::LabelNotFound)),
+                Some(n) => n,
+            };
+        } else {
+            return Err(self.context.error(ErrorType::BadConstant));
+        }
+        self.expect_token(Operator(Equals))?;
+        const_value = self.expect_word(-1)?;
+        let if_true = label_value == const_value;
+        match self.if_level.last() {
+            Some(Else(false)) |
+            Some(If(false)) |
+            Some(SkipEnd) => self.if_level.push(SkipEnd),
+            _ => self.if_level.push(IfBlock::If(if_true))
+        }
+
+        Ok(())
+    }
+
+    fn process_endif(&mut self) -> Result<(), Error> {
+        if self.if_level.len() == 0 {
+            Err(self.context.error(ErrorType::EndIfWithoutIf))
+        } else {
+            self.if_level.pop();
+            Ok(())
+        }
+    }
+
+    fn process_else(&mut self) -> Result<(), Error> {
+        if self.if_level.len() == 0 {
+            Err(self.context.error(ErrorType::ElseWithoutIf))
+        } else {
+            if let Some(If(t)) = self.if_level.pop() {
+                self.if_level.push(Else(!t));
+            }
+            Ok(())
+        }
+    }
+
+
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error> {
         match directive {
             Directive::Org => self.set_origin(),
@@ -237,6 +287,9 @@ impl Directives for Assembler {
             }
             //Directive::Align => {}
             Directive::Hex => self.handle_hex(),
+            Directive::If => self.process_if(),
+            Directive::Else => self.process_else(),
+            Directive::EndIf => self.process_endif(),
             _ => Err(self.context.error_text(ErrorType::UnhandledDirective, &format!("{:?}", directive)))
         }
         //Ok(())

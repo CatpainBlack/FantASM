@@ -45,6 +45,14 @@ pub struct ForwardReference {
     file_name: String,
 }
 
+#[derive(Debug)]
+pub enum IfBlock {
+    None,
+    If(bool),
+    Else(bool),
+    SkipEnd,
+}
+
 pub struct Assembler {
     context: AssemblerContext,
     macros: MacroHandler,
@@ -55,12 +63,13 @@ pub struct Assembler {
     total_lines: isize,
     expr: ExpressionParser,
     z80n_enabled: bool,
-    cspect_enabled: bool,
+    c_spect_enabled: bool,
     debug: bool,
     collect_macro: bool,
     warnings: Vec<String>,
     include_dirs: Vec<String>,
     labels_file: String,
+    if_level: Vec<IfBlock>,
 }
 
 #[derive(Debug)]

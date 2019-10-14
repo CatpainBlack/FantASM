@@ -97,6 +97,11 @@ start
 
 
 ### History
+
+1.1.3
+
+* Added IF/ELSE/ENDIF conditional assembly
+
 1.1.2
 
 * Fixed: Exporting of labels should not include temp/local labels

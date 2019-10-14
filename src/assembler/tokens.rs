@@ -109,6 +109,9 @@ pub enum Directive {
     Macro,
     End,
     StringZero,
+    If,
+    Else,
+    EndIf,
 }
 
 #[derive(Debug, Clone, PartialEq)]

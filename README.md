@@ -42,6 +42,6 @@ and copy the binary somewhere in your path.
 - [ ] ```Structs``` - Define data structures, similar to C.
 - [ ] ```Modules``` - Group code into modules.
 - [ ] ```Exports``` - Define a way of exporting only certain labels.
-- [ ] ```Conditionals``` - Conditional assembly using DEFINE, IFDEF, ELSE, ENDIF.
+- [x] ```Conditionals``` - Conditional assembly using DEFINE, IFDEF, ELSE, ENDIF.
 - [ ] ```Include``` - Include needs to check the same directory as the source file that requested it.
 - [ ] ```zx7/lz4``` - Add support for compression, either as output or when including binary files.
