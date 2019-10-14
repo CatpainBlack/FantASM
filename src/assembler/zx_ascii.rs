@@ -1,12 +1,10 @@
 pub struct ZXAscii {}
 
 impl ZXAscii {
-    pub fn zx_safe(string: &str) -> String {
-        let x = string.to_string()
+    pub fn zx_safe(src: &str) -> String {
+        src.to_string()
             .replace("£", "`")
             .replace("©", "\u{007F}")
-            .replace("↑", "^");
-        //println!("{} - {:02X?} ", x, x.as_bytes());
-        x
+            .replace("↑", "^")
     }
 }

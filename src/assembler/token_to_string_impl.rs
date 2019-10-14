@@ -263,7 +263,7 @@ impl ToString for Token {
                 t.join(" ")
             }
             Token::MacroParam(mp) => mp.to_string(),
-            Token::IndexIndirectExpression(_, _) => unimplemented!()
+            //Token::IndexIndirectExpression(_, _) => unimplemented!()
         }
     }
 }

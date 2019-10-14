@@ -65,8 +65,8 @@ Binary numbers may be in any of the following formats
 `DW,WORD nnnn[,..]`
     outputs one or more words (16 bit values)
     
-`DS <string>[,..]`
-    outputs one or mor strings
+`DS nn,size`
+    creates a block of size and fills with the byte nn
 
 `DH,HEX "0-F.."`
     Outputs a sequence of 8 bit values by converting each 2 characters at a time, so "12FF" would be output as 0x12,0xFF
