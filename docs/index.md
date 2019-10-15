@@ -11,17 +11,17 @@ It supports all undocumented op-codes and the extended instruction set of the ZX
 ## Commandline options
 
 <pre>
--N, --z80n                Enable z80n extended opcodes.
--c, --cspect              Enable CSpect pseudo ops, BREAK and QUIT.
--I, --include             Add a directory to search when looking for includes. 
-                          May be used more than once to add multiple directories.
--e, --export-labels       Exports labels to the given text file.
--O, --origin              Address at which to start assembling code.
--M, --max-code-size       Limit the size of assembled code to nnnn bytes.
--n, --nologo              Suppress the startup banner.
--v, --verbose             Enable verbose output.
--h, --help                Display command line help.
--V, --version             Display the program version and exit.
+  -h,--help             Show this help message and exit
+  -N,--z80n             Enable Z80n (ZX Next) cpu extensions
+  -c,--cspect           Enable cspect "exit" and "break" instructions
+  -n,--nologo           Do no display the program name and version
+  -v,--verbose          Enable verbose output
+  -V,--version          Displays the version and exits
+  -I,--include INCLUDE  Add a directory to search for include files
+  -D,--define DEFINE    Define 1 more constants
+  -e,--export-labels    Export labels to a file
+  -O,--origin ORIGIN    Address to start assembling code
+  -M,--max-code-size=   Limit the size of assembled code
 </pre>
 
 ### Labels & Constants
@@ -50,32 +50,46 @@ Binary numbers may be in any of the following formats
 
 ### Directives
 
-```ORG <addr>```
-    Tells the assembler at which address to start assembling code.
+```ORG expr```
+
+Tells the assembler at which address to start assembling code.
 
 ```!opt / #pragma```
-    Controls different assembly options.
-
-`!message <string>`
-    Displays a message on the console during assembly
-
-`DB,BYTE nn[,..]`
-    outputs one or more bytes (8 bit values)
-
-`DW,WORD nnnn[,..]`
-    outputs one or more words (16 bit values)
     
-`DS nn,size`
-    creates a block of size and fills with the byte nn
+Controls different assembly options.
 
-`DH,HEX "0-F.."`
-    Outputs a sequence of 8 bit values by converting each 2 characters at a time, so "12FF" would be output as 0x12,0xFF
+```!message "string"```
 
-`include <filename>`
-    Includes another source file to be assembled.
+Displays a message on the console during assembly
 
-`binary, incbin`
-    Includes a binary file.
+```DB,BYTE nn[,..]```
+
+outputs one or more bytes (8 bit values)
+
+```DW,WORD nnnn[,..]```
+
+outputs one or more words (16 bit values)
+    
+```DS nn,size```
+
+creates a block of size and fills with the byte nn
+
+```DH,HEX "0-F.."```
+
+Outputs a sequence of 8 bit values by converting each 2 characters at a time, so "12FF" would be output as 0x12,0xFF
+
+```include "filename"```
+I
+Includes another source file to be assembled.
+
+```binary,incbin "filename" ```
+
+Includes a binary file.
+
+```IF / ELSE / ENDIF```
+
+Conditinally control assembly.
+    
 
 ### Expressions
 

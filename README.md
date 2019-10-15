@@ -22,26 +22,27 @@ and copy the binary somewhere in your path.
 ## Commandline options
 
 <pre>
--N, --z80n                Enable z80n extended opcodes.
--c, --cspect              Enable CSpect pseudo ops, BREAK and QUIT.
--I, --include             Add a directory to search when looking for includes. 
-                          May be used more than once to add multiple directories.
--e, --export-labels       Exports labels to the given text file.
--O, --origin              Address at which to start assembling code.
--M, --max-code-size       Limit the size of assembled code to nnnn bytes.
--n, --nologo              Suppress the startup banner.
--v, --verbose             Enable verbose output.
--h, --help                Display command line help.
--V, --version             Display the program version and exit.
+  -h,--help             Show this help message and exit
+  -N,--z80n             Enable Z80n (ZX Next) cpu extensions
+  -c,--cspect           Enable cspect "exit" and "break" instructions
+  -n,--nologo           Do no display the program name and version
+  -v,--verbose          Enable verbose output
+  -V,--version          Displays the version and exits
+  -I,--include INCLUDE  Add a directory to search for include files
+  -D,--define DEFINE    Define 1 more constants
+  -e,--export-labels    Export labels to a file
+  -O,--origin ORIGIN    Address to start assembling code
+  -M,--max-code-size=   Limit the size of assembled code
 </pre>
 
 ## To-Do
-- [x] ```--define``` - Add commandline switch to define a constant.
-- [ ] ```Expressions``` - Fix remaining opcodes that don't use expressions, eg: ```ld (ix+n)),r```.
-- [ ] ```SizeOf``` - Give the size of an included binary file.
-- [ ] ```Structs``` - Define data structures, similar to C.
-- [ ] ```Modules``` - Group code into modules.
-- [ ] ```Exports``` - Define a way of exporting only certain labels.
-- [x] ```Conditionals``` - Conditional assembly using DEFINE, IFDEF, ELSE, ENDIF.
-- [ ] ```Include``` - Include needs to check the same directory as the source file that requested it.
-- [ ] ```zx7/lz4``` - Add support for compression, either as output or when including binary files.
+- [x] ```--define```        Add commandline switch to define a constant.
+- [ ] ```Expressions```     Fix remaining opcodes that don't use expressions, eg: ```ld (ix+n)),r```.
+- [ ] ```SizeOf```          Give the size of an included binary file.
+- [ ] ```Structs```         Define data structures, similar to C.
+- [ ] ```Modules```         Group code into modules.
+- [ ] ```Exports```         Define a way of exporting only certain labels.
+- [x] ```Conditionals```    Conditional assembly using DEFINE, IFDEF, ELSE, ENDIF.
+- [ ] ```Include```         Include needs to check the same directory as the source file that requested it.
+- [ ] ```zx7/lz4```         Add support for compression, either as output or when including binary files.
+- [ ] ```ENUM```            Enumerator directive.

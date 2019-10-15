@@ -41,7 +41,7 @@ impl Directives for Assembler {
                 }
                 self.origin = o
             }
-            Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
+            Ok(None) => return Err(self.context.error(ErrorType::BadExpression)),
             Err(e) => return Err(self.context.error(e))
         }
         self.context.pc(self.origin);
@@ -266,7 +266,6 @@ impl Directives for Assembler {
         }
     }
 
-
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error> {
         match directive {
             Directive::Org => self.set_origin(),
@@ -286,13 +285,10 @@ impl Directives for Assembler {
                     return Err(self.context.error(ErrorType::DanglingEnd));
                 }
             }
-            //Directive::Align => unimplemented!();
             Directive::Hex => self.handle_hex(),
             Directive::If => self.process_if(),
             Directive::Else => self.process_else(),
             Directive::EndIf => self.process_endif(),
-            //_ => Err(self.context.error_text(ErrorType::UnhandledDirective, &format!("{:?}", directive)))
         }
-        //Ok(())
     }
 }
