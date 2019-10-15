@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::ops::Range;
 
-use crate::assembler::{Assembler, Error, ErrorLevel, TokenReader, IfBlock};
+use crate::assembler::{Assembler, Error, ErrorLevel, IfBlock, TokenReader};
 use crate::assembler::bank_impl::Bank;
 use crate::assembler::directive_impl::Directives;
 use crate::assembler::error_impl::ErrorType;
@@ -12,10 +12,10 @@ use crate::assembler::instruction_encoder::InstructionEncoder;
 use crate::assembler::macro_impl::MacroHandler;
 use crate::assembler::reg_pair::HighLow;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
-use crate::assembler::tokens::Directive::{End, EndIf, Else, If};
+use crate::assembler::tokens::Directive::{Else, End, EndIf, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
-use crate::assembler::tokens::Token::{Operator, Directive};
+use crate::assembler::tokens::Token::{Directive, Operator};
 
 impl Assembler {
     pub fn new() -> Assembler {

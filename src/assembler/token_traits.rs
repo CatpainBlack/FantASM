@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use ascii::AsAsciiStr;
 use regex::Regex;
 
 use crate::assembler::number_parser::NumberParser;
@@ -7,7 +8,6 @@ use crate::assembler::tokens::{AluOp, Bool, OptionType, RegPair, RotOp, Token};
 use crate::assembler::tokens::{Cnd, Del, Directive, Ir, IxU, IyU, Op, OpCode, Reg};
 use crate::assembler::tokens::Token::{ConstLabel, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair};
 use crate::assembler::zx_ascii::ZXAscii;
-use ascii::AsAsciiStr;
 
 pub trait Tokens {
     fn from_string(word: String) -> Token;
@@ -176,7 +176,7 @@ impl FromStr for Directive {
             "ds" | "block" => Ok(Directive::Block),
             "dh" | "hex" => Ok(Directive::Hex),
             "!opt" | "#pragma" => Ok(Directive::Opt),
-            "align" => Ok(Directive::Align),
+            //"align" => Ok(Directive::Align),
             "macro" => Ok(Directive::Macro),
             "end" | "endm" => Ok(Directive::End),
             "dz" => Ok(Directive::StringZero),

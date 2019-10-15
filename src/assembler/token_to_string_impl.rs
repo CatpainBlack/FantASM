@@ -104,7 +104,7 @@ impl ToString for Directive {
             Directive::Word => "DW",
             Directive::Block => "DS",
             Directive::Hex => "DH",
-            Directive::Align => "ALIGN",
+            //Directive::Align => "ALIGN",
             Directive::Macro => "MACRO",
             Directive::End => "END",
             Directive::StringZero => "DZ",

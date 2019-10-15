@@ -105,7 +105,7 @@ pub enum Directive {
     Word,
     Block,
     Hex,
-    Align,
+    //Align,
     Macro,
     End,
     StringZero,

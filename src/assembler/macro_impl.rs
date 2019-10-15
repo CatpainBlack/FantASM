@@ -177,5 +177,4 @@ impl MacroHandler {
         self.collecting = false;
         Ok(())
     }
-
 }

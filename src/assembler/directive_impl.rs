@@ -3,14 +3,15 @@ use std::io::Read;
 use std::path::Path;
 
 use ascii::AsAsciiStr;
+
 use crate::assembler::{Assembler, Error, IfBlock};
 use crate::assembler::error_impl::ErrorType;
+use crate::assembler::IfBlock::{Else, If, SkipEnd};
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Del::Comma;
-use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral, Operator};
-use crate::assembler::zx_ascii::ZXAscii;
 use crate::assembler::tokens::Op::Equals;
-use crate::assembler::IfBlock::{Else, If, SkipEnd};
+use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Operator, Opt, StringLiteral};
+use crate::assembler::zx_ascii::ZXAscii;
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;
@@ -285,12 +286,12 @@ impl Directives for Assembler {
                     return Err(self.context.error(ErrorType::DanglingEnd));
                 }
             }
-            //Directive::Align => {}
+            //Directive::Align => unimplemented!();
             Directive::Hex => self.handle_hex(),
             Directive::If => self.process_if(),
             Directive::Else => self.process_else(),
             Directive::EndIf => self.process_endif(),
-            _ => Err(self.context.error_text(ErrorType::UnhandledDirective, &format!("{:?}", directive)))
+            //_ => Err(self.context.error_text(ErrorType::UnhandledDirective, &format!("{:?}", directive)))
         }
         //Ok(())
     }

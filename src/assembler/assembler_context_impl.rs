@@ -1,13 +1,14 @@
+use std::cmp::max;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{BufWriter, Write};
+use std::path::Path;
+
+use asciimath::{eval, scope};
+use pad::PadStr;
 
 use crate::assembler::{Error, ErrorLevel, ForwardReference};
 use crate::assembler::error_impl::ErrorType;
-use std::cmp::max;
-use pad::PadStr;
-use std::path::Path;
-use std::fs::File;
-use std::io::{BufWriter, Write};
-use asciimath::{eval, scope};
 
 #[derive(Default)]
 pub struct AssemblerContext {

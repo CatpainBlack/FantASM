@@ -116,13 +116,13 @@ impl<R> TokenReader<R> where R: BufRead {
 
     fn handle_index_indirect(&mut self, tokens: &mut Vec<Token>, rp: RegPair) -> Result<Option<Token>, Error> {
         let mut index = 0;
-        if let Some(Operator(Op::Sub))=tokens.last() {
+        if let Some(Operator(Op::Sub)) = tokens.last() {
             tokens.pop();
             if let Some(Number(n)) = tokens.pop() {
                 if n > 255 {
                     return Err(Error::fatal("Integer out of range", self.line_number, &self.file_name));
                 }
-                index = (256-n) as u8;
+                index = (256 - n) as u8;
             }
         }
         if let Some(Operator(Op::Add)) = tokens.pop()
