@@ -4,6 +4,7 @@ use crate::assembler::{Error, TokenReader};
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Cnd, Op, Reg, RegPair, RegPairInd, Token};
+use crate::assembler::tokens::Functions::SizeOf;
 use crate::assembler::tokens::Op::{LParens, RParens};
 use crate::assembler::tokens::Token::{Condition, ConstLabel, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterPair};
 
@@ -98,7 +99,23 @@ impl<R> TokenReader<R> where R: BufRead {
         }
         self.store_token_string();
         self.words.reverse();
-//        println!("{:?}", self.words);
+    }
+
+    fn parse_function(&mut self, keyword: &str) -> Option<Token> {
+        let x = match keyword {
+            "sizeof" => {
+                if &self.words.pop().unwrap_or(String::new()) != "(" {
+                    return None;
+                }
+                let label = self.words.pop().unwrap_or(String::new());
+                if &self.words.pop().unwrap_or(String::new()) != ")" {
+                    return None
+                }
+                Some(Token::Function(SizeOf(label)))
+            }
+            _ => None
+        };
+        x
     }
 
     fn next_token(&mut self) -> Option<Token> {
@@ -106,7 +123,7 @@ impl<R> TokenReader<R> where R: BufRead {
             return None;
         }
         let w = self.words.pop().unwrap_or(String::new());
-        let mut tok = Token::from_string(w);
+        let mut tok = self.parse_function(&w.to_lowercase()).unwrap_or(Token::from_string(w));
         if self.preceding_token.can_be_conditional() && tok == Register(Reg::C) {
             tok = Condition(Cnd::C)
         }
@@ -115,29 +132,23 @@ impl<R> TokenReader<R> where R: BufRead {
     }
 
     fn handle_index_indirect(&mut self, tokens: &mut Vec<Token>, rp: RegPair) -> Result<Option<Token>, Error> {
-        let mut index = 0;
-        if let Some(Operator(Op::Sub)) = tokens.last() {
-            tokens.pop();
-            if let Some(Number(n)) = tokens.pop() {
-                if n > 255 {
-                    return Err(Error::fatal("Integer out of range", self.line_number, &self.file_name));
-                }
-                index = (256 - n) as u8;
-            }
+        let valid = match tokens.last() {
+            Some(Operator(Op::Sub)) |
+            Some(Operator(Op::Add)) => true,
+            None => true,
+            _ => false
+        };
+
+        if !valid {
+            return Err(Error::fatal("Invalid operand, Expected +/-", self.line_number, &self.file_name));
         }
-        if let Some(Operator(Op::Add)) = tokens.pop()
-        {
-            if let Some(Number(n)) = tokens.pop() {
-                if n > 255 {
-                    return Err(Error::fatal("Integer out of range", self.line_number, &self.file_name));
-                }
-                index = n as u8;
-            }
-        }
-        if tokens.is_empty() {
-            return Ok(Some(IndexIndirect(rp, index)));
-        }
-        Ok(None)
+
+        let mut expr = tokens.clone();
+        expr.push(Number(0));
+        expr.reverse();
+        let ret = Ok(Some(IndexIndirect(rp, expr)));
+        tokens.clear();
+        return ret;
     }
 
     fn handle_parentheses(&mut self, s: usize, e: usize) -> Result<(), Error> {
@@ -202,6 +213,7 @@ impl<R> TokenReader<R> where R: BufRead {
         if !parens.is_empty() {
             return Err(Error::fatal(&ErrorType::UnclosedParentheses.to_string(), self.line_number, &self.file_name));
         }
+
         Ok(self.tokens.to_owned())
     }
 }

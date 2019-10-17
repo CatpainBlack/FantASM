@@ -5,7 +5,8 @@ use crate::assembler::error_impl::ErrorType;
 use crate::assembler::ForwardReference;
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Op, Token};
-use crate::assembler::tokens::Token::{ConstLabel, Number, Operator};
+use crate::assembler::tokens::Functions::SizeOf;
+use crate::assembler::tokens::Token::{ConstLabel, Function, Number, Operator};
 
 use self::asciimath::{eval, scope};
 
@@ -17,6 +18,7 @@ impl ExpressionParser {
     }
 
     pub fn get_expression(&mut self, context: &mut AssemblerContext, tokens: &mut Vec<Token>) -> (bool, Vec<Token>) {
+
         let mut expr = vec![];
         let mut has_forward_ref = false;
         while tokens.last().unwrap_or(&Token::None).is_expression() {
@@ -34,6 +36,10 @@ impl ExpressionParser {
                 } else if !context.is_constant_defined(&l) && !context.is_label_defined(&l) {
                     has_forward_ref = true;
                 }
+            } else if let Function(SizeOf(label)) = last {
+                if !context.is_label_defined(&label) {
+                    has_forward_ref = true;
+                }
             }
         }
         (has_forward_ref, expr)
@@ -43,6 +49,11 @@ impl ExpressionParser {
         let mut strings = vec![];
         for token in expr {
             match &token {
+                Function(SizeOf(label)) => if let Some(size) = context.get_size_of(label) {
+                    strings.push(format!("{}", size));
+                } else {
+                    return Err(ErrorType::UnknownSizeOf);
+                }
                 ConstLabel(l) => {
                     if let Some(n) = context.get_constant(l) {
                         strings.push(format!("{}", n));

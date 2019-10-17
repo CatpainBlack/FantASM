@@ -37,8 +37,8 @@ and copy the binary somewhere in your path.
 
 ## To-Do
 - [x] ```--define```        Add commandline switch to define a constant.
-- [ ] ```Expressions```     Fix remaining opcodes that don't use expressions, eg: ```ld (ix+n)),r```.
-- [ ] ```SizeOf```          Give the size of an included binary file.
+- [x] ```Expressions```     Fix remaining opcodes that don't use expressions, eg: ```ld (ix+n)),r```.
+- [x] ```SizeOf```          Give the size of an included binary file.
 - [ ] ```Structs```         Define data structures, similar to C.
 - [ ] ```Modules```         Group code into modules.
 - [ ] ```Exports```         Define a way of exporting only certain labels.
@@ -46,3 +46,4 @@ and copy the binary somewhere in your path.
 - [ ] ```Include```         Include needs to check the same directory as the source file that requested it.
 - [ ] ```zx7/lz4```         Add support for compression, either as output or when including binary files.
 - [ ] ```ENUM```            Enumerator directive.
+- [ ] ```Documentation```   Improve the documentation!

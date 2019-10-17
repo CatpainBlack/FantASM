@@ -36,6 +36,7 @@ pub enum ErrorType {
     DanglingEnd,
     EndIfWithoutIf,
     ElseWithoutIf,
+    //ExpectedParenthesis,
 
     BadMacroName,
     CommaExpected,
@@ -45,6 +46,7 @@ pub enum ErrorType {
     MacroLabel,
 
     CodeSize,
+    UnknownSizeOf,
 
     NonAscii,
     //NotImplemented,
@@ -90,7 +92,9 @@ impl ToString for ErrorType {
             ErrorType::NonAscii => String::from("Bad string"),
             ErrorType::CodeSize => String::from("Maximum code size exceeded"),
             ErrorType::EndIfWithoutIf => String::from("ENDIF without IF"),
-            ErrorType::ElseWithoutIf => String::from("ELSE without IF")
+            ErrorType::ElseWithoutIf => String::from("ELSE without IF"),
+            //ErrorType::ExpectedParenthesis => String::from("Expected opening parenthesis"),
+            ErrorType::UnknownSizeOf => String::from("SizeOf cannot be determined")
         }
     }
 }

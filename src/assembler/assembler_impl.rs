@@ -515,12 +515,4 @@ impl Assembler {
         }
         Ok(())
     }
-
-//    pub fn dump(&mut self) {
-//        magenta_ln!("--=[ debug info ]=--");
-//        magenta_ln!("Origin            : {} [0x{:02X}]", self.origin,self.origin);
-//        magenta_ln!("Total Lines       : {}", self.total_lines);
-//        magenta_ln!("Code Length       : {}", self.bank.as_slice().len());
-//        self.context.dump();
-//    }
 }

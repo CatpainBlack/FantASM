@@ -50,6 +50,8 @@ Binary numbers may be in any of the following formats
 
 ### Directives
 
+Directives are not case sensitive, so any variation of ORG, org, Org etc. are completely valid.
+
 ```ORG expr```
 
 Tells the assembler at which address to start assembling code.
@@ -90,6 +92,11 @@ Includes a binary file.
 
 Conditinally control assembly.
     
+```SIZEOF(label)```
+
+Returns the size of an included binary file.
+In order to support ```SIZEOF```, your ```INCBIN``` must be preceded by a label.
+
 
 ### Expressions
 
@@ -116,6 +123,8 @@ start
 
 * Added: IF/ELSE/ENDIF conditional assembly
 * Added: -D --define command line option
+* Fixed: Support for (ix+expr) and (iy+expr)
+* Added: SIZEOF(label) - Gives the size of an included binary file
 
 1.1.2
 

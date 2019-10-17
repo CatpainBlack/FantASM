@@ -217,6 +217,7 @@ impl Directives for Assembler {
         let mut f = File::open(&file_name)?;
         let r = f.read_to_end(b.as_mut())? as isize;
         self.context.result(self.bank.append(&mut b))?;
+        self.context.add_size_of(r);
         let pc = self.context.offset_pc(r);
         self.context.pc(pc);
         Ok(())

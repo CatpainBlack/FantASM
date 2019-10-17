@@ -14,6 +14,7 @@ use crate::assembler::error_impl::ErrorType;
 pub struct AssemblerContext {
     labels: HashMap<String, isize>,
     constants: HashMap<String, isize>,
+    size_of: HashMap<String, isize>,
     forward_references: Vec<ForwardReference>,
     line_number: Vec<isize>,
     file_name: Vec<String>,
@@ -191,5 +192,23 @@ impl AssemblerContext {
             }
         }
         Ok(())
+    }
+
+    pub fn get_size_of(&mut self, label: &str) -> Option<isize> {
+        if !self.size_of.contains_key(label) {
+            None
+        } else {
+            Some(self.size_of[label])
+        }
+    }
+
+    pub fn add_size_of(&mut self, size: isize) {
+        let label = self.label_context.to_string();
+        if let Some(pc) = self.get_label(&label) {
+            if self.current_pc == pc {
+                self.size_of.insert(self.label_context.to_string(), size);
+                //println!("Added sizeof({},{})", self.label_context, size);
+            }
+        }
     }
 }

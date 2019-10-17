@@ -138,6 +138,11 @@ pub enum Op {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum Functions {
+    SizeOf(String)
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum OpCode {
     Nop,
     Adc,
@@ -261,7 +266,7 @@ pub enum Token {
     Delimiter(Del),
     Operator(Op),
     RegisterIndirect(RegPairInd),
-    IndexIndirect(RegPair, u8),
+    IndexIndirect(RegPair, Vec<Token>),
     //IndexIndirectExpression(RegPair, Vec<Token>),
     Condition(Cnd),
     StringLiteral(String),
@@ -269,4 +274,5 @@ pub enum Token {
     Boolean(bool),
     IndirectExpression(Vec<Token>),
     MacroParam(String),
+    Function(Functions),
 }

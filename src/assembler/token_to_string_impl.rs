@@ -182,7 +182,7 @@ impl ToString for Del {
 
 impl ToString for Op {
     fn to_string(&self) -> String {
-        match self {
+        let x = match self {
             Op::Add => "+",
             Op::Sub => "-",
             Op::Mul => "*",
@@ -196,8 +196,9 @@ impl ToString for Op {
             Op::Equals => "=",
             Op::Ampersand => "&",
             Op::Pipe => "|",
-            Op::AsmPc => "$"
-        }.to_string()
+            Op::AsmPc => "$",
+        }.to_string();
+        x
     }
 }
 
@@ -256,7 +257,7 @@ impl ToString for Token {
             Token::Delimiter(del) => del.to_string(),
             Token::Operator(op) => op.to_string(),
             Token::RegisterIndirect(ri) => ri.to_string(),
-            Token::IndexIndirect(r, i) => format!("({}+{})", r.to_string(), i),
+            Token::IndexIndirect(r, i) => format!("({}+{:?})", r.to_string(), i),
             Token::Condition(c) => c.to_string(),
             Token::StringLiteral(l) => l.to_string(),
             Token::Opt(o) => o.to_string(),
@@ -266,7 +267,7 @@ impl ToString for Token {
                 t.join(" ")
             }
             Token::MacroParam(mp) => mp.to_string(),
-            //Token::IndexIndirectExpression(_, _) => unimplemented!()
+            Token::Function(_) => "".to_string()
         }
     }
 }

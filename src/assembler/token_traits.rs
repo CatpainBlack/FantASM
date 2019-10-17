@@ -6,7 +6,7 @@ use regex::Regex;
 use crate::assembler::number_parser::NumberParser;
 use crate::assembler::tokens::{AluOp, Bool, OptionType, RegPair, RotOp, Token};
 use crate::assembler::tokens::{Cnd, Del, Directive, Ir, IxU, IyU, Op, OpCode, Reg};
-use crate::assembler::tokens::Token::{ConstLabel, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair};
+use crate::assembler::tokens::Token::{ConstLabel, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair, Function};
 use crate::assembler::zx_ascii::ZXAscii;
 
 pub trait Tokens {
@@ -360,6 +360,7 @@ impl Tokens for Token {
             Number(_) => true,
             Operator(_) => true,
             ConstLabel(_) => true,
+            Function(_) => true,
             _ => false
         }
     }

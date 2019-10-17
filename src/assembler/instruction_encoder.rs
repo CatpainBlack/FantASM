@@ -45,7 +45,11 @@ impl InstructionEncoder for Assembler {
         self.context.pc_add(size);
 
         match tok {
-            IndexIndirect(_, n) => self.emit(&[alu!(a, Reg::_HL_ as u8), n]),
+            IndexIndirect(_, n) => if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {
+                self.emit(&[alu!(a, Reg::_HL_ as u8), byte as u8])
+            } else {
+                Err(self.context.error(ErrorType::BadExpression))
+            }
             RegisterIX(r) => self.emit_byte(alu!(a, r as u8)),
             RegisterIY(r) => self.emit_byte(alu!(a, r as u8)),
             Register(r) => self.emit_byte(alu!(a, r as u8)),
@@ -103,8 +107,6 @@ impl InstructionEncoder for Assembler {
     }
 
     fn bit_res_set(&mut self, x: u8) -> Result<(), Error> {
-        // todo, fix if iX or Iy
-
         let bit = self.expect_byte(1)?;
         if bit < 0 || bit > 7 {
             self.warn(ErrorType::BitTruncated);
@@ -120,12 +122,20 @@ impl InstructionEncoder for Assembler {
                 if self.next_token_is(&Delimiter(Comma)) {
                     self.tokens.pop();
                     if let Register(r) = self.take_token()? {
-                        self.emit(&[0xCB, n, xyz!(x, bit as u8, r as u8)])?
+                        if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {
+                            self.emit(&[0xCB, byte as u8, xyz!(x, bit as u8, r as u8)])?
+                        } else {
+                            return Err(self.context.error(ErrorType::BadExpression));
+                        }
                     } else {
                         return Err(self.context.error(ErrorType::SyntaxError));
                     }
                 } else {
-                    self.emit(&[0xCB, n, xyz!(x, bit as u8, _HL_ as u8)])?
+                    if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {
+                        self.emit(&[0xCB, byte as u8, xyz!(x, bit as u8, _HL_ as u8)])?
+                    } else {
+                        return Err(self.context.error(ErrorType::BadExpression));
+                    }
                 }
             }
             RegisterIX(_) => self.emit(&[0xCb, xyz!(x, bit as u8, _HL_ as u8)])?,
@@ -209,7 +219,13 @@ impl InstructionEncoder for Assembler {
         self.context.pc_add(n);
 
         match tok {
-            IndexIndirect(_reg, n) => self.emit(&[xyz!(0, _HL_ as u8, q + 4), n]),
+            IndexIndirect(_reg, n) => {
+                if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {
+                    self.emit(&[xyz!(0, _HL_ as u8, q + 4), byte as u8])
+                } else {
+                    return Err(self.context.error(ErrorType::BadExpression));
+                }
+            }
             RegisterPair(Ix) => self.emit_byte(xpqz!(0, 2, q, 3)),
             RegisterPair(Iy) => self.emit_byte(xpqz!(0, 2, q, 3)),
             RegisterPair(r) => self.emit_byte(xpqz!(0, r.rp1()?, q, 3)),
@@ -310,10 +326,18 @@ impl InstructionEncoder for Assembler {
                 if self.next_token_is(&Delimiter(Comma)) {
                     self.tokens.pop();
                     if let Register(r) = self.take_token()? {
-                        return self.emit(&[0xCB, n, rot_encode!(a, r.clone() as u8)]);
+                        if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {
+                            return self.emit(&[0xCB, byte as u8, rot_encode!(a, r.clone() as u8)]);
+                        } else {
+                            return Err(self.context.error(ErrorType::BadExpression));
+                        }
                     }
                 } else {
-                    return self.emit(&[0xCB, n, rot_encode!(a, Reg::_HL_ as u8)]);
+                    if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {
+                        return self.emit(&[0xCB, byte as u8, rot_encode!(a, Reg::_HL_ as u8)]);
+                    } else {
+                        return Err(self.context.error(ErrorType::BadExpression));
+                    }
                 }
                 Err(self.context.error(ErrorType::SyntaxError))
             }
@@ -392,10 +416,28 @@ impl InstructionEncoder for Assembler {
 
             (IndirectExpression(tokens), RegisterPair(r)) => self.emit_instr(Some(0xED), xpqz!(1, r.rp1()?, 0, 3), tokens.as_slice(), false),
 
-            (Register(r), IndexIndirect(_reg, o)) => self.emit(&[xyz!(1, r.clone() as u8, Reg::_HL_ as u8), o.clone()]),
+            (Register(r), IndexIndirect(_reg, o)) => {
+                if let Ok(byte) = self.expr.eval(&mut self.context, &mut o.clone()) {
+                    self.emit(&[xyz!(1, r.clone() as u8, Reg::_HL_ as u8), byte as u8])
+                } else {
+                    Err(self.context.error(ErrorType::BadExpression))
+                }
+            }
 
-            (IndexIndirect(_rp, i), Number(n)) => self.emit(&[0x36, i.clone(), n.clone() as u8]),
-            (IndexIndirect(_rp, o), Register(r)) => self.emit(&[xyz!(1, Reg::_HL_ as u8, r.clone() as u8), o.clone()]),
+            (IndexIndirect(_rp, i), Number(n)) => {
+                if let Ok(byte) = self.expr.eval(&mut self.context, &mut i.clone()) {
+                    self.emit(&[0x36, byte as u8, n.clone() as u8])
+                } else {
+                    Err(self.context.error(ErrorType::BadExpression))
+                }
+            }
+            (IndexIndirect(_rp, o), Register(r)) => {
+                if let Ok(byte) = self.expr.eval(&mut self.context, &mut o.clone()) {
+                    self.emit(&[xyz!(1, Reg::_HL_ as u8, r.clone() as u8), byte as u8])
+                } else {
+                    Err(self.context.error(ErrorType::BadExpression))
+                }
+            }
 
             _ => {
                 println!("load_indirect: {:?},{:?}", dst, src);
