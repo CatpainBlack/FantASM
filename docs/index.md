@@ -97,6 +97,9 @@ Conditinally control assembly.
 Returns the size of an included binary file.
 In order to support ```SIZEOF```, your ```INCBIN``` must be preceded by a label.
 
+```GLOBAL label```
+
+Marks a label as global. This determines whether a label will be included when using the -e,--export-labels switches
 
 ### Expressions
 
@@ -123,8 +126,10 @@ start
 
 * Added: IF/ELSE/ENDIF conditional assembly
 * Added: -D --define command line option
-* Fixed: Support for (ix+expr) and (iy+expr)
 * Added: SIZEOF(label) - Gives the size of an included binary file
+* Added: GLOBAL directive, to determine which labels can be exported
+* Fixed: Support for (ix+expr) and (iy+expr)
+* Fixed: INCLUDE/INCBIN now look int the same directory as the parent file.
 
 1.1.2
 

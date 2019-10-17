@@ -12,7 +12,7 @@ use crate::assembler::instruction_encoder::InstructionEncoder;
 use crate::assembler::macro_impl::MacroHandler;
 use crate::assembler::reg_pair::HighLow;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
-use crate::assembler::tokens::Directive::{Else, End, EndIf, If};
+use crate::assembler::tokens::Directive::{Else, End, EndIf, Global, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Directive, Operator};
@@ -38,6 +38,7 @@ impl Assembler {
             labels_file: String::new(),
             if_level: vec![],
             defines: vec![],
+            next_label_global: false,
         }
     }
 
@@ -439,7 +440,8 @@ impl Assembler {
         Ok(())
     }
 
-    fn handle_label(&mut self, l: &str) -> Result<(), Error> {
+    fn handle_label(&mut self, l: &str, global: bool) -> Result<(), Error> {
+        self.next_label_global = false;
         if self.next_token_is(&Operator(Equals)) {
             self.tokens.pop();
             match self.expr.parse(&mut self.context, &mut self.tokens, 0, -1, false) {
@@ -452,7 +454,7 @@ impl Assembler {
                 self.warn(ErrorType::ExtraCharacters)
             }
         } else {
-            self.context.add_label(l.to_string())?
+            self.context.add_label(l.to_string(), global)?
         }
         Ok(())
     }
@@ -489,6 +491,11 @@ impl Assembler {
         }
         self.tokens = tokens.to_owned();
         self.tokens.reverse();
+
+        if self.next_token_is(&Directive(Global)) {
+            self.next_label_global = true;
+        }
+
         while !self.tokens.is_empty() {
             self.context.init_asm_pc();
             if self.skip_translate()? {
@@ -496,13 +503,15 @@ impl Assembler {
             }
             if let Some(tok) = self.tokens.pop() {
                 match &tok {
-                    Token::ConstLabel(l) => if self.macros.macro_defined(l) {
-                        self.macros.begin_expand(&mut self.context, l, &mut self.tokens)?;
-                        while let Some(line) = self.macros.expand() {
-                            self.translate(&mut line.clone())?
+                    Token::ConstLabel(l) => {
+                        if self.macros.macro_defined(l) {
+                            self.macros.begin_expand(&mut self.context, l, &mut self.tokens)?;
+                            while let Some(line) = self.macros.expand() {
+                                self.translate(&mut line.clone())?
+                            }
+                        } else {
+                            self.handle_label(l, self.next_label_global)?
                         }
-                    } else {
-                        self.handle_label(l)?
                     }
                     Token::Directive(d) => self.process_directive(*d)?,
                     Token::OpCode(op) => self.handle_opcodes(op.clone())?,

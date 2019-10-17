@@ -112,6 +112,7 @@ pub enum Directive {
     If,
     Else,
     EndIf,
+    Global,
 }
 
 #[derive(Debug, Clone, PartialEq)]

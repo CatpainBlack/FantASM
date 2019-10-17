@@ -36,14 +36,20 @@ and copy the binary somewhere in your path.
 </pre>
 
 ## To-Do
+
+General
+- [ ] Improve the documentation
+
+1.1.3
 - [x] ```--define```        Add commandline switch to define a constant.
 - [x] ```Expressions```     Fix remaining opcodes that don't use expressions, eg: ```ld (ix+n)),r```.
 - [x] ```SizeOf```          Give the size of an included binary file.
+- [x] ```Conditionals```    Conditional assembly using DEFINE, IFDEF, ELSE, ENDIF.
+- [x] ```Include```         Include needs to check the same directory as the source file that requested it.
+- [x] ```Exports```         Added GLOBAL directive (similar to NASM).
+
+1.1.4
 - [ ] ```Structs```         Define data structures, similar to C.
 - [ ] ```Modules```         Group code into modules.
-- [ ] ```Exports```         Define a way of exporting only certain labels.
-- [x] ```Conditionals```    Conditional assembly using DEFINE, IFDEF, ELSE, ENDIF.
-- [ ] ```Include```         Include needs to check the same directory as the source file that requested it.
 - [ ] ```zx7/lz4```         Add support for compression, either as output or when including binary files.
 - [ ] ```ENUM```            Enumerator directive.
-- [ ] ```Documentation```   Improve the documentation!

@@ -23,6 +23,7 @@ impl<R> TokenReader<R> where R: BufRead {
         }
     }
 
+
     pub fn delimiters(&mut self, del: &str) -> &mut TokenReader<R> {
         self.delimiters = del.to_string();
         self
@@ -48,6 +49,7 @@ impl<R> TokenReader<R> where R: BufRead {
     fn split_line(&mut self, line: &String) {
         let mut in_quotes = false;
         self.words = vec![];
+
 
         for c in line.chars() {
             if in_quotes {
@@ -109,7 +111,7 @@ impl<R> TokenReader<R> where R: BufRead {
                 }
                 let label = self.words.pop().unwrap_or(String::new());
                 if &self.words.pop().unwrap_or(String::new()) != ")" {
-                    return None
+                    return None;
                 }
                 Some(Token::Function(SizeOf(label)))
             }

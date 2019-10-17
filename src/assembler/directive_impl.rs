@@ -28,6 +28,7 @@ pub trait Directives {
     fn process_if(&mut self) -> Result<(), Error>;
     fn process_endif(&mut self) -> Result<(), Error>;
     fn process_else(&mut self) -> Result<(), Error>;
+    fn process_global(&mut self) -> Result<(), Error>;
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error>;
 }
 
@@ -168,7 +169,12 @@ impl Directives for Assembler {
     }
 
     fn locate_file(&mut self, file_name: &str) -> Result<String, Error> {
+        let src = self.context.current_file_name().to_string();
+        let path = Path::new(&src).parent().unwrap_or(Path::new("."));
         let mut dirs = self.include_dirs.clone();
+        if !dirs.contains(&path.to_str().unwrap().to_string()) {
+            dirs.insert(0, path.to_str().unwrap().to_string());
+        }
         if !dirs.contains(&String::from(".")) {
             dirs.insert(0, String::from("."));
         }
@@ -209,12 +215,10 @@ impl Directives for Assembler {
             ConstLabel(l) => l,
             _ => return Err(self.context.error(ErrorType::FileNotFound))
         };
-        if !Path::new(&file_name).exists() {
-            return Err(self.context.error(ErrorType::FileNotFound));
-        }
-        self.info(format!("Including binary file from {}", file_name).as_str());
+        let file_path = self.locate_file(&file_name)?;
+        self.info(format!("Including binary file from {}", file_path).as_str());
         let mut b: Vec<u8> = vec![];
-        let mut f = File::open(&file_name)?;
+        let mut f = File::open(&file_path)?;
         let r = f.read_to_end(b.as_mut())? as isize;
         self.context.result(self.bank.append(&mut b))?;
         self.context.add_size_of(r);
@@ -267,6 +271,12 @@ impl Directives for Assembler {
         }
     }
 
+    fn process_global(&mut self) -> Result<(), Error> {
+        //unimplemented!()
+        Ok(())
+
+    }
+
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error> {
         match directive {
             Directive::Org => self.set_origin(),
@@ -290,6 +300,7 @@ impl Directives for Assembler {
             Directive::If => self.process_if(),
             Directive::Else => self.process_else(),
             Directive::EndIf => self.process_endif(),
+            Directive::Global => self.process_global(),
         }
     }
 }

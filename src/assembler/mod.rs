@@ -71,6 +71,7 @@ pub struct Assembler {
     labels_file: String,
     if_level: Vec<IfBlock>,
     defines: Vec<(String)>,
+    next_label_global: bool,
 }
 
 #[derive(Debug)]

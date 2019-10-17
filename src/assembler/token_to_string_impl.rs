@@ -110,7 +110,8 @@ impl ToString for Directive {
             Directive::StringZero => "DZ",
             Directive::If => "IF",
             Directive::Else => "ELSE",
-            Directive::EndIf => "ENDIF"
+            Directive::EndIf => "ENDIF",
+            Directive::Global => "GLOBAL"
         }.to_string()
     }
 }

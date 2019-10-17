@@ -13,6 +13,7 @@ use crate::assembler::error_impl::ErrorType;
 #[derive(Default)]
 pub struct AssemblerContext {
     labels: HashMap<String, isize>,
+    global_labels: Vec<String>,
     constants: HashMap<String, isize>,
     size_of: HashMap<String, isize>,
     forward_references: Vec<ForwardReference>,
@@ -141,7 +142,7 @@ impl AssemblerContext {
         }
     }
 
-    pub fn add_label(&mut self, name: String) -> Result<(), Error> {
+    pub fn add_label(&mut self, name: String, global: bool) -> Result<(), Error> {
         let mut label_name = name.clone();
         if label_name.ends_with(":") {
             label_name = name.replace(":", "");
@@ -155,7 +156,10 @@ impl AssemblerContext {
         if self.is_label_defined(label_name.as_str()) {
             return Err(self.error(ErrorType::LabelOrConstantExists));
         }
-        self.labels.insert(label_name, self.current_pc);
+        self.labels.insert(label_name.to_string(), self.current_pc);
+        if global {
+            self.global_labels.push(label_name.to_string());
+        }
         Ok(())
     }
 
@@ -184,11 +188,10 @@ impl AssemblerContext {
             for (l, _) in &self.labels {
                 m = max(m, l.len() + 1);
             }
-            for (l, s) in &self.labels {
-                if !l.contains(".") {
-                    let line = format!("{} = 0x{:x}\n", l.pad_to_width(m), s);
-                    file.write(line.as_bytes())?;
-                }
+            for g in self.global_labels.clone() {
+                let s = self.get_label(&g.clone()).unwrap_or(-1);
+                let line = format!("{} = 0x{:x}\n", g.pad_to_width(m), s);
+                file.write(line.as_bytes())?;
             }
         }
         Ok(())
