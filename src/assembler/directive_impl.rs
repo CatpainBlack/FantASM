@@ -163,6 +163,7 @@ impl Directives for Assembler {
             (Opt(OptionType::Verbose), Token::Boolean(b)) => self.enable_console(b),
             (Opt(OptionType::CSpect), Token::Boolean(b)) => self.enable_cspect(b),
             (Opt(OptionType::Z80n), Token::Boolean(b)) => self.enable_z80n(b),
+            (Opt(OptionType::MaxCodeSize), Token::Number(n)) => self.max_code_size(n as usize),
             (_, _) => return Err(self.context.error(ErrorType::InvalidOption))
         };
         Ok(())
@@ -274,7 +275,6 @@ impl Directives for Assembler {
     fn process_global(&mut self) -> Result<(), Error> {
         //unimplemented!()
         Ok(())
-
     }
 
     fn process_directive(&mut self, directive: Directive) -> Result<(), Error> {

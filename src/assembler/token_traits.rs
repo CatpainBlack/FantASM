@@ -40,6 +40,7 @@ impl FromStr for OptionType {
             "verbose" => Ok(OptionType::Verbose),
             "cspect" => Ok(OptionType::CSpect),
             "z80n" => Ok(OptionType::Z80n),
+            "maxcodesize" => Ok(OptionType::MaxCodeSize),
             _ => Err(())
         }
     }

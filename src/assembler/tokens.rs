@@ -241,6 +241,7 @@ pub enum OptionType {
     Verbose,
     CSpect,
     Z80n,
+    MaxCodeSize,
 }
 
 #[derive(Debug, Clone, PartialEq)]

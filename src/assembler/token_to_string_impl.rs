@@ -235,6 +235,7 @@ impl ToString for OptionType {
             OptionType::Verbose => "verbose",
             OptionType::CSpect => "cspect",
             OptionType::Z80n => "z80n",
+            OptionType::MaxCodeSize=>"maxcodesize"
         }.to_string()
     }
 }

@@ -122,6 +122,10 @@ start
 
 ### History
 
+1.1.4
+
+* Added: Ability to set MAXCODESIZE at source level (#pragma MAXCODESIZE nnnn)
+
 1.1.3
 
 * Added: IF/ELSE/ENDIF conditional assembly
