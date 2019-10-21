@@ -109,6 +109,7 @@ impl ToString for Directive {
             Directive::End => "END",
             Directive::StringZero => "DZ",
             Directive::If => "IF",
+            Directive::IfDef => "IFDEF",
             Directive::Else => "ELSE",
             Directive::EndIf => "ENDIF",
             Directive::Global => "GLOBAL"
@@ -235,7 +236,7 @@ impl ToString for OptionType {
             OptionType::Verbose => "verbose",
             OptionType::CSpect => "cspect",
             OptionType::Z80n => "z80n",
-            OptionType::MaxCodeSize=>"maxcodesize"
+            OptionType::MaxCodeSize => "maxcodesize"
         }.to_string()
     }
 }

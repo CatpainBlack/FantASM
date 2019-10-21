@@ -1,11 +1,9 @@
 	org 32768
 
-start
-    ld  hl,bug
-    ld  de,0x4000
-    ld  bc,SIZEOF(bug)
+wibble=1
 
-
-global
-bug        incbin  "bug.asm"
-
+ifdef wibble
+    ld  a,0
+else
+    ld  a,1
+endif
