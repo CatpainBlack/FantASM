@@ -49,7 +49,7 @@ General
 - [x] ```Exports```         Added GLOBAL directive (similar to NASM).
 
 1.1.4
-- [ ] ```IFDEF```           Condition assembly.
+- [x] ```IFDEF```           Condition assembly.
 - [ ] ```Structs```         Define data structures, similar to C.
 - [ ] ```Modules```         Group code into modules.
 - [ ] ```zx7/lz4```         Add support for compression, either as output or when including binary files.
