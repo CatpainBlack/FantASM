@@ -20,6 +20,7 @@ impl<R> TokenReader<R> where R: BufRead {
             tokens: vec![],
             preceding_token: Token::EndOfFile,
             file_name: String::default(),
+            whitespace_at_start: false,
         }
     }
 
@@ -50,8 +51,14 @@ impl<R> TokenReader<R> where R: BufRead {
         let mut in_quotes = false;
         self.words = vec![];
 
+        let mut pos = 0;
+        self.whitespace_at_start = false;
 
         for c in line.chars() {
+            if pos == 0 && c.is_whitespace() {
+                self.whitespace_at_start = true;
+            }
+            pos += 1;
             if in_quotes {
                 self.token_string.push(c);
                 if (c == '\"' || c == '\'') && !self.token_string.ends_with("\\\"") {

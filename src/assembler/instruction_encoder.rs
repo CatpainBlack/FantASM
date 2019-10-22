@@ -39,11 +39,8 @@ pub(crate) trait InstructionEncoder {
 impl InstructionEncoder for Assembler {
     fn alu_op(&mut self, a: AluOp) -> Result<(), Error> {
         let tok = self.take_token()?;
-
         let size = self.context.result(self.bank.emit_prefix(&tok))?;
-
         self.context.pc_add(size);
-
         match tok {
             IndexIndirect(_, n) => if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {
                 self.emit(&[alu!(a, Reg::_HL_ as u8), byte as u8])
@@ -128,7 +125,7 @@ impl InstructionEncoder for Assembler {
                             return Err(self.context.error(ErrorType::BadExpression));
                         }
                     } else {
-                        return Err(self.context.error(ErrorType::SyntaxError));
+                        return Err(self.context.error(ErrorType::RegisterExpected));
                     }
                 } else {
                     if let Ok(byte) = self.expr.eval(&mut self.context, &mut n.clone()) {

@@ -31,6 +31,7 @@ struct TokenReader<R> {
     tokens: Vec<Token>,
     preceding_token: Token,
     file_name: String,
+    whitespace_at_start: bool,
 }
 
 #[derive(Debug)]

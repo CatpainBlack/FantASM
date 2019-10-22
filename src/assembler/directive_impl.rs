@@ -20,6 +20,7 @@ pub trait Directives {
     fn handle_words(&mut self) -> Result<(), Error>;
     fn handle_block(&mut self) -> Result<(), Error>;
     fn handle_hex(&mut self) -> Result<(), Error>;
+    fn handle_define(&mut self) -> Result<(), Error>;
     fn set_option(&mut self) -> Result<(), Error>;
     fn locate_file(&mut self, file_name: &str) -> Result<String, Error>;
     fn include_source_file(&mut self) -> Result<(), Error>;
@@ -74,7 +75,7 @@ impl Directives for Assembler {
                     self.tokens.pop();
                     self.handle_string(&s, terminator)?;
                     continue;
-                } else {}
+                }
                 self.tokens.push(t);
                 match self.expr.parse(&mut self.context, &mut self.tokens, 0, 1, false) {
                     Ok(Some(n)) => {
@@ -154,6 +155,18 @@ impl Directives for Assembler {
             self.emit(&bytes)
         } else {
             Err(self.context.error(ErrorType::HexStringExpected))
+        }
+    }
+
+    fn handle_define(&mut self) -> Result<(), Error> {
+        if let ConstLabel(name) = self.take_token()? {
+            if self.macros.macro_defined(&name) {
+                Err(self.context.error(ErrorType::MacroExists))
+            } else {
+                self.macros.add_define(&name, &mut self.tokens)
+            }
+        } else {
+            Err(self.context.error(ErrorType::BadMacroName))
         }
     }
 
@@ -289,7 +302,6 @@ impl Directives for Assembler {
     }
 
     fn process_global(&mut self) -> Result<(), Error> {
-        //unimplemented!()
         Ok(())
     }
 
@@ -318,6 +330,7 @@ impl Directives for Assembler {
             Directive::Else => self.process_else(),
             Directive::EndIf => self.process_endif(),
             Directive::Global => self.process_global(),
+            Directive::Define => self.handle_define()
         }
     }
 }

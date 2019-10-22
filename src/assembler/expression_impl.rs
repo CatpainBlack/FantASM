@@ -98,7 +98,6 @@ impl ExpressionParser {
             return Ok(Some(0));
         }
 
-
         match self.eval(context, expr.as_mut()) {
             Ok(n) => Ok(Some(n)),
             Err(e) => return Err(e),

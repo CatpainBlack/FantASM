@@ -503,6 +503,8 @@ impl Assembler {
             }
             if let Some(tok) = self.tokens.pop() {
                 match &tok {
+                    Token::Directive(d) => self.process_directive(*d)?,
+                    Token::OpCode(op) => self.handle_opcodes(op.clone())?,
                     Token::ConstLabel(l) => {
                         if self.macros.macro_defined(l) {
                             self.macros.begin_expand(&mut self.context, l, &mut self.tokens)?;
@@ -513,8 +515,6 @@ impl Assembler {
                             self.handle_label(l, self.next_label_global)?
                         }
                     }
-                    Token::Directive(d) => self.process_directive(*d)?,
-                    Token::OpCode(op) => self.handle_opcodes(op.clone())?,
                     Token::Invalid => return Err(self.context.error(ErrorType::InvalidLabel)),
                     _ => {
                         return Err(self.context.error(ErrorType::SyntaxError));

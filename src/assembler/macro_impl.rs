@@ -117,6 +117,18 @@ impl MacroHandler {
         token
     }
 
+    pub fn add_define(&mut self, name: &str, tokens: &mut Vec<Token>) -> Result<(), Error> {
+        let mut mtokens = vec![];
+        mtokens.push(tokens.clone());
+        tokens.clear();
+        let m = Macro {
+            params: vec![],
+            tokens: mtokens,
+        };
+        self.macros.insert(name.to_string(), m);
+        Ok(())
+    }
+
     pub fn begin_collect(&mut self, context: &mut AssemblerContext, tokens: &mut Vec<Token>) -> Result<(), Error> {
         if self.collecting {
             return Err(context.error(ErrorType::NestedMacro));

@@ -104,7 +104,6 @@ impl ToString for Directive {
             Directive::Word => "DW",
             Directive::Block => "DS",
             Directive::Hex => "DH",
-            //Directive::Align => "ALIGN",
             Directive::Macro => "MACRO",
             Directive::End => "END",
             Directive::StringZero => "DZ",
@@ -112,7 +111,8 @@ impl ToString for Directive {
             Directive::IfDef => "IFDEF",
             Directive::Else => "ELSE",
             Directive::EndIf => "ENDIF",
-            Directive::Global => "GLOBAL"
+            Directive::Global => "GLOBAL",
+            Directive::Define => "DEFINE"
         }.to_string()
     }
 }

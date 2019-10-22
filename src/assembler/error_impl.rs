@@ -44,44 +44,47 @@ pub enum ErrorType {
     NestedMacro,
     MacroParamCount,
     MacroLabel,
+    MacroExists,
 
     CodeSize,
     UnknownSizeOf,
 
     NonAscii,
     //NotImplemented,
+
+    RegisterExpected,
 }
 
 impl ToString for ErrorType {
     fn to_string(&self) -> String {
         match self {
-            //ErrorType::NotImplemented => String::from("Not implemented"),
+            ErrorType::BadExpression => String::from("Invalid number or expression"),
+            ErrorType::InvalidInstruction => String::from("Invalid instruction"),
+            ErrorType::BitTruncated => String::from("Bit number is out of range will and will be truncated"),
+            ErrorType::RegisterExpected => String::from("Invalid 8-bit register"),
+            ErrorType::InvalidRegisterPair => String::from("Invalid register pair"),
             ErrorType::PCOverflow => String::from("Address overflow, PC > 65535"),
             ErrorType::InvalidLabel => String::from("Invalid character in label"),
-            ErrorType::SyntaxError => String::from("Syntax error"),
             ErrorType::BadConstant => String::from("Bad constant definition"),
-            ErrorType::InvalidRegisterPair => String::from("Invalid register pair"),
-            ErrorType::InvalidInstruction => String::from("Invalid instruction"),
             ErrorType::IntegerOutOfRange => String::from("Integer out of range"),
             ErrorType::FileNotFound => String::from("File not found"),
             ErrorType::LabelNotFound => String::from("Undefined label or constant"),
             ErrorType::AddressTruncated => String::from("Address is out of range, the value has been truncated"),
             ErrorType::LabelOrConstantExists => String::from("Attempt to redefine label or constant"),
-            ErrorType::UnexpectedEndOfLine => String::from("Unexpected end of line"),
             ErrorType::InvalidCondition => String::from("Invalid condition"),
             ErrorType::Z80NDisabled => String::from("Z80n extended instructions are not enabled"),
             ErrorType::ByteTruncated => String::from("Integer has been truncated to 8 bits"),
+
+            ErrorType::SyntaxError => String::from("Syntax error"),
+            ErrorType::UnexpectedEndOfLine => String::from("Unexpected end of line"),
             ErrorType::UnexpectedClose => String::from("Unexpected closing parentheses"),
             ErrorType::UnclosedParentheses => String::from("Unclosed parentheses"),
             ErrorType::CSpectDisabled => String::from("CSpect pseudo ops are not enabled"),
             ErrorType::InvalidOption => String::from("Invalid assembler option"),
-            ErrorType::BadExpression => String::from("Unable to parse expression"),
             ErrorType::WordTruncated => String::from("Integer has been truncated to 16 bits"),
             ErrorType::HexStringExpected => String::from("Invalid Hexadecimal string"),
-            ErrorType::BitTruncated => String::from("Bit number is out of range will and will be truncated"),
             ErrorType::MultipleIncludes => String::from("Source file previously included"),
             ErrorType::ExtraCharacters => String::from("Discarded extra characters at and of line"),
-            //ErrorType::UnhandledDirective => String::from("Unhandled directive"),
             ErrorType::DanglingEnd => String::from("Encountered END without MACRO directive "),
             ErrorType::BadMacroName => String::from("Invalid or missing macro name"),
             ErrorType::CommaExpected => String::from("Comma expected"),
@@ -89,12 +92,12 @@ impl ToString for ErrorType {
             ErrorType::NestedMacro => String::from("Macros may not be nested"),
             ErrorType::MacroParamCount => String::from("Incorrect number of macro parameters"),
             ErrorType::MacroLabel => String::from("Only local labels are permitted inside macros"),
-            ErrorType::NonAscii => String::from("Bad string"),
+            ErrorType::NonAscii => String::from("String contains non-ascii characters"),
             ErrorType::CodeSize => String::from("Maximum code size exceeded"),
             ErrorType::EndIfWithoutIf => String::from("ENDIF without IF"),
             ErrorType::ElseWithoutIf => String::from("ELSE without IF"),
-            //ErrorType::ExpectedParenthesis => String::from("Expected opening parenthesis"),
-            ErrorType::UnknownSizeOf => String::from("SizeOf cannot be determined")
+            ErrorType::UnknownSizeOf => String::from("SizeOf cannot be determined"),
+            ErrorType::MacroExists =>  String::from("Macro already defined")
         }
     }
 }

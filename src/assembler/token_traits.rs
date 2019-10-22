@@ -186,6 +186,7 @@ impl FromStr for Directive {
             "else" => Ok(Directive::Else),
             "endif" => Ok(Directive::EndIf),
             "global" => Ok(Directive::Global),
+            "#define" => Ok(Directive::Define),
             _ => Err(())
         }
     }

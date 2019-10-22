@@ -1,9 +1,6 @@
 	org 32768
 
-wibble=1
+#define Yep 1
+#define Nope 0
 
-ifdef wibble
-    ld  a,0
-else
-    ld  a,1
-endif
+    db  Yep
