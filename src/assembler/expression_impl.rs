@@ -63,8 +63,8 @@ impl ExpressionParser {
                         return Err(ErrorType::BadConstant);
                     }
                 }
-                Operator(Op::Shl) => strings.push("*2^".to_string()),
-                Operator(Op::Shr) => strings.push("/2^".to_string()),
+                //Operator(Op::Shl) => strings.push("*2^".to_string()),
+                //Operator(Op::Shr) => strings.push("/2^".to_string()),
                 Number(_) | Operator(_) => strings.push(token.to_string()),
                 _ => return Err(ErrorType::BadExpression)
             }

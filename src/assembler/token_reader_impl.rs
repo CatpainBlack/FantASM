@@ -24,7 +24,6 @@ impl<R> TokenReader<R> where R: BufRead {
         }
     }
 
-
     pub fn delimiters(&mut self, del: &str) -> &mut TokenReader<R> {
         self.delimiters = del.to_string();
         self
