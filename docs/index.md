@@ -124,6 +124,7 @@ start
 
 1.1.4
 
+* Added: IFDEF/IFNDEF conditional assembly directives
 * Added: Ability to set MAXCODESIZE at source level (#pragma MAXCODESIZE nnnn)
 
 1.1.3
