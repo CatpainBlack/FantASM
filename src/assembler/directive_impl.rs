@@ -27,7 +27,7 @@ pub trait Directives {
     fn write_message(&mut self) -> Result<(), Error>;
     fn include_binary(&mut self) -> Result<(), Error>;
     fn process_if(&mut self) -> Result<(), Error>;
-    fn process_if_def(&mut self) -> Result<(), Error>;
+    fn process_if_def(&mut self, defined: bool) -> Result<(), Error>;
     fn process_endif(&mut self) -> Result<(), Error>;
     fn process_else(&mut self) -> Result<(), Error>;
     fn process_global(&mut self) -> Result<(), Error>;
@@ -266,9 +266,12 @@ impl Directives for Assembler {
         Ok(())
     }
 
-    fn process_if_def(&mut self) -> Result<(), Error> {
+    fn process_if_def(&mut self, defined: bool) -> Result<(), Error> {
         if let ConstLabel(l) = self.take_token()? {
-            let exists = self.context.is_constant_defined(&l);
+            let mut exists = self.context.is_constant_defined(&l);
+            if !defined {
+                exists = !exists;
+            }
             match self.if_level.last() {
                 Some(Else(false)) |
                 Some(If(false)) |
@@ -326,7 +329,8 @@ impl Directives for Assembler {
             }
             Directive::Hex => self.handle_hex(),
             Directive::If => self.process_if(),
-            Directive::IfDef => self.process_if_def(),
+            Directive::IfDef => self.process_if_def(true),
+            Directive::IfNotDef => self.process_if_def(false),
             Directive::Else => self.process_else(),
             Directive::EndIf => self.process_endif(),
             Directive::Global => self.process_global(),

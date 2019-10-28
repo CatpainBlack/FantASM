@@ -1,8 +1,11 @@
 	org 32768
 
-    ld  hl,$4000
-    ld  de,$4001
-    ld  bc,6912
-    ld  (hl),l
-    ldir
-    ret
+wibble=1
+
+IFNDEF wibble
+    ld  a,0
+ELSE
+    ld  a,1
+ENDIF
+
+    db  0,0

@@ -183,6 +183,7 @@ impl FromStr for Directive {
             "dz" => Ok(Directive::StringZero),
             "if" => Ok(Directive::If),
             "ifdef" => Ok(Directive::IfDef),
+            "ifndef" => Ok(Directive::IfNotDef),
             "else" => Ok(Directive::Else),
             "endif" => Ok(Directive::EndIf),
             "global" => Ok(Directive::Global),

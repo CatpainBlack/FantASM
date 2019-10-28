@@ -111,6 +111,7 @@ pub enum Directive {
     StringZero,
     If,
     IfDef,
+    IfNotDef,
     Else,
     EndIf,
     Global,
