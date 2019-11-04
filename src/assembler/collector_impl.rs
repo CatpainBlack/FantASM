@@ -15,7 +15,7 @@ impl Collector for Assembler {
             }
             self.tokens.pop();
         }
-        if let Number(n) = self.take_token()? {
+        if let Ok(Number(n)) = self.take_token() {
             Ok(Some(n))
         } else {
             Ok(None)

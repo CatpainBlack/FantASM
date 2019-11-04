@@ -1,6 +1,6 @@
 	org 32768
 
-ENUM Gadget 0,1
+ENUM Gadget 10,2
     None
     Button
     Box = 10
