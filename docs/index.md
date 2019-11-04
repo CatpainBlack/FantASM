@@ -94,7 +94,7 @@ Conditinally control assembly.
     
 ```SIZEOF(label)```
 
-Returns the size of an included binary file.
+Returns the size of a struct or included binary file.
 In order to support ```SIZEOF```, your ```INCBIN``` must be preceded by a label.
 
 ```GLOBAL label```
@@ -152,8 +152,8 @@ start
 
 * Added: IFDEF/IFNDEF conditional assembly directives
 * Added: Ability to set MAXCODESIZE at source level (#pragma MAXCODESIZE nnnn)
-* Added: ENUM Directive.
-* Added: STRUCT Directive.
+* Added: ENUM directive.
+* Added: STRUCT directive and SIZOF(struct)
 * Fixed: Expression parser handling of bitwise operations, *&*, *|*, *<<*, and *>>*
 
 1.1.3

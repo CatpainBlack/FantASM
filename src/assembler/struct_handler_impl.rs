@@ -22,6 +22,8 @@ impl StructHandler for Assembler {
 
     fn end_process_struct(&mut self) -> Result<(), Error> {
         if self.collect_struct.is_some() {
+            let (n, o) = self.collect_struct.clone().unwrap();
+            self.context.add_size_of_struct(&n, o);
             self.take_token()?;
             self.collect_struct = None;
             Ok(())

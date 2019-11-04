@@ -50,11 +50,12 @@ General
 
 1.1.4
 - [x] ```IFDEF```           Condition assembly.
-- [x] Fix/Update all errors to be more descriptive and helpful
-- [x] Fix expression parser bitwise operations
 - [x] ```#define```         Single line macros
 - [x] ```ENUM```            Enumerator directive.
 - [x] ```STRUCT```          Define data structures.
+- [x] ```SIZEOF(STRUCT)```   Gives the computed size of a STRUCT
+- [x] Fix/Update all errors to be more descriptive and helpful
+- [x] Fix expression parser bitwise operations
 
 1.x.x
 - [ ] Source code formatting/linter

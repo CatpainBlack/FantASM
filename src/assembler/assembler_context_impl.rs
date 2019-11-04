@@ -205,6 +205,10 @@ impl AssemblerContext {
         }
     }
 
+    pub fn add_size_of_struct(&mut self, name: &str, size: isize) {
+        self.size_of.insert(name.to_string(), size);
+    }
+
     pub fn add_size_of(&mut self, size: isize) {
         let label = self.label_context.to_string();
         if let Some(pc) = self.get_label(&label) {

@@ -14,9 +14,7 @@ STRUCT mystruct
 END
 
     ld  a,Gadget.None
-
-    ld  a,(ix+mystruct.top)
-
+    ld  a,sizeof(mystruct)
     db  0,0
 
 
