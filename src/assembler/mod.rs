@@ -20,6 +20,9 @@ mod macro_impl;
 mod token_to_string_impl;
 mod macros;
 mod zx_ascii;
+mod enum_handler_impl;
+mod conditional_impl;
+mod collector_impl;
 
 struct TokenReader<R> {
     reader: R,
@@ -67,12 +70,14 @@ pub struct Assembler {
     c_spect_enabled: bool,
     debug: bool,
     collect_macro: bool,
+    collect_enum: Option<(String, isize, isize)>,
     warnings: Vec<String>,
     include_dirs: Vec<String>,
     labels_file: String,
     if_level: Vec<IfBlock>,
     defines: Vec<(String)>,
     next_label_global: bool,
+
 }
 
 #[derive(Debug)]

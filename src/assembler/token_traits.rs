@@ -188,6 +188,8 @@ impl FromStr for Directive {
             "endif" => Ok(Directive::EndIf),
             "global" => Ok(Directive::Global),
             "#define" => Ok(Directive::Define),
+            "enum" => Ok(Directive::Enum),
+            "ende" => Ok(Directive::EndEnum),
             _ => Err(())
         }
     }
@@ -227,13 +229,12 @@ impl FromStr for Op {
 }
 
 lazy_static! {
-    static ref LABEL: Regex = Regex::new(r"^\.?[a-zA-Z]+[a-zA-Z0-9_]*:?$").unwrap();
+    static ref LABEL: Regex = Regex::new(r"^\.?[a-zA-Z]+[a-zA-Z0-9_.]*:?$").unwrap();
 }
 
 impl Tokens for Token {
     fn from_string(word: String) -> Token {
         let w = word.to_lowercase();
-
 
         // string literals
         let is_double_quoted = word.starts_with("\"") & &word.ends_with("\"");

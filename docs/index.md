@@ -101,6 +101,19 @@ In order to support ```SIZEOF```, your ```INCBIN``` must be preceded by a label.
 
 Marks a label as global. This determines whether a label will be included when using the -e,--export-labels switches
 
+```ENUM <name>,[<value>,<increment>]```
+
+Example
+```
+    ENUM name 0,1
+        first
+        second
+        ...
+        another = 20
+        last       
+    END
+```
+
 ### Expressions
 
 ### Macros
@@ -126,6 +139,7 @@ start
 
 * Added: IFDEF/IFNDEF conditional assembly directives
 * Added: Ability to set MAXCODESIZE at source level (#pragma MAXCODESIZE nnnn)
+* Added: ENUM Directive
 * Fixed: Expression parser handling of bitwise operations, *&*, *|*, *<<*, and *>>*
 
 1.1.3

@@ -16,6 +16,7 @@ use crate::assembler::tokens::Directive::{Else, End, EndIf, Global, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Directive, Operator};
+use crate::assembler::enum_handler_impl::EnumHandler;
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -33,6 +34,7 @@ impl Assembler {
             c_spect_enabled: false,
             debug: false,
             collect_macro: false,
+            collect_enum: None,
             warnings: vec![],
             include_dirs: vec![],
             labels_file: String::new(),
@@ -498,6 +500,10 @@ impl Assembler {
 
         while !self.tokens.is_empty() {
             self.context.init_asm_pc();
+            if self.collect_enum.is_some() {
+                self.process_enum()?;
+                continue;
+            }
             if self.skip_translate()? {
                 continue;
             }

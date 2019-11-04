@@ -53,6 +53,12 @@ pub enum ErrorType {
     //NotImplemented,
 
     RegisterExpected,
+
+    EnumBadName,
+    EnumBadEnd,
+    EnumMemberName,
+    EnumStepValue,
+
 }
 
 impl ToString for ErrorType {
@@ -97,7 +103,12 @@ impl ToString for ErrorType {
             ErrorType::EndIfWithoutIf => String::from("ENDIF without IF"),
             ErrorType::ElseWithoutIf => String::from("ELSE without IF"),
             ErrorType::UnknownSizeOf => String::from("SizeOf cannot be determined"),
-            ErrorType::MacroExists =>  String::from("Macro already defined")
+            ErrorType::MacroExists => String::from("Macro already defined"),
+
+            ErrorType::EnumBadName => String::from("ENUM name expected"),
+            ErrorType::EnumBadEnd => String::from("ENDE without ENUM"),
+            ErrorType::EnumMemberName => String::from("Enum member name is invalid"),
+            ErrorType::EnumStepValue => String::from("Enum step value cannot be zero"),
         }
     }
 }

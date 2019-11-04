@@ -18,7 +18,6 @@ impl ExpressionParser {
     }
 
     pub fn get_expression(&mut self, context: &mut AssemblerContext, tokens: &mut Vec<Token>) -> (bool, Vec<Token>) {
-
         let mut expr = vec![];
         let mut has_forward_ref = false;
         while tokens.last().unwrap_or(&Token::None).is_expression() {
@@ -63,8 +62,6 @@ impl ExpressionParser {
                         return Err(ErrorType::BadConstant);
                     }
                 }
-                //Operator(Op::Shl) => strings.push("*2^".to_string()),
-                //Operator(Op::Shr) => strings.push("/2^".to_string()),
                 Number(_) | Operator(_) => strings.push(token.to_string()),
                 _ => return Err(ErrorType::BadExpression)
             }
