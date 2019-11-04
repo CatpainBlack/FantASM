@@ -126,6 +126,7 @@ start
 
 * Added: IFDEF/IFNDEF conditional assembly directives
 * Added: Ability to set MAXCODESIZE at source level (#pragma MAXCODESIZE nnnn)
+* Fixed: Expression parser handling of bitwise operations, *&*, *|*, *<<*, and *>>*
 
 1.1.3
 

@@ -1,11 +1,5 @@
 	org 32768
 
-wibble=1
-
-IFNDEF wibble
-    ld  a,0
-ELSE
-    ld  a,1
-ENDIF
+    db  (1<<2)|1
 
     db  0,0
