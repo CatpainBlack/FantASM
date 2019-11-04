@@ -56,7 +56,7 @@ General
 - [x] ```ENUM```            Enumerator directive.
 - [x] ```STRUCT```          Define data structures.
 
-1.1.x
-- [ ] ```Modules```         Group code into modules.
-- [ ] ```zx7/lz4```         Add support for compression, either as output or when including binary files.
+1.x.x
 - [ ] Source code formatting/linter
+- [ ] Disassembler
+- [ ] Build System, config file driven with support for different output types (TAP, NEX etc)
