@@ -62,10 +62,10 @@ impl Options {
             parser.set_description(&description);
 
             parser.refer(&mut options.source)
-                .add_argument("input", Store, "Source file");
+                .add_argument("source", Store, "Source file");
 
             parser.refer(&mut options.output)
-                .add_argument("output", Store, "Output file");
+                .add_argument("file", Store, "Output file");
 
             parser.refer(&mut options.z80n)
                 .add_option(&["-N", "--z80n"], StoreTrue, "Enable Z80n (ZX Next) cpu extensions");
@@ -83,18 +83,23 @@ impl Options {
                 .add_option(&["-V", "--version"], StoreTrue, "Displays the version and exits");
 
             parser.refer(&mut options.include_dirs)
+                .metavar("file")
                 .add_option(&["-I", "--include"], List, "Add a directory to search for include files");
 
             parser.refer(&mut options.defines)
+                .metavar("constant")
                 .add_option(&["-D", "--define"], List, "Define 1 more constants");
 
             parser.refer(&mut options.export_labels)
+                .metavar("file")
                 .add_option(&["-e", "--export-labels"], Store, "Export labels to a file");
 
             parser.refer(&mut options.origin)
+                .metavar("address")
                 .add_option(&["-O", "--origin"], Store, "Address to start assembling code");
 
             parser.refer(&mut options.max_code_size)
+                .metavar("size")
                 .add_option(&["-M", "--max-code-size"], Store, "Limit the size of assembled code");
 
             parser.parse_args_or_exit();
