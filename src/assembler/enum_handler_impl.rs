@@ -38,13 +38,12 @@ impl EnumHandler for Assembler {
     }
 
     fn process_enum(&mut self) -> Result<(), Error> {
-        if self.next_token_is(&Token::Directive(Directive::EndEnum)) || self.next_token_is(&Token::Directive(Directive::EndEnum)) {
+        if self.next_token_is(&Token::Directive(Directive::EndEnum)) || self.next_token_is(&Token::Directive(Directive::End)) {
             self.end_process_enum()
         } else if let ConstLabel(name) = self.take_token()? {
             let (e, mut v, step) = self.collect_enum.clone().unwrap();
             v = self.optional_parameter(Some(&Token::Operator(Equals)))?.unwrap_or(v);
             let label = format!("{}.{}", e, name);
-            //println!("{} = {}", label, v);
             self.context.add_constant(label, v)?;
             v += step;
             self.collect_enum = Some((e, v, step));

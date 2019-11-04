@@ -4,7 +4,7 @@ ENUM Gadget 0,1
     None
     Button
     Box = 10
-ENDE
+END
 
     ld  a,Gadget.None
 
