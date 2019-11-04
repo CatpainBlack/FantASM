@@ -59,6 +59,10 @@ pub enum ErrorType {
     EnumMemberName,
     EnumStepValue,
 
+    StructBadName,
+    StructBadEnd,
+    StructMemberName,
+    StructMemberSize,
 }
 
 impl ToString for ErrorType {
@@ -109,6 +113,11 @@ impl ToString for ErrorType {
             ErrorType::EnumBadEnd => String::from("ENDE without ENUM"),
             ErrorType::EnumMemberName => String::from("Enum member name is invalid"),
             ErrorType::EnumStepValue => String::from("Enum step value cannot be zero"),
+
+            ErrorType::StructBadName => String::from("STRUCT name expected"),
+            ErrorType::StructBadEnd => String::from("ENDS without STRUCT"),
+            ErrorType::StructMemberName => String::from("STRUCT member name is invalid"),
+            ErrorType::StructMemberSize => String::from("STRUCT member size suffix is invalid"),
         }
     }
 }

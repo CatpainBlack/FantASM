@@ -54,9 +54,9 @@ General
 - [x] Fix expression parser bitwise operations
 - [x] ```#define```         Single line macros
 - [x] ```ENUM```            Enumerator directive.
+- [x] ```STRUCT```          Define data structures.
 
 1.1.x
-- [ ] ```Structs```         Define data structures, similar to C.
 - [ ] ```Modules```         Group code into modules.
 - [ ] ```zx7/lz4```         Add support for compression, either as output or when including binary files.
 - [ ] Source code formatting/linter

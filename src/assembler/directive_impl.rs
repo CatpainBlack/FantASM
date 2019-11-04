@@ -8,6 +8,7 @@ use crate::assembler::{Assembler, Error};
 use crate::assembler::conditional_impl::Conditional;
 use crate::assembler::enum_handler_impl::EnumHandler;
 use crate::assembler::error_impl::ErrorType;
+use crate::assembler::struct_handler_impl::StructHandler;
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral};
@@ -271,6 +272,8 @@ impl Directives for Assembler {
             Directive::Define => self.handle_define(),
             Directive::Enum => self.begin_process_enum(),
             Directive::EndEnum => self.end_process_enum(),
+            Directive::Struct => self.begin_process_struct(),
+            Directive::EndStruct => self.end_process_struct()
         }
     }
 }

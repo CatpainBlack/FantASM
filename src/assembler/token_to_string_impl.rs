@@ -115,7 +115,9 @@ impl ToString for Directive {
             Directive::Define => "DEFINE",
             Directive::IfNotDef => "IFNDEF",
             Directive::Enum => "ENUM",
-            Directive::EndEnum => "ENDE"
+            Directive::EndEnum => "ENDE",
+            Directive::Struct => "STRUCT",
+            Directive::EndStruct => "ENDS"
         }.to_string()
     }
 }

@@ -116,7 +116,9 @@ pub enum Directive {
     EndIf,
     Global,
     Enum,
-    EndEnum
+    EndEnum,
+    Struct,
+    EndStruct,
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -190,6 +190,8 @@ impl FromStr for Directive {
             "#define" => Ok(Directive::Define),
             "enum" => Ok(Directive::Enum),
             "ende" => Ok(Directive::EndEnum),
+            "struct" => Ok(Directive::Struct),
+            "ends" => Ok(Directive::EndStruct),
             _ => Err(())
         }
     }

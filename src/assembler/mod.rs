@@ -23,6 +23,7 @@ mod zx_ascii;
 mod enum_handler_impl;
 mod conditional_impl;
 mod collector_impl;
+mod struct_handler_impl;
 
 struct TokenReader<R> {
     reader: R,
@@ -71,6 +72,7 @@ pub struct Assembler {
     debug: bool,
     collect_macro: bool,
     collect_enum: Option<(String, isize, isize)>,
+    collect_struct: Option<(String, isize)>,
     warnings: Vec<String>,
     include_dirs: Vec<String>,
     labels_file: String,

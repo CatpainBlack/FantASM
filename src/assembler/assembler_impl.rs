@@ -5,18 +5,19 @@ use std::ops::Range;
 use crate::assembler::{Assembler, Error, ErrorLevel, IfBlock, TokenReader};
 use crate::assembler::bank_impl::Bank;
 use crate::assembler::directive_impl::Directives;
+use crate::assembler::enum_handler_impl::EnumHandler;
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::error_impl::ErrorType::SyntaxError;
 use crate::assembler::expression_impl::ExpressionParser;
 use crate::assembler::instruction_encoder::InstructionEncoder;
 use crate::assembler::macro_impl::MacroHandler;
 use crate::assembler::reg_pair::HighLow;
+use crate::assembler::struct_handler_impl::StructHandler;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Directive::{Else, End, EndIf, Global, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Directive, Operator};
-use crate::assembler::enum_handler_impl::EnumHandler;
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -35,6 +36,7 @@ impl Assembler {
             debug: false,
             collect_macro: false,
             collect_enum: None,
+            collect_struct: None,
             warnings: vec![],
             include_dirs: vec![],
             labels_file: String::new(),
@@ -502,6 +504,10 @@ impl Assembler {
             self.context.init_asm_pc();
             if self.collect_enum.is_some() {
                 self.process_enum()?;
+                continue;
+            }
+            if self.collect_struct.is_some() {
+                self.process_struct()?;
                 continue;
             }
             if self.skip_translate()? {
