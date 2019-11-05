@@ -45,58 +45,8 @@ impl Assembler {
             labels_file: String::new(),
             if_level: vec![],
             defines: vec![],
-            next_label_global: false,
+            //next_label_global: false,
         }
-    }
-
-    pub fn enable_z80n(&mut self, enabled: bool) -> &mut Assembler {
-        self.z80n_enabled = enabled;
-        self
-    }
-
-    pub fn enable_console(&mut self, enabled: bool) -> &mut Assembler {
-        self.console_output = enabled;
-        self
-    }
-
-    pub fn enable_cspect(&mut self, enabled: bool) -> &mut Assembler {
-        self.c_spect_enabled = enabled;
-        self
-    }
-
-    pub fn enable_debug(&mut self, enabled: bool) -> &mut Assembler {
-        self.debug = enabled;
-        self
-    }
-
-    pub fn add_include_dirs(&mut self, dirs: Vec<String>) -> &mut Assembler {
-        self.include_dirs = dirs.clone();
-        self
-    }
-
-    pub fn add_defines(&mut self, defines: Vec<String>) -> &mut Assembler {
-        self.defines = defines.clone();
-        self
-    }
-
-    pub fn export_labels(&mut self, file_name: &str) -> &mut Assembler {
-        self.labels_file = file_name.to_string();
-        self
-    }
-
-    pub fn origin(&mut self, address: u16) -> &mut Assembler {
-        self.origin = address as isize;
-        self.context.pc(self.origin);
-        self
-    }
-
-    pub fn max_code_size(&mut self, size: usize) -> &mut Assembler {
-        if size > 0 {
-            self.bank.max_code_size(size);
-        } else {
-            self.bank.max_code_size(65536);
-        }
-        self
     }
 
     fn write_status(&self) {
@@ -399,7 +349,7 @@ impl Assembler {
     }
 
     fn handle_label(&mut self, l: &str, global: bool) -> Result<(), Error> {
-        self.next_label_global = false;
+        self.context.next_label_global = false;
         if self.next_token_is(&Operator(Equals)) {
             self.tokens.pop();
             match self.expr.parse(&mut self.context, &mut self.tokens, 0, -1, false) {
@@ -451,7 +401,7 @@ impl Assembler {
         self.tokens.reverse();
 
         if self.next_token_is(&Directive(Global)) {
-            self.next_label_global = true;
+            self.context.next_label_global = true;
         }
 
         while !self.tokens.is_empty() {
@@ -480,7 +430,7 @@ impl Assembler {
                                 self.translate(&mut line.clone())?
                             }
                         } else {
-                            self.handle_label(l, self.next_label_global)?
+                            self.handle_label(l, self.context.next_label_global)?
                         }
                     }
                     Token::Invalid => return Err(self.context.error(ErrorType::InvalidLabel)),

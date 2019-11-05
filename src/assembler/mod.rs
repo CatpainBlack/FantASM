@@ -4,6 +4,7 @@ use crate::assembler::expression::ExpressionParser;
 use crate::assembler::r#macro::MacroHandler;
 use crate::assembler::tokens::Token;
 
+pub(super) mod assembler_options;
 mod token_reader;
 mod error_type;
 mod tokens;
@@ -28,7 +29,7 @@ mod label;
 mod constant;
 mod sizeof;
 mod emitter;
-pub mod error;
+pub(super) mod error;
 
 struct TokenReader<R> {
     reader: R,
@@ -83,7 +84,6 @@ pub struct Assembler {
     labels_file: String,
     if_level: Vec<IfBlock>,
     defines: Vec<(String)>,
-    next_label_global: bool,
 }
 
 

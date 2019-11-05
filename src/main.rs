@@ -11,6 +11,7 @@ use std::time::Instant;
 use crate::assembler::Assembler;
 use crate::assembler::error::Error;
 use crate::options::Options;
+use crate::assembler::assembler_options::AssemblerOptions;
 
 mod options;
 mod assembler;

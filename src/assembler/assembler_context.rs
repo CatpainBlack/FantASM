@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use asciimath::{eval, scope};
 
-use crate::assembler::ForwardReference;
-use crate::assembler::error_type::ErrorType;
-use crate::assembler::label::Label;
 use crate::assembler::error::{Error, ErrorLevel};
+use crate::assembler::error_type::ErrorType;
+use crate::assembler::ForwardReference;
+use crate::assembler::label::Label;
 
 #[derive(Default)]
 pub struct AssemblerContext {
@@ -13,13 +13,14 @@ pub struct AssemblerContext {
     pub(super)global_labels: Vec<String>,
     pub(super)constants: HashMap<String, isize>,
     pub(super)size_of: HashMap<String, isize>,
-    pub(crate)struct_defs: HashMap<String, HashMap<String, isize>>,
-    forward_references: Vec<ForwardReference>,
-    line_number: Vec<isize>,
-    file_name: Vec<String>,
+    pub(super)struct_defs: HashMap<String, HashMap<String, isize>>,
+    pub(super)forward_references: Vec<ForwardReference>,
+    pub(super)line_number: Vec<isize>,
+    pub(super)file_name: Vec<String>,
     pub(super)current_pc: isize,
-    pub(crate)label_context: String,
-    asm_pc: isize,
+    pub(super)label_context: String,
+    pub(super)asm_pc: isize,
+    pub(super)next_label_global: bool,
 }
 
 impl AssemblerContext {
