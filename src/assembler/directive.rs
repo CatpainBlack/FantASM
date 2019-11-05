@@ -15,6 +15,7 @@ use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral}
 use crate::assembler::zx_ascii::ZXAscii;
 use crate::assembler::sizeof::SizeOfHandler;
 use crate::assembler::error::Error;
+use crate::assembler::emitter::Emitter;
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;

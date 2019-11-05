@@ -27,6 +27,7 @@ mod struct_handler;
 mod label;
 mod constant;
 mod sizeof;
+mod emitter;
 pub mod error;
 
 struct TokenReader<R> {

@@ -11,7 +11,6 @@ use crate::assembler::error_type::ErrorType::SyntaxError;
 use crate::assembler::expression::ExpressionParser;
 use crate::assembler::instruction_encoder::InstructionEncoder;
 use crate::assembler::r#macro::MacroHandler;
-use crate::assembler::reg_pair::HighLow;
 use crate::assembler::struct_handler::StructHandler;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Directive::{Else, End, EndIf, Global, If};
@@ -21,6 +20,7 @@ use crate::assembler::tokens::Token::{Directive, Operator};
 use crate::assembler::label::Label;
 use crate::assembler::constant::Constant;
 use crate::assembler::error::{ErrorLevel, Error};
+use crate::assembler::emitter::Emitter;
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -275,55 +275,6 @@ impl Assembler {
             return Err(self.context.error(ErrorType::SyntaxError));
         }
         Ok(())
-    }
-
-    pub(crate) fn emit(&mut self, b: &[u8]) -> Result<(), Error> {
-        let pc = self.context.offset_pc(b.len() as isize);
-        if pc > 65535 {
-            self.warn(ErrorType::PCOverflow)
-        }
-        self.context.pc(pc);
-        self.context.result(self.bank.append(&mut b.to_vec()))
-    }
-
-    pub(crate) fn emit_byte(&mut self, b: u8) -> Result<(), Error> {
-        let pc = self.context.offset_pc(1);
-        if pc > 65535 {
-            self.warn(ErrorType::PCOverflow)
-        }
-        self.context.pc(pc);
-        self.context.result(self.bank.push(b))?;
-        Ok(())
-    }
-
-    pub(crate) fn emit_word(&mut self, word: isize) -> Result<(), Error> {
-        if word < 0 || word > 65535 {
-            self.warn(ErrorType::WordTruncated);
-        }
-        let w = word as u16;
-        let pc = self.context.offset_pc(2);
-        if pc > 65535 {
-            self.warn(ErrorType::PCOverflow)
-        }
-        self.context.pc(pc);
-        self.context.result(self.bank.push(w.lo()))?;
-        self.context.result(self.bank.push(w.hi()))
-    }
-
-    pub(crate) fn emit_instr(&mut self, prefix: Option<u8>, instr: u8, expr: &[Token], byte: bool) -> Result<(), Error> {
-        if prefix.is_some() {
-            self.emit_byte(prefix.unwrap())?;
-        }
-        self.emit_byte(instr)?;
-        let a = match self.expr.parse(&mut self.context, &mut expr.to_vec(), 0, 2, false) {
-            Ok(Some(addr)) => addr,
-            Ok(None) => 0,
-            Err(e) => return Err(self.context.error(e))
-        };
-        if byte {
-            return self.emit_byte(a as u8);
-        }
-        self.emit_word(a)
     }
 
     fn handle_opcodes(&mut self, op: OpCode) -> Result<(), Error> {

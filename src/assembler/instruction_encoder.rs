@@ -11,6 +11,7 @@ use crate::assembler::tokens::Op::{LParens, RParens};
 use crate::assembler::tokens::Reg::_HL_;
 use crate::assembler::tokens::RegPair::{_Af, Af, De, Hl, Ix, Iy, Sp};
 use crate::assembler::tokens::Token::{Condition, ConstLabel, Delimiter, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterIR, RegisterIX, RegisterIY, RegisterPair};
+use crate::assembler::emitter::Emitter;
 
 pub(crate) trait InstructionEncoder {
     fn alu_op(&mut self, a: AluOp) -> Result<(), Error>;

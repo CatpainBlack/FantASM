@@ -10,6 +10,7 @@ use crate::assembler::tokens::Directive::{End, EndStruct};
 use crate::assembler::tokens::Token;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter};
 use crate::assembler::error::Error;
+use crate::assembler::emitter::Emitter;
 
 pub trait StructHandler {
     fn begin_process_struct(&mut self) -> Result<(), Error>;
