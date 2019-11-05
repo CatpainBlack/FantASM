@@ -105,13 +105,19 @@ Marks a label as global. This determines whether a label will be included when u
 
 Example
 ```
-    STRUCT window
+    STRUCT rect
         left.w      // 2 bytes
         top.w
         width.w
         height.w
         flags.b    ; Single byte
     END
+
+    ld  hl,(window.left)
+    ld  de,window.top
+
+window:  rect 0,0,0,0
+
 ```
 
 ```ENUM <name>,[<value>,<increment>]```
@@ -147,6 +153,10 @@ start
 
 
 ### History
+
+1.1.5
+
+* Improved struct handling (see docs)
 
 1.1.4
 

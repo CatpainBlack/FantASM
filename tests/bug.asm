@@ -1,20 +1,12 @@
 	org 32768
 
-ENUM Gadget 10,2
-    None
-    Button
-    Box = 10
-END
-
-STRUCT mystruct
+STRUCT rect
     top.b
     left
     width.w
     height.w
 END
 
-    ld  a,Gadget.None
-    ld  a,sizeof(mystruct)
-    db  0,0
+    ld  hl,window.top
 
-
+window  rect 1,2,3,4

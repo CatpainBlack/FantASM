@@ -16,6 +16,8 @@ pub struct AssemblerContext {
     global_labels: Vec<String>,
     constants: HashMap<String, isize>,
     size_of: HashMap<String, isize>,
+    pub(crate)struct_defs: HashMap<String, HashMap<String, isize>>,
+    //pub(crate)structs: HashMap<String, String>,
     forward_references: Vec<ForwardReference>,
     line_number: Vec<isize>,
     file_name: Vec<String>,

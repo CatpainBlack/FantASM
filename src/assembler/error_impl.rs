@@ -63,6 +63,7 @@ pub enum ErrorType {
     StructBadEnd,
     StructMemberName,
     StructMemberSize,
+    StructExists,
 }
 
 impl ToString for ErrorType {
@@ -118,6 +119,7 @@ impl ToString for ErrorType {
             ErrorType::StructBadEnd => String::from("ENDS without STRUCT"),
             ErrorType::StructMemberName => String::from("STRUCT member name is invalid"),
             ErrorType::StructMemberSize => String::from("STRUCT member size suffix is invalid"),
+            ErrorType::StructExists => String::from("STRUCT already defined"),
         }
     }
 }

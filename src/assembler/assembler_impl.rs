@@ -238,7 +238,7 @@ impl Assembler {
         self.expect_number_in_range(0..65536, 2, ErrorType::WordTruncated, instr_size)
     }
 
-    fn expect_number_in_range(&mut self, range: Range<isize>, count: isize, error_type: ErrorType, instr_size: isize) -> Result<isize, Error> {
+    pub(crate) fn expect_number_in_range(&mut self, range: Range<isize>, count: isize, error_type: ErrorType, instr_size: isize) -> Result<isize, Error> {
         match self.expr.parse(&mut self.context, &mut self.tokens, instr_size, count, false) {
             Ok(Some(n)) => {
                 if !range.contains(&n) {
@@ -518,7 +518,9 @@ impl Assembler {
                     Token::Directive(d) => self.process_directive(*d)?,
                     Token::OpCode(op) => self.handle_opcodes(op.clone())?,
                     Token::ConstLabel(l) => {
-                        if self.macros.macro_defined(l) {
+                        if self.is_struct(l) {
+                            self.emit_struct(l)?;
+                        } else if self.macros.macro_defined(l) {
                             self.macros.begin_expand(&mut self.context, l, &mut self.tokens)?;
                             while let Some(line) = self.macros.expand() {
                                 self.translate(&mut line.clone())?
