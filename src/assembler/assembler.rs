@@ -2,24 +2,25 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::ops::Range;
 
-use crate::assembler::{Assembler, Error, ErrorLevel, IfBlock, TokenReader};
-use crate::assembler::bank_impl::Bank;
-use crate::assembler::directive_impl::Directives;
-use crate::assembler::enum_handler_impl::EnumHandler;
-use crate::assembler::error_impl::ErrorType;
-use crate::assembler::error_impl::ErrorType::SyntaxError;
-use crate::assembler::expression_impl::ExpressionParser;
+use crate::assembler::{Assembler, IfBlock, TokenReader};
+use crate::assembler::bank::Bank;
+use crate::assembler::directive::Directives;
+use crate::assembler::enum_handler::EnumHandler;
+use crate::assembler::error_type::ErrorType;
+use crate::assembler::error_type::ErrorType::SyntaxError;
+use crate::assembler::expression::ExpressionParser;
 use crate::assembler::instruction_encoder::InstructionEncoder;
-use crate::assembler::macro_impl::MacroHandler;
+use crate::assembler::r#macro::MacroHandler;
 use crate::assembler::reg_pair::HighLow;
-use crate::assembler::struct_handler_impl::StructHandler;
+use crate::assembler::struct_handler::StructHandler;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Directive::{Else, End, EndIf, Global, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Directive, Operator};
-use crate::assembler::label_impl::Label;
-use crate::assembler::constant_impl::Constant;
+use crate::assembler::label::Label;
+use crate::assembler::constant::Constant;
+use crate::assembler::error::{ErrorLevel, Error};
 
 impl Assembler {
     pub fn new() -> Assembler {

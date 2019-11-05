@@ -1,4 +1,4 @@
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::error_type::ErrorType;
 use crate::assembler::tokens::RegPair::{Af, Bc, De, Hl, Ix, Iy, Sp};
 use crate::assembler::tokens::RegPair;
 

@@ -1,11 +1,12 @@
-use crate::assembler::{Assembler, Error};
-use crate::assembler::collector_impl::Collector;
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::Assembler;
+use crate::assembler::collector::Collector;
+use crate::assembler::constant::Constant;
+use crate::assembler::error_type::ErrorType;
 use crate::assembler::tokens::{Directive, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::Token::ConstLabel;
-use crate::assembler::constant_impl::Constant;
+use crate::assembler::error::Error;
 
 pub trait EnumHandler {
     fn begin_process_enum(&mut self) -> Result<(), Error>;

@@ -1,6 +1,7 @@
 use crate::{alu, alu_imm, rot_encode, xpqz, xyz};
-use crate::assembler::{Assembler, Error};
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::Assembler;
+use crate::assembler::error::Error;
+use crate::assembler::error_type::ErrorType;
 use crate::assembler::reg_pair::HighLow;
 use crate::assembler::reg_pair::RegPairValue;
 use crate::assembler::token_traits::Tokens;

@@ -8,7 +8,8 @@ extern crate version;
 use std::process::exit;
 use std::time::Instant;
 
-use crate::assembler::{Assembler, Error};
+use crate::assembler::Assembler;
+use crate::assembler::error::Error;
 use crate::options::Options;
 
 mod options;

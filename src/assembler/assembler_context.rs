@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use asciimath::{eval, scope};
 
-use crate::assembler::{Error, ErrorLevel, ForwardReference};
-use crate::assembler::error_impl::ErrorType;
-use crate::assembler::label_impl::Label;
+use crate::assembler::ForwardReference;
+use crate::assembler::error_type::ErrorType;
+use crate::assembler::label::Label;
+use crate::assembler::error::{Error, ErrorLevel};
 
 #[derive(Default)]
 pub struct AssemblerContext {

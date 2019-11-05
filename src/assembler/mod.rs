@@ -1,32 +1,33 @@
-use crate::assembler::assembler_context_impl::AssemblerContext;
-use crate::assembler::bank_impl::Bank;
-use crate::assembler::expression_impl::ExpressionParser;
-use crate::assembler::macro_impl::MacroHandler;
+use crate::assembler::assembler_context::AssemblerContext;
+use crate::assembler::bank::Bank;
+use crate::assembler::expression::ExpressionParser;
+use crate::assembler::r#macro::MacroHandler;
 use crate::assembler::tokens::Token;
 
-mod token_reader_impl;
-mod error_impl;
+mod token_reader;
+mod error_type;
 mod tokens;
 mod token_traits;
 mod number_parser;
 mod instruction_encoder;
-mod assembler_impl;
+mod assembler;
 mod reg_pair;
-mod directive_impl;
-mod expression_impl;
-mod assembler_context_impl;
-mod bank_impl;
-mod macro_impl;
+mod directive;
+mod expression;
+mod assembler_context;
+mod bank;
+mod r#macro;
 mod token_to_string_impl;
 mod macros;
 mod zx_ascii;
-mod enum_handler_impl;
-mod conditional_impl;
-mod collector_impl;
-mod struct_handler_impl;
-mod label_impl;
-mod constant_impl;
-mod sizeof_impl;
+mod enum_handler;
+mod conditional;
+mod collector;
+mod struct_handler;
+mod label;
+mod constant;
+mod sizeof;
+pub mod error;
 
 struct TokenReader<R> {
     reader: R,
@@ -84,14 +85,5 @@ pub struct Assembler {
     next_label_global: bool,
 }
 
-#[derive(Debug)]
-pub enum ErrorLevel {
-    Fatal,
-}
 
-pub struct Error {
-    pub line_no: isize,
-    pub message: String,
-    pub level: ErrorLevel,
-    pub file_name: String,
-}
+

@@ -5,9 +5,9 @@ use std::path::Path;
 
 use pad::PadStr;
 
-use crate::assembler::assembler_context_impl::AssemblerContext;
-use crate::assembler::Error;
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::assembler_context::AssemblerContext;
+use crate::assembler::error_type::ErrorType;
+use crate::assembler::error::Error;
 
 pub trait Label {
     fn add_label(&mut self, name: String, global: bool) -> Result<(), Error>;

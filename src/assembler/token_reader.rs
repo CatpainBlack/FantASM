@@ -1,12 +1,13 @@
 use std::io::BufRead;
 
-use crate::assembler::{Error, TokenReader};
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::TokenReader;
+use crate::assembler::error_type::ErrorType;
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Cnd, Op, Reg, RegPair, RegPairInd, Token};
 use crate::assembler::tokens::Functions::SizeOf;
 use crate::assembler::tokens::Op::{LParens, RParens};
 use crate::assembler::tokens::Token::{Condition, ConstLabel, IndexIndirect, IndirectExpression, Number, Operator, Register, RegisterIndirect, RegisterPair};
+use crate::assembler::error::Error;
 
 impl<R> TokenReader<R> where R: BufRead {
     pub fn new(reader: R) -> TokenReader<R> {

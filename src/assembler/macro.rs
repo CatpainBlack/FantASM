@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use crate::assembler::assembler_context_impl::AssemblerContext;
-use crate::assembler::Error;
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::assembler_context::AssemblerContext;
+use crate::assembler::error_type::ErrorType;
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Del, Token};
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter, MacroParam};
+use crate::assembler::error::Error;
 
 #[derive(Debug, Default)]
 pub struct Macro {

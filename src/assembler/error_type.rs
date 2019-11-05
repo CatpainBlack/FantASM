@@ -1,11 +1,3 @@
-extern crate colour;
-
-use std::error::Error as StdErr;
-use std::fmt;
-use std::fmt::Formatter;
-
-use crate::assembler::{Error, ErrorLevel};
-
 pub enum ErrorType {
     PCOverflow,
     InvalidLabel,
@@ -85,7 +77,6 @@ impl ToString for ErrorType {
             ErrorType::InvalidCondition => String::from("Invalid condition"),
             ErrorType::Z80NDisabled => String::from("Z80n extended instructions are not enabled"),
             ErrorType::ByteTruncated => String::from("Integer has been truncated to 8 bits"),
-
             ErrorType::SyntaxError => String::from("Syntax error"),
             ErrorType::UnexpectedEndOfLine => String::from("Unexpected end of line"),
             ErrorType::UnexpectedClose => String::from("Unexpected closing parentheses"),
@@ -109,66 +100,15 @@ impl ToString for ErrorType {
             ErrorType::ElseWithoutIf => String::from("ELSE without IF"),
             ErrorType::UnknownSizeOf => String::from("SizeOf cannot be determined"),
             ErrorType::MacroExists => String::from("Macro already defined"),
-
             ErrorType::EnumBadName => String::from("ENUM name expected"),
             ErrorType::EnumBadEnd => String::from("ENDE without ENUM"),
             ErrorType::EnumMemberName => String::from("Enum member name is invalid"),
             ErrorType::EnumStepValue => String::from("Enum step value cannot be zero"),
-
             ErrorType::StructBadName => String::from("STRUCT name expected"),
             ErrorType::StructBadEnd => String::from("ENDS without STRUCT"),
             ErrorType::StructMemberName => String::from("STRUCT member name is invalid"),
             ErrorType::StructMemberSize => String::from("STRUCT member size suffix is invalid"),
             ErrorType::StructExists => String::from("STRUCT already defined"),
-        }
-    }
-}
-
-impl Error {
-    pub fn fatal(message: &str, line_no: isize, file_name: &str) -> Error {
-        Error {
-            line_no,
-            message: message.to_string(),
-            level: ErrorLevel::Fatal,
-            file_name: file_name.to_string(),
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        if self.line_no > -1 {
-            write!(f, "{:?}: line {} - {}", self.level, self.line_no, self.message)
-        } else {
-            write!(f, "{:?} - {}", self.level, self.message)
-        }
-    }
-}
-
-impl fmt::Debug for Error {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{:?}: line {} - {}", self.level, self.line_no, self.message)
-    }
-}
-
-impl std::convert::From<std::string::String> for Error {
-    fn from(s: String) -> Self {
-        Error {
-            line_no: -1,
-            message: s,
-            level: ErrorLevel::Fatal,
-            file_name: "FantASM".to_string(),
-        }
-    }
-}
-
-impl std::convert::From<std::io::Error> for Error {
-    fn from(e: std::io::Error) -> Self {
-        Error {
-            line_no: -1,
-            message: e.description().to_string(),
-            level: ErrorLevel::Fatal,
-            file_name: "FantASM".to_string(),
         }
     }
 }

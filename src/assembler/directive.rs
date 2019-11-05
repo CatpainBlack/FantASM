@@ -4,16 +4,17 @@ use std::path::Path;
 
 use ascii::AsAsciiStr;
 
-use crate::assembler::{Assembler, Error};
-use crate::assembler::conditional_impl::Conditional;
-use crate::assembler::enum_handler_impl::EnumHandler;
-use crate::assembler::error_impl::ErrorType;
-use crate::assembler::struct_handler_impl::StructHandler;
+use crate::assembler::{Assembler};
+use crate::assembler::conditional::Conditional;
+use crate::assembler::enum_handler::EnumHandler;
+use crate::assembler::error_type::ErrorType;
+use crate::assembler::struct_handler::StructHandler;
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral};
 use crate::assembler::zx_ascii::ZXAscii;
-use crate::assembler::sizeof_impl::SizeOfHandler;
+use crate::assembler::sizeof::SizeOfHandler;
+use crate::assembler::error::Error;
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;

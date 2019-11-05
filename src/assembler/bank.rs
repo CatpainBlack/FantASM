@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::error_type::ErrorType;
 use crate::assembler::tokens::{RegPair, Token};
 use crate::assembler::tokens::Token::{IndexIndirect, RegisterIX, RegisterIY, RegisterPair};
 

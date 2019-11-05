@@ -1,5 +1,5 @@
-use crate::assembler::assembler_context_impl::AssemblerContext;
-use crate::assembler::label_impl::Label;
+use crate::assembler::assembler_context::AssemblerContext;
+use crate::assembler::label::Label;
 
 pub trait SizeOfHandler {
     fn get_size_of(&mut self, label: &str) -> Option<isize>;

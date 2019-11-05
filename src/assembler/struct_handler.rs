@@ -1,14 +1,15 @@
 use std::collections::HashMap;
 
-use crate::assembler::{Assembler, Error};
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::Assembler;
+use crate::assembler::constant::Constant;
+use crate::assembler::error_type::ErrorType;
+use crate::assembler::label::Label;
+use crate::assembler::sizeof::SizeOfHandler;
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Directive::{End, EndStruct};
 use crate::assembler::tokens::Token;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter};
-use crate::assembler::label_impl::Label;
-use crate::assembler::constant_impl::Constant;
-use crate::assembler::sizeof_impl::SizeOfHandler;
+use crate::assembler::error::Error;
 
 pub trait StructHandler {
     fn begin_process_struct(&mut self) -> Result<(), Error>;

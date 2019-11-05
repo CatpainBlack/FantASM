@@ -1,9 +1,10 @@
-use crate::assembler::{Assembler, Error, IfBlock};
-use crate::assembler::error_impl::ErrorType;
+use crate::assembler::{Assembler, IfBlock};
+use crate::assembler::constant::Constant;
+use crate::assembler::error_type::ErrorType;
 use crate::assembler::IfBlock::{Else, If, SkipEnd};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::Token::{ConstLabel, Operator};
-use crate::assembler::constant_impl::Constant;
+use crate::assembler::error::Error;
 
 pub trait Conditional {
     fn process_if(&mut self) -> Result<(), Error>;
