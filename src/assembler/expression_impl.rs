@@ -1,8 +1,11 @@
 extern crate asciimath;
 
 use crate::assembler::assembler_context_impl::AssemblerContext;
+use crate::assembler::constant_impl::Constant;
 use crate::assembler::error_impl::ErrorType;
 use crate::assembler::ForwardReference;
+use crate::assembler::label_impl::Label;
+use crate::assembler::sizeof_impl::SizeOfHandler;
 use crate::assembler::token_traits::Tokens;
 use crate::assembler::tokens::{Op, Token};
 use crate::assembler::tokens::Functions::SizeOf;

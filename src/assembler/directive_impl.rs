@@ -13,6 +13,7 @@ use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral};
 use crate::assembler::zx_ascii::ZXAscii;
+use crate::assembler::sizeof_impl::SizeOfHandler;
 
 pub trait Directives {
     fn set_origin(&mut self) -> Result<(), Error>;

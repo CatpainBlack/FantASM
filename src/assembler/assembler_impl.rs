@@ -18,6 +18,8 @@ use crate::assembler::tokens::Directive::{Else, End, EndIf, Global, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Directive, Operator};
+use crate::assembler::label_impl::Label;
+use crate::assembler::constant_impl::Constant;
 
 impl Assembler {
     pub fn new() -> Assembler {

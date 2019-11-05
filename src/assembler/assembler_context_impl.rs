@@ -1,27 +1,22 @@
-use std::cmp::max;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{BufWriter, Write};
-use std::path::Path;
 
 use asciimath::{eval, scope};
-use pad::PadStr;
 
 use crate::assembler::{Error, ErrorLevel, ForwardReference};
 use crate::assembler::error_impl::ErrorType;
+use crate::assembler::label_impl::Label;
 
 #[derive(Default)]
 pub struct AssemblerContext {
-    labels: HashMap<String, isize>,
-    global_labels: Vec<String>,
-    constants: HashMap<String, isize>,
-    size_of: HashMap<String, isize>,
+    pub(super)labels: HashMap<String, isize>,
+    pub(super)global_labels: Vec<String>,
+    pub(super)constants: HashMap<String, isize>,
+    pub(super)size_of: HashMap<String, isize>,
     pub(crate)struct_defs: HashMap<String, HashMap<String, isize>>,
-    //pub(crate)structs: HashMap<String, String>,
     forward_references: Vec<ForwardReference>,
     line_number: Vec<isize>,
     file_name: Vec<String>,
-    current_pc: isize,
+    pub(super)current_pc: isize,
     pub(crate)label_context: String,
     asm_pc: isize,
 }
@@ -92,17 +87,6 @@ impl AssemblerContext {
         self.line_number[len] += 1;
     }
 
-    pub fn is_label_defined(&self, name: &str) -> bool {
-        let mut label_name = name.to_string();
-        if label_name.starts_with(".") {
-            label_name = self.label_context.clone() + &label_name.clone();
-        }
-        self.labels.contains_key(&label_name)
-    }
-    pub fn is_constant_defined(&self, name: &str) -> bool {
-        self.constants.contains_key(name)
-    }
-
     pub fn get_label_or_constant_value(&mut self, name: &str) -> Result<isize, Error> {
         if let Some(address) = self.get_label(name) {
             return Ok(address);
@@ -113,17 +97,6 @@ impl AssemblerContext {
         Err(self.error(ErrorType::LabelNotFound))
     }
 
-    pub fn get_constant(&mut self, name: &str) -> Option<isize> {
-        self.constants.get(name).cloned()
-    }
-
-    pub fn get_label(&mut self, name: &str) -> Option<isize> {
-        let mut label_name = name.to_string();
-        if label_name.starts_with(".") {
-            label_name = self.label_context.clone() + &label_name.clone();
-        }
-        self.labels.get(&label_name).cloned()
-    }
 
     pub fn error(&mut self, t: ErrorType) -> Error {
         Error {
@@ -144,34 +117,6 @@ impl AssemblerContext {
         }
     }
 
-    pub fn add_label(&mut self, name: String, global: bool) -> Result<(), Error> {
-        let mut label_name = name.clone();
-        if label_name.ends_with(":") {
-            label_name = name.replace(":", "");
-        }
-        if !label_name.starts_with(".") {
-            self.label_context = label_name.clone();
-        } else {
-            label_name = self.label_context.clone() + &label_name.clone();
-        }
-
-        if self.is_label_defined(label_name.as_str()) {
-            return Err(self.error(ErrorType::LabelOrConstantExists));
-        }
-        self.labels.insert(label_name.to_string(), self.current_pc);
-        if global {
-            self.global_labels.push(label_name.to_string());
-        }
-        Ok(())
-    }
-
-    pub fn add_constant(&mut self, name: String, value: isize) -> Result<(), Error> {
-        if self.is_constant_defined(name.as_str()) {
-            return Err(self.error(ErrorType::LabelOrConstantExists));
-        }
-        self.constants.insert(name, value);
-        Ok(())
-    }
 
     pub fn next_forward_ref(&mut self) -> Option<ForwardReference> {
         self.forward_references.pop()
@@ -179,45 +124,5 @@ impl AssemblerContext {
 
     pub fn add_forward_ref(&mut self, fw: ForwardReference) {
         self.forward_references.push(fw);
-    }
-
-    pub fn export_labels(&mut self, file_name: &str) -> Result<(), Error> {
-        if file_name.len() > 0 {
-            let path = Path::new(file_name);
-            let mut file = BufWriter::new(File::create(&path)?);
-
-            let mut m = 0;
-            for (l, _) in &self.labels {
-                m = max(m, l.len() + 1);
-            }
-            for g in self.global_labels.clone() {
-                let s = self.get_label(&g.clone()).unwrap_or(-1);
-                let line = format!("{} = 0x{:x}\n", g.pad_to_width(m), s);
-                file.write(line.as_bytes())?;
-            }
-        }
-        Ok(())
-    }
-
-    pub fn get_size_of(&mut self, label: &str) -> Option<isize> {
-        if !self.size_of.contains_key(label) {
-            None
-        } else {
-            Some(self.size_of[label])
-        }
-    }
-
-    pub fn add_size_of_struct(&mut self, name: &str, size: isize) {
-        self.size_of.insert(name.to_string(), size);
-    }
-
-    pub fn add_size_of(&mut self, size: isize) {
-        let label = self.label_context.to_string();
-        if let Some(pc) = self.get_label(&label) {
-            if self.current_pc == pc {
-                self.size_of.insert(self.label_context.to_string(), size);
-                //println!("Added sizeof({},{})", self.label_context, size);
-            }
-        }
     }
 }

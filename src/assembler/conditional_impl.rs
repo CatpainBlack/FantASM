@@ -3,6 +3,7 @@ use crate::assembler::error_impl::ErrorType;
 use crate::assembler::IfBlock::{Else, If, SkipEnd};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::Token::{ConstLabel, Operator};
+use crate::assembler::constant_impl::Constant;
 
 pub trait Conditional {
     fn process_if(&mut self) -> Result<(), Error>;

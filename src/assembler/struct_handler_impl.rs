@@ -6,6 +6,9 @@ use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Directive::{End, EndStruct};
 use crate::assembler::tokens::Token;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter};
+use crate::assembler::label_impl::Label;
+use crate::assembler::constant_impl::Constant;
+use crate::assembler::sizeof_impl::SizeOfHandler;
 
 pub trait StructHandler {
     fn begin_process_struct(&mut self) -> Result<(), Error>;

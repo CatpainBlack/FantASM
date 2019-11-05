@@ -24,6 +24,9 @@ mod enum_handler_impl;
 mod conditional_impl;
 mod collector_impl;
 mod struct_handler_impl;
+mod label_impl;
+mod constant_impl;
+mod sizeof_impl;
 
 struct TokenReader<R> {
     reader: R,
@@ -79,7 +82,6 @@ pub struct Assembler {
     if_level: Vec<IfBlock>,
     defines: Vec<(String)>,
     next_label_global: bool,
-
 }
 
 #[derive(Debug)]

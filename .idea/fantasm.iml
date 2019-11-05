@@ -9,6 +9,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../fantasm\examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../fantasm\benches" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/../FantASM\target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
