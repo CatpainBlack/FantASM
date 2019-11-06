@@ -6,8 +6,8 @@ use std::path::Path;
 use pad::PadStr;
 
 use crate::assembler::assembler_context::AssemblerContext;
-use crate::assembler::error_type::ErrorType;
 use crate::assembler::error::Error;
+use crate::assembler::error_type::ErrorType;
 
 pub trait Label {
     fn add_label(&mut self, name: String, global: bool) -> Result<(), Error>;
@@ -71,5 +71,4 @@ impl Label for AssemblerContext {
         }
         Ok(())
     }
-
 }

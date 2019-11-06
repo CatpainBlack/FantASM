@@ -5,6 +5,7 @@ use crate::assembler::r#macro::MacroHandler;
 use crate::assembler::tokens::Token;
 
 pub(super) mod assembler_options;
+pub(super) mod error;
 mod token_reader;
 mod error_type;
 mod tokens;
@@ -21,15 +22,15 @@ mod r#macro;
 mod token_to_string_impl;
 mod macros;
 mod zx_ascii;
-mod enum_handler;
+mod enumerator;
 mod conditional;
 mod collector;
-mod struct_handler;
+mod structure;
 mod label;
 mod constant;
 mod sizeof;
 mod emitter;
-pub(super) mod error;
+mod get_token;
 
 struct TokenReader<R> {
     reader: R,

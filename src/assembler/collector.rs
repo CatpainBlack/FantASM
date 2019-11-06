@@ -1,5 +1,6 @@
 use crate::assembler::Assembler;
 use crate::assembler::error::Error;
+use crate::assembler::get_token::GetToken;
 use crate::assembler::tokens::Token;
 use crate::assembler::tokens::Token::Number;
 

@@ -2,17 +2,18 @@ use std::collections::HashMap;
 
 use crate::assembler::Assembler;
 use crate::assembler::constant::Constant;
+use crate::assembler::emitter::Emitter;
+use crate::assembler::error::Error;
 use crate::assembler::error_type::ErrorType;
+use crate::assembler::get_token::GetToken;
 use crate::assembler::label::Label;
 use crate::assembler::sizeof::SizeOfHandler;
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Directive::{End, EndStruct};
 use crate::assembler::tokens::Token;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter};
-use crate::assembler::error::Error;
-use crate::assembler::emitter::Emitter;
 
-pub trait StructHandler {
+pub trait Structure {
     fn begin_process_struct(&mut self) -> Result<(), Error>;
     fn end_process_struct(&mut self) -> Result<(), Error>;
     fn add_struct_member(&mut self, name: &str, member: &str, size: isize) -> Result<(), Error>;
@@ -21,7 +22,7 @@ pub trait StructHandler {
     fn emit_struct(&mut self, name: &str) -> Result<(), Error>;
 }
 
-impl StructHandler for Assembler {
+impl Structure for Assembler {
     fn begin_process_struct(&mut self) -> Result<(), Error> {
         if let ConstLabel(name) = self.take_token()? {
             if self.is_struct(&name) {

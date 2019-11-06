@@ -1,20 +1,21 @@
 use crate::assembler::Assembler;
 use crate::assembler::collector::Collector;
 use crate::assembler::constant::Constant;
+use crate::assembler::error::Error;
 use crate::assembler::error_type::ErrorType;
+use crate::assembler::get_token::GetToken;
 use crate::assembler::tokens::{Directive, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::Token::ConstLabel;
-use crate::assembler::error::Error;
 
-pub trait EnumHandler {
+pub trait Enumerator {
     fn begin_process_enum(&mut self) -> Result<(), Error>;
     fn end_process_enum(&mut self) -> Result<(), Error>;
     fn process_enum(&mut self) -> Result<(), Error>;
 }
 
-impl EnumHandler for Assembler {
+impl Enumerator for Assembler {
     fn begin_process_enum(&mut self) -> Result<(), Error> {
         if let ConstLabel(name) = self.take_token()? {
             let count = self.optional_parameter(None)?.unwrap_or(0);

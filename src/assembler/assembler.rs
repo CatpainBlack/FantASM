@@ -1,26 +1,26 @@
 use std::fs::File;
 use std::io::{BufReader, Write};
-use std::ops::Range;
 
 use crate::assembler::{Assembler, IfBlock, TokenReader};
 use crate::assembler::bank::Bank;
+use crate::assembler::constant::Constant;
 use crate::assembler::directive::Directives;
-use crate::assembler::enum_handler::EnumHandler;
+use crate::assembler::emitter::Emitter;
+use crate::assembler::enumerator::Enumerator;
+use crate::assembler::error::{Error, ErrorLevel};
 use crate::assembler::error_type::ErrorType;
 use crate::assembler::error_type::ErrorType::SyntaxError;
 use crate::assembler::expression::ExpressionParser;
+use crate::assembler::get_token::GetToken;
 use crate::assembler::instruction_encoder::InstructionEncoder;
+use crate::assembler::label::Label;
 use crate::assembler::r#macro::MacroHandler;
-use crate::assembler::struct_handler::StructHandler;
+use crate::assembler::structure::Structure;
 use crate::assembler::tokens::{AluOp, OpCode, Token};
 use crate::assembler::tokens::Directive::{Else, End, EndIf, Global, If};
 use crate::assembler::tokens::Op::Equals;
 use crate::assembler::tokens::RotOp::{Rl, Rlc, Rr, Rrc, Sla, Sll, Sra, Srl};
 use crate::assembler::tokens::Token::{Directive, Operator};
-use crate::assembler::label::Label;
-use crate::assembler::constant::Constant;
-use crate::assembler::error::{ErrorLevel, Error};
-use crate::assembler::emitter::Emitter;
 
 impl Assembler {
     pub fn new() -> Assembler {
@@ -171,60 +171,6 @@ impl Assembler {
             level: ErrorLevel::Fatal,
             file_name: file_name.to_string(),
         }
-    }
-
-    pub fn relative(&mut self) -> Result<u8, Error> {
-        let addr = match self.expr.parse(&mut self.context, &mut self.tokens, 1, 1, true) {
-            Ok(Some(n)) => n,
-            Ok(None) => 0,
-            Err(e) => return Err(self.context.error(e)),
-        };
-        let pc = (self.context.offset_pc(2)) as isize;
-        Ok((addr - pc) as u8)
-    }
-
-    pub(crate) fn expect_byte(&mut self, instr_size: isize) -> Result<isize, Error> {
-        self.expect_number_in_range(0..256, 1, ErrorType::ByteTruncated, instr_size)
-    }
-
-    pub(crate) fn expect_word(&mut self, instr_size: isize) -> Result<isize, Error> {
-        self.expect_number_in_range(0..65536, 2, ErrorType::WordTruncated, instr_size)
-    }
-
-    pub(crate) fn expect_number_in_range(&mut self, range: Range<isize>, count: isize, error_type: ErrorType, instr_size: isize) -> Result<isize, Error> {
-        match self.expr.parse(&mut self.context, &mut self.tokens, instr_size, count, false) {
-            Ok(Some(n)) => {
-                if !range.contains(&n) {
-                    self.warn(error_type);
-                }
-                Ok(n)
-            }
-            Ok(None) => return Err(self.context.error(ErrorType::SyntaxError)),
-            Err(e) => return Err(self.context.error(e))
-        }
-    }
-
-    pub fn take_token(&mut self) -> Result<Token, Error> {
-        if let Some(tok) = self.tokens.pop() {
-            return Ok(tok);
-        }
-        Err(self.context.error(ErrorType::UnexpectedEndOfLine))
-    }
-
-    pub fn next_token_is(&mut self, tok: &Token) -> bool {
-        if let Some(t) = self.tokens.last() {
-            t == tok
-        } else {
-            false
-        }
-    }
-
-    pub fn expect_token(&mut self, tok: Token) -> Result<(), Error> {
-        let t = self.take_token()?;
-        if t != tok {
-            return Err(self.context.error(ErrorType::SyntaxError));
-        }
-        Ok(())
     }
 
     fn handle_opcodes(&mut self, op: OpCode) -> Result<(), Error> {
@@ -408,16 +354,11 @@ impl Assembler {
             self.context.init_asm_pc();
             if self.collect_enum.is_some() {
                 self.process_enum()?;
-                continue;
-            }
-            if self.collect_struct.is_some() {
+            } else if self.collect_struct.is_some() {
                 self.process_struct()?;
+            } else if self.skip_translate()? {
                 continue;
-            }
-            if self.skip_translate()? {
-                continue;
-            }
-            if let Some(tok) = self.tokens.pop() {
+            } else if let Some(tok) = self.tokens.pop() {
                 match &tok {
                     Token::Directive(d) => self.process_directive(*d)?,
                     Token::OpCode(op) => self.handle_opcodes(op.clone())?,
