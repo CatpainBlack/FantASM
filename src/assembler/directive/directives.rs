@@ -6,14 +6,14 @@ use ascii::AsAsciiStr;
 
 use crate::assembler::Assembler;
 use crate::assembler::assembler_options::AssemblerOptions;
-use crate::assembler::conditional::Conditional;
+use crate::assembler::directive::conditional::Conditional;
+use crate::assembler::directive::enumerator::Enumerator;
+use crate::assembler::directive::sizeof::SizeOfHandler;
+use crate::assembler::directive::structure::Structure;
 use crate::assembler::emitter::Emitter;
-use crate::assembler::enumerator::Enumerator;
 use crate::assembler::error::Error;
 use crate::assembler::error_type::ErrorType;
 use crate::assembler::get_token::GetToken;
-use crate::assembler::sizeof::SizeOfHandler;
-use crate::assembler::structure::Structure;
 use crate::assembler::tokens::{Directive, OptionType, Token};
 use crate::assembler::tokens::Del::Comma;
 use crate::assembler::tokens::Token::{ConstLabel, Delimiter, Opt, StringLiteral};

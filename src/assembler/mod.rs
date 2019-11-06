@@ -1,7 +1,7 @@
 use crate::assembler::assembler_context::AssemblerContext;
 use crate::assembler::bank::Bank;
+use crate::assembler::directive::macros::MacroHandler;
 use crate::assembler::expression::ExpressionParser;
-use crate::assembler::r#macro::MacroHandler;
 use crate::assembler::tokens::Token;
 
 pub(super) mod assembler_options;
@@ -18,17 +18,12 @@ mod directive;
 mod expression;
 mod assembler_context;
 mod bank;
-mod r#macro;
 mod token_to_string_impl;
 mod macros;
 mod zx_ascii;
-mod enumerator;
-mod conditional;
 mod collector;
-mod structure;
 mod label;
 mod constant;
-mod sizeof;
 mod emitter;
 mod get_token;
 
