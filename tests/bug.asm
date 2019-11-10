@@ -1,12 +1,17 @@
 	org 32768
 
-STRUCT rect
-    top.b
-    left
-    width.w
-    height.w
+
+STRUCT	Window
+	top.b
+	left.b
+	width.b
+	height.b
+	colour.b
+	title.w
 END
 
-    ld  hl,window.top
+w_title:    dz  "WRD"
 
-window  rect 1,2,3,4
+w:  Window 1,2,3,4,5,w_title
+
+

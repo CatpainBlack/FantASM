@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use indexmap::IndexMap;
 
 use crate::assembler::Assembler;
 use crate::assembler::constant::Constant;
@@ -28,7 +28,7 @@ impl Structure for Assembler {
             if self.is_struct(&name) {
                 return Err(self.context.error(ErrorType::StructExists));
             }
-            self.context.struct_defs.insert(name.to_string(), HashMap::new());
+            self.context.struct_defs.insert(name.to_string(), IndexMap::new());
             self.collect_struct = Some((name, 0));
             Ok(())
         } else {
