@@ -55,7 +55,7 @@ pub struct Options {
 
 impl Options {
     pub fn parse() -> Result<Options, String> {
-        let description = format!("\nFantASM {} (Guy Fawkes) [{}]\n\u{000A9}2019 Captain Black\n", version!(), env!("BUILD_DATE"));
+        let description = format!("\nFantASM {} (Octarine) [{}]\n\u{000A9}2019 Captain Black\n", version!(), env!("BUILD_DATE"));
         let mut options = Options::default();
         {
             let mut parser = ArgumentParser::new();
@@ -88,7 +88,7 @@ impl Options {
 
             parser.refer(&mut options.defines)
                 .metavar("constant")
-                .add_option(&["-D", "--define"], List, "Define 1 more constants");
+                .add_option(&["-D", "--define"], List, "Defines a constants");
 
             parser.refer(&mut options.export_labels)
                 .metavar("file")

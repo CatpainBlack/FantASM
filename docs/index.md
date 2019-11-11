@@ -17,11 +17,13 @@ It supports all undocumented op-codes and the extended instruction set of the ZX
   -n,--nologo           Do no display the program name and version
   -v,--verbose          Enable verbose output
   -V,--version          Displays the version and exits
-  -I,--include INCLUDE  Add a directory to search for include files
-  -D,--define DEFINE    Define 1 more constants
-  -e,--export-labels    Export labels to a file
-  -O,--origin ORIGIN    Address to start assembling code
-  -M,--max-code-size=   Limit the size of assembled code
+  -I,--include file     Add a directory to search for include files
+  -D,--define constant  Define 1 more constants
+  -e,--export-labels file
+                        Export labels to a file
+  -O,--origin address   Address to start assembling code
+  -M,--max-code-size size
+                        Limit the size of assembled code
 </pre>
 
 ### Labels & Constants
@@ -46,7 +48,7 @@ Hexadecimal numbers may be in any of the following formats
 Binary numbers may be in any of the following formats
 
 * %10101010
-* 010101010b (must have leading zero, which is not included in the final value)  
+* 010101010b (must have leading zero)
 
 ### Directives
 

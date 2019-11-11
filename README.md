@@ -40,23 +40,6 @@ and copy the binary somewhere in your path.
 General
 - [ ] Improve the documentation
 
-1.1.3
-- [x] ```--define```        Add commandline switch to define a constant.
-- [x] ```Expressions```     Fix remaining opcodes that don't use expressions, eg: ```ld (ix+n)),r```.
-- [x] ```SizeOf```          Give the size of an included binary file.
-- [x] ```Conditionals```    Conditional assembly using IF, ELSE, ENDIF.
-- [x] ```Include```         Include needs to check the same directory as the source file that requested it.
-- [x] ```Exports```         Added GLOBAL directive (similar to NASM).
-
-1.1.4
-- [x] ```IFDEF```           Condition assembly.
-- [x] ```#define```         Single line macros
-- [x] ```ENUM```            Enumerator directive.
-- [x] ```STRUCT```          Define data structures.
-- [x] ```SIZEOF(STRUCT)```   Gives the computed size of a STRUCT
-- [x] Fix/Update all errors to be more descriptive and helpful
-- [x] Fix expression parser bitwise operations
-
 1.x.x
 - [ ] Source code formatting/linter
 - [ ] Disassembler
