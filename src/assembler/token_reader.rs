@@ -99,10 +99,10 @@ impl<R> TokenReader<R> where R: BufRead {
             let brk = in_quotes || is_whitespace || is_delimiter || is_operator;
             if brk {
                 self.store_token_string();
-                if !c.is_whitespace() {
+                if !c.is_whitespace() && !c.eq(&'\u{FEFF}') {
                     self.words.push(c.to_string());
                 }
-            } else if !c.is_whitespace() {
+            } else if !c.is_whitespace() && !c.eq(&'\u{FEFF}') {
                 self.token_string.push(c);
             }
         }
