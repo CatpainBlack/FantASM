@@ -12,6 +12,7 @@ pub trait AssemblerOptions {
     fn export_labels(&mut self, file_name: &str) -> &mut Assembler;
     fn origin(&mut self, address: u16) -> &mut Assembler;
     fn max_code_size(&mut self, size: usize) -> &mut Assembler;
+    fn case_insensitive(&mut self, ci: bool) -> &mut Assembler;
 }
 
 impl AssemblerOptions for Assembler {
@@ -62,6 +63,11 @@ impl AssemblerOptions for Assembler {
         } else {
             self.bank.max_code_size(65536);
         }
+        self
+    }
+
+    fn case_insensitive(&mut self, ci: bool) -> &mut Assembler {
+        self.context.case_insensitive = ci;
         self
     }
 }

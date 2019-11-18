@@ -9,9 +9,9 @@ use std::process::exit;
 use std::time::Instant;
 
 use crate::assembler::Assembler;
+use crate::assembler::assembler_options::AssemblerOptions;
 use crate::assembler::error::Error;
 use crate::options::Options;
-use crate::assembler::assembler_options::AssemblerOptions;
 
 mod options;
 mod assembler;
@@ -20,7 +20,7 @@ fn main() {
     match _main() {
         Ok(_) => exit(0),
         Err(e) => {
-            red_ln!("{}", e.message);
+            red_ln!("Error - {}", e.message);
             exit(1);
         }
     }
@@ -30,6 +30,7 @@ fn _main() -> Result<(), Error> {
     let options = Options::parse()?;
 
     let mut assembler = Assembler::new();
+
     assembler
         .enable_cspect(options.c_spect)
         .enable_z80n(options.z80n)
@@ -39,7 +40,8 @@ fn _main() -> Result<(), Error> {
         .add_defines(options.defines)
         .export_labels(&options.export_labels)
         .origin(options.origin)
-        .max_code_size(options.max_code_size as usize);
+        .max_code_size(options.max_code_size as usize)
+        .case_insensitive(options.case_insensitive_labels);
 
     let now = Instant::now();
     if options.verbose {

@@ -51,6 +51,7 @@ pub struct Options {
     pub origin: u16,
     pub max_code_size: isize,
     pub defines: Vec<String>,
+    pub case_insensitive_labels: bool,
 }
 
 impl Options {
@@ -86,9 +87,12 @@ impl Options {
                 .metavar("file")
                 .add_option(&["-I", "--include"], List, "Add a directory to search for include files");
 
+            parser.refer(&mut options.case_insensitive_labels)
+                .add_option(&["-i", "--case-insensitive"], StoreTrue, "Enable case insensitive labels & constants");
+
             parser.refer(&mut options.defines)
                 .metavar("constant")
-                .add_option(&["-D", "--define"], List, "Defines a constants");
+                .add_option(&["-D", "--define"], List, "Defines a constant");
 
             parser.refer(&mut options.export_labels)
                 .metavar("file")
