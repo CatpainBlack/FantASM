@@ -4,8 +4,8 @@
 STRUCT	Window
 	top.b
 	left.b
-	width.b
 	height.b
+	width.b
 	colour.b
 	title.w
 END

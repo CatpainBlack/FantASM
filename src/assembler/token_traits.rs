@@ -10,7 +10,7 @@ use crate::assembler::tokens::Token::{ConstLabel, Function, IndexIndirect, Indir
 use crate::assembler::zx_ascii::ZXAscii;
 
 lazy_static! {
-    static ref LABEL: Regex = Regex::new(r"^\.?\w*:?$").unwrap();
+    static ref LABEL: Regex = Regex::new(r"^\.?[\w.]*:?$").unwrap();
 }
 
 pub trait Tokens {
@@ -320,7 +320,7 @@ impl Tokens for Token {
 		}
 
 		// Label
-		if LABEL.is_match_at(&word, 0) {
+		if LABEL.is_match(&word) {
 			return Token::ConstLabel(word);
 		}
 
