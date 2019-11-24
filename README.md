@@ -40,6 +40,7 @@ and copy the binary somewhere in your path.
 
 1.1.7
 - [ ] Fix: Attempt to redefine label or constant when emitting structs without label
+- [ ] Add: .z/.s types to structures
 
 General
 - [ ] Improve the documentation
