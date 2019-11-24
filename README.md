@@ -38,6 +38,9 @@ and copy the binary somewhere in your path.
 
 ## To-Do
 
+1.1.7
+- [ ] Fix: Attempt to redefine label or constant when emitting structs without label
+
 General
 - [ ] Improve the documentation
 

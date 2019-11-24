@@ -13,5 +13,8 @@ END
 w_title:    dz  "WRD"
 
 w:  Window 1,2,3,4,5,w_title
+  Window 1,2,3,4,5,w_title
+  Window 1,2,3,4,5,w_title
+  Window 1,2,3,4,5,w_title
 
 
