@@ -18,6 +18,7 @@ It supports all undocumented op-codes and the extended instruction set of the ZX
   -v,--verbose          Enable verbose output
   -V,--version          Displays the version and exits
   -I,--include file     Add a directory to search for include files
+  -i,--case-insensitive Enable case insensitive labels
   -D,--define constant  Define 1 more constants
   -e,--export-labels file
                         Export labels to a file
@@ -155,6 +156,11 @@ start
 
 
 ### History
+
+1.1.6
+
+* Added: -i,--case-insensitive command line switch, appplies to labels and constants
+* Added: IFDEF/IF/ELSE/ENDIF can now be prefixed with # (TASM compatibility)
 
 1.1.5
 

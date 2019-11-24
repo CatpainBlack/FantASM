@@ -19,6 +19,7 @@ pub trait Label {
 impl Label for AssemblerContext {
     fn add_label(&mut self, name: String, global: bool) -> Result<(), Error> {
         let mut label_name = name.clone();
+
         if label_name.ends_with(":") {
             label_name = name.replace(":", "");
         }
@@ -26,6 +27,10 @@ impl Label for AssemblerContext {
             self.label_context = label_name.clone();
         } else {
             label_name = self.label_context.clone() + &label_name.clone();
+        }
+
+        if self.case_insensitive {
+            label_name = label_name.to_uppercase()
         }
 
         if self.is_label_defined(label_name.as_str()) {
@@ -40,16 +45,26 @@ impl Label for AssemblerContext {
 
     fn get_label(&mut self, name: &str) -> Option<isize> {
         let mut label_name = name.to_string();
+
         if label_name.starts_with(".") {
             label_name = self.label_context.clone() + &label_name.clone();
         }
+
+        if self.case_insensitive {
+            label_name = label_name.to_uppercase()
+        }
+
         self.labels.get(&label_name).cloned()
     }
 
     fn is_label_defined(&self, name: &str) -> bool {
         let mut label_name = name.to_string();
+
         if label_name.starts_with(".") {
             label_name = self.label_context.clone() + &label_name.clone();
+        }
+        if self.case_insensitive {
+            label_name = label_name.to_uppercase()
         }
         self.labels.contains_key(&label_name)
     }

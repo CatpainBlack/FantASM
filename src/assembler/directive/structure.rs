@@ -24,7 +24,6 @@ pub trait Structure {
 
 impl Structure for Assembler {
 	fn begin_process_struct(&mut self) -> Result<(), Error> {
-		println!("begin_process_struct");
 		if let ConstLabel(name) = self.take_token()? {
 			if self.is_struct(&name) {
 				return Err(self.context.error(ErrorType::StructExists));
@@ -38,7 +37,6 @@ impl Structure for Assembler {
 	}
 
 	fn end_process_struct(&mut self) -> Result<(), Error> {
-		println!("end_process_struct");
 		if self.collect_struct.is_some() {
 			let (n, o) = self.collect_struct.clone().unwrap();
 			self.context.add_size_of_struct(&n, o);
@@ -51,7 +49,6 @@ impl Structure for Assembler {
 	}
 
 	fn add_struct_member(&mut self, name: &str, member: &str, size: isize) -> Result<(), Error> {
-		println!("add_struct_member");
 		if let Some(s) = self.context.struct_defs.get_mut(name) {
 			s.insert(member.to_string(), size);
 		}
@@ -59,8 +56,6 @@ impl Structure for Assembler {
 	}
 
 	fn process_struct(&mut self) -> Result<(), Error> {
-		println!("process_struct: {:?}", self.tokens);
-
 		if self.next_token_is(&Token::Directive(EndStruct)) || self.next_token_is(&Token::Directive(End)) {
 			self.end_process_struct()
 		} else if let ConstLabel(member) = self.take_token()? {

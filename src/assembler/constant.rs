@@ -10,18 +10,30 @@ pub trait Constant {
 
 impl Constant for AssemblerContext {
     fn is_constant_defined(&self, name: &str) -> bool {
-        self.constants.contains_key(name)
+        if self.case_insensitive {
+            self.constants.contains_key(&name.to_uppercase())
+        } else {
+            self.constants.contains_key(name)
+        }
     }
 
     fn get_constant(&mut self, name: &str) -> Option<isize> {
-        self.constants.get(name).cloned()
+        if self.case_insensitive {
+            self.constants.get(&name.to_uppercase()).cloned()
+        } else {
+            self.constants.get(name).cloned()
+        }
     }
 
     fn add_constant(&mut self, name: String, value: isize) -> Result<(), Error> {
         if self.is_constant_defined(name.as_str()) {
             return Err(self.error(ErrorType::LabelOrConstantExists));
         }
-        self.constants.insert(name, value);
+        if self.case_insensitive {
+            self.constants.insert(name.to_uppercase(), value);
+        } else {
+            self.constants.insert(name, value);
+        }
         Ok(())
     }
 }

@@ -29,6 +29,7 @@ and copy the binary somewhere in your path.
   -v,--verbose          Enable verbose output
   -V,--version          Displays the version and exits
   -I,--include INCLUDE  Add a directory to search for include files
+  -i,--case-insensitive Enable case insensitive labels
   -D,--define DEFINE    Define 1 more constants
   -e,--export-labels    Export labels to a file
   -O,--origin ORIGIN    Address to start assembling code
