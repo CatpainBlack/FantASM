@@ -156,6 +156,8 @@ start
 
 
 ### History
+1.1.7
+* Added: Z80_INCLUDE environment variable is now parsed, use a colon separated list of directories to search for includes
 
 1.1.6
 
