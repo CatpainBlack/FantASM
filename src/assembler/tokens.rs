@@ -236,8 +236,16 @@ pub enum OpCode {
     Pixelad,
     Setae,
     Test,
+    Bsla,
+    Bsra,
+    Bsrl,
+    Bsrf,
+    Brlc,
 
-    // cspect
+
+
+
+// cspect
     Break,
     Exit,
 }

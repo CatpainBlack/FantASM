@@ -500,6 +500,11 @@ impl FromStr for OpCode {
 			"pixelad" => Ok(OpCode::Pixelad),
 			"setae" => Ok(OpCode::Setae),
 			"test" => Ok(OpCode::Test),
+			"bsla" => Ok(OpCode::Bsla),
+			"bsra" => Ok(OpCode::Bsra),
+			"bsrl" => Ok(OpCode::Bsrl),
+			"bsrf" => Ok(OpCode::Bsrf),
+			"brlc" => Ok(OpCode::Brlc),
 
 			// cspect
 			"break" => Ok(OpCode::Break),

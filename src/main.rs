@@ -48,10 +48,12 @@ fn _main() -> Result<(), Error> {
         white_ln!("Assembling: {}",options.source);
     }
 
+
     match assembler.assemble(options.source.as_str()) {
         Ok(_) => assembler.save_raw(&options.output)?,
         Err(e) => {
             red_ln!("[{} : {}] {}",e.file_name,e.line_no,e.message);
+            exit(1);
         }
     }
 

@@ -87,7 +87,12 @@ impl ToString for OpCode {
             OpCode::Setae => "setae",
             OpCode::Test => "test",
             OpCode::Break => "break",
-            OpCode::Exit => "exit"
+            OpCode::Exit => "exit",
+            OpCode::Bsla => "bsla",
+            OpCode::Bsra => "bsra",
+            OpCode::Bsrl => "bsrl",
+            OpCode::Bsrf => "bsrf",
+            OpCode::Brlc => "brlc"
         }.to_string()
     }
 }

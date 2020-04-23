@@ -156,6 +156,10 @@ start
 
 
 ### History
+1.1.8
+* Added: Extra Z80N 16-bit barrel shift opcodes (BSRL et al)
+* Fix: Non zero exit code if assembly failed with an error
+
 1.1.7
 * Added: Z80_INCLUDE environment variable is now parsed, use a colon separated list of directories to search for includes
 
