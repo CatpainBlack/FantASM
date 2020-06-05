@@ -54,10 +54,9 @@ impl std::convert::From<std::string::String> for Error {
 
 impl std::convert::From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
-        use std::error::Error;
         self::Error {
             line_no: -1,
-            message: e.description().to_string(),
+            message: e.to_string(),
             level: ErrorLevel::Fatal,
             file_name: "FantASM".to_string(),
         }

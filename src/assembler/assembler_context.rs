@@ -10,19 +10,19 @@ use crate::assembler::label::Label;
 
 #[derive(Default)]
 pub struct AssemblerContext {
-    pub(super)labels: HashMap<String, isize>,
-    pub(super)global_labels: Vec<String>,
-    pub(super)constants: HashMap<String, isize>,
-    pub(super)size_of: HashMap<String, isize>,
-    pub(super)struct_defs: HashMap<String, IndexMap<String, isize>>,
-    pub(super)forward_references: Vec<ForwardReference>,
-    pub(super)line_number: Vec<isize>,
-    pub(super)file_name: Vec<String>,
-    pub(super)current_pc: isize,
-    pub(super)label_context: String,
-    pub(super)asm_pc: isize,
-    pub(super)next_label_global: bool,
-    pub(super)case_insensitive: bool,
+    pub(super) labels: HashMap<String, isize>,
+    pub(super) global_labels: Vec<String>,
+    pub(super) constants: HashMap<String, isize>,
+    pub(super) size_of: HashMap<String, isize>,
+    pub(super) struct_defs: HashMap<String, IndexMap<String, isize>>,
+    pub(super) forward_references: Vec<ForwardReference>,
+    pub(super) line_number: Vec<isize>,
+    pub(super) file_name: Vec<String>,
+    pub(super) current_pc: isize,
+    pub(super) label_context: String,
+    pub(super) asm_pc: isize,
+    pub(super) next_label_global: bool,
+    pub(super) case_insensitive: bool,
 }
 
 impl AssemblerContext {

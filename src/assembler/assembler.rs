@@ -243,11 +243,11 @@ impl Assembler {
             OpCode::Srl => self.rot(Srl),
             OpCode::Sub => self.alu_op(AluOp::Sub),
             OpCode::Xor => self.alu_op(AluOp::Xor),
-            OpCode::Bsla=> self.emit(&[0xED,0x28]),
-            OpCode::Bsra=> self.emit(&[0xED,0x29]),
-            OpCode::Bsrl=> self.emit(&[0xED,0x2A]),
-            OpCode::Bsrf=> self.emit(&[0xED,0x2B]),
-            OpCode::Brlc=> self.emit(&[0xED,0x2C]),
+            OpCode::Bsla => self.emit(&[0xED, 0x28]),
+            OpCode::Bsra => self.emit(&[0xED, 0x29]),
+            OpCode::Bsrl => self.emit(&[0xED, 0x2A]),
+            OpCode::Bsrf => self.emit(&[0xED, 0x2B]),
+            OpCode::Brlc => self.emit(&[0xED, 0x2C]),
             _ => {
                 self.encode_z80n(&op)?;
                 self.encode_cspect(&op)?;
