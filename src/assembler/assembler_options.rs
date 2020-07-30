@@ -13,6 +13,7 @@ pub trait AssemblerOptions {
     fn origin(&mut self, address: u16) -> &mut Assembler;
     fn max_code_size(&mut self, size: usize) -> &mut Assembler;
     fn case_insensitive(&mut self, ci: bool) -> &mut Assembler;
+    fn display_unused(&mut self);
 }
 
 impl AssemblerOptions for Assembler {
@@ -69,5 +70,13 @@ impl AssemblerOptions for Assembler {
     fn case_insensitive(&mut self, ci: bool) -> &mut Assembler {
         self.context.case_insensitive = ci;
         self
+    }
+
+    fn display_unused(&mut self) {
+        for (name, used) in self.context.used.clone() {
+            if !used {
+                dark_magenta_ln!("Warning: unused label {}", name);
+            }
+        }
     }
 }

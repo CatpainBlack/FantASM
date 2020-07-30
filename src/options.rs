@@ -24,6 +24,7 @@ pub struct Options {
     pub max_code_size: isize,
     pub defines: Vec<String>,
     pub case_insensitive_labels: bool,
+    pub warnings: bool,
 }
 
 impl Options {
@@ -70,6 +71,11 @@ impl Options {
                 .metavar("file")
                 .add_option(&["-e", "--export-labels"], Store, "Export labels to a file");
 
+            parser.refer(&mut options.warnings)
+                .metavar("warnings")
+                .add_option(&["-W", "--enable-warnings"], StoreTrue, "Export labels to a file");
+
+
             parser.refer(&mut options.origin)
                 .metavar("address")
                 .add_option(&["-O", "--origin"], Store, "Address to start assembling code");
@@ -82,12 +88,12 @@ impl Options {
         }
 
         if options.version {
-            white_ln!("FantASM {}", version!());
+            println!("FantASM {}", version!());
             exit(0);
         }
 
         if !options.no_logo {
-            white_ln!("{}",description);
+            println!("{}",description);
         }
 
         if options.source.is_empty() {

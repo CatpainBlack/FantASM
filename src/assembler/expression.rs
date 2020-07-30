@@ -60,6 +60,7 @@ impl ExpressionParser {
                     if let Some(n) = context.get_constant(l) {
                         strings.push(format!("{}", n));
                     } else if let Some(n) = context.get_label(l) {
+                        context.mark_label_used(l);
                         strings.push(format!("{}", n));
                     } else {
                         return Err(ErrorType::BadConstant);

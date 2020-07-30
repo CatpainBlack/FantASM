@@ -17,5 +17,6 @@ w:  Window 1,2,3,4,5,w_title
 ;  Window 1,2,3,4,5,w_title
 ;  Window 1,2,3,4,5,w_title
 
+wibble	db	0
 
 ld  hl,w.top

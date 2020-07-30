@@ -11,6 +11,7 @@ use crate::assembler::label::Label;
 #[derive(Default)]
 pub struct AssemblerContext {
     pub(super) labels: HashMap<String, isize>,
+    pub(super) used: HashMap<String, bool>,
     pub(super) global_labels: Vec<String>,
     pub(super) constants: HashMap<String, isize>,
     pub(super) size_of: HashMap<String, isize>,
@@ -93,6 +94,7 @@ impl AssemblerContext {
 
     pub fn get_label_or_constant_value(&mut self, name: &str) -> Result<isize, Error> {
         if let Some(address) = self.get_label(name) {
+            self.mark_label_used(name);
             return Ok(address);
         }
         if let Some(&address) = self.constants.get(name) {

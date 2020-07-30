@@ -14,6 +14,7 @@ pub trait Label {
     fn get_label(&mut self, name: &str) -> Option<isize>;
     fn is_label_defined(&self, name: &str) -> bool;
     fn export_labels(&mut self, file_name: &str) -> Result<(), Error>;
+    fn mark_label_used(&mut self, name: &str);
 }
 
 impl Label for AssemblerContext {
@@ -40,6 +41,7 @@ impl Label for AssemblerContext {
         if global {
             self.global_labels.push(label_name.to_string());
         }
+        self.used.insert(label_name, false);
         Ok(())
     }
 
@@ -53,10 +55,14 @@ impl Label for AssemblerContext {
         if self.case_insensitive {
             label_name = label_name.to_uppercase()
         }
-
-        self.labels.get(&label_name).cloned()
+        match self.labels.get(&label_name).cloned() {
+            None => None,
+            Some(s) => {
+                self.mark_label_used(&label_name);
+                Some(s)
+            }
+        }
     }
-
     fn is_label_defined(&self, name: &str) -> bool {
         let mut label_name = name.to_string();
 
@@ -85,5 +91,11 @@ impl Label for AssemblerContext {
             }
         }
         Ok(())
+    }
+
+    fn mark_label_used(&mut self, name: &str) {
+        if self.used.contains_key(name) {
+            *self.used.get_mut(name).unwrap() = true;
+        }
     }
 }

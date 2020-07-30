@@ -45,7 +45,7 @@ fn _main() -> Result<(), Error> {
 
     let now = Instant::now();
     if options.verbose {
-        white_ln!("Assembling: {}",options.source);
+        println!("Assembling: {}",options.source);
     }
 
 
@@ -57,8 +57,12 @@ fn _main() -> Result<(), Error> {
         }
     }
 
+    if options.warnings {
+        assembler.display_unused();
+    }
+
     if options.verbose {
-        white_ln!("Assembly complete [{}s]", (now.elapsed().as_millis() as f64)/1000f64);
+        println!("Assembly complete [{}s]", (now.elapsed().as_millis() as f64)/1000f64);
     }
 
     Ok(())
