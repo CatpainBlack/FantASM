@@ -34,6 +34,7 @@ and copy the binary somewhere in your path.
   -e,--export-labels    Export labels to a file
   -O,--origin ORIGIN    Address to start assembling code
   -M,--max-code-size=   Limit the size of assembled code
+  -W,--enable-warnings  Enable warnings (unused labels)
 </pre>
 
 ## To-Do
