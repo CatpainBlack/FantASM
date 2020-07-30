@@ -73,7 +73,7 @@ impl Options {
 
             parser.refer(&mut options.warnings)
                 .metavar("warnings")
-                .add_option(&["-W", "--enable-warnings"], StoreTrue, "Export labels to a file");
+                .add_option(&["-W", "--enable-warnings"], StoreTrue, "Enable warnings (unused labels)");
 
 
             parser.refer(&mut options.origin)
