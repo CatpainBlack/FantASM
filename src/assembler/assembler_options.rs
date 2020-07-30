@@ -73,9 +73,9 @@ impl AssemblerOptions for Assembler {
     }
 
     fn display_unused(&mut self) {
-        for (name, used) in self.context.used.clone() {
+        for (name, (used, line, file)) in self.context.used.clone() {
             if !used {
-                dark_magenta_ln!("Warning: unused label {}", name);
+                dark_magenta_ln!("[{}:{}] Warning: unused label {} " ,file,line,name);
             }
         }
     }

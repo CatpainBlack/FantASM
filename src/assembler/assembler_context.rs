@@ -11,7 +11,7 @@ use crate::assembler::label::Label;
 #[derive(Default)]
 pub struct AssemblerContext {
     pub(super) labels: HashMap<String, isize>,
-    pub(super) used: HashMap<String, bool>,
+    pub(super) used: HashMap<String, (bool, isize, String)>,
     pub(super) global_labels: Vec<String>,
     pub(super) constants: HashMap<String, isize>,
     pub(super) size_of: HashMap<String, isize>,

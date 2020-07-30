@@ -41,7 +41,7 @@ impl Label for AssemblerContext {
         if global {
             self.global_labels.push(label_name.to_string());
         }
-        self.used.insert(label_name, false);
+        self.used.insert(label_name, (false, self.current_line_number(), self.current_file_name()));
         Ok(())
     }
 
@@ -95,7 +95,8 @@ impl Label for AssemblerContext {
 
     fn mark_label_used(&mut self, name: &str) {
         if self.used.contains_key(name) {
-            *self.used.get_mut(name).unwrap() = true;
+            let (_, line, file) = self.used.get(name).unwrap();
+            *self.used.get_mut(name).unwrap() = (true, *line, file.to_string());
         }
     }
 }

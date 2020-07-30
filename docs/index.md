@@ -156,6 +156,10 @@ start
 
 
 ### History
+1.1.10
+* Added -W --enable-warnings
+** Added "unused label" warning
+
 1.1.8
 * Added: Extra Z80N 16-bit barrel shift opcodes (BSRL et al)
 * Fix: Non zero exit code if assembly failed with an error
