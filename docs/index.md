@@ -156,6 +156,10 @@ start
 
 
 ### History
+
+1.1.11
+* Fixed a problem parsing strings containing apostrophes
+
 1.1.10
 * Added -W --enable-warnings
 ** Added "unused label" warning
