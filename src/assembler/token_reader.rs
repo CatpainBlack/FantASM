@@ -49,6 +49,7 @@ impl<R> TokenReader<R> where R: BufRead {
 
     fn split_line(&mut self, line: &String) {
         let mut in_quotes = false;
+        let mut quote_type = ' ';
         self.words = vec![];
 
         let mut pos = 0;
@@ -61,8 +62,9 @@ impl<R> TokenReader<R> where R: BufRead {
             pos += 1;
             if in_quotes {
                 self.token_string.push(c);
-                if (c == '\"' || c == '\'') && !self.token_string.ends_with("\\\"") {
+                if c == quote_type {
                     in_quotes = false;
+                    quote_type = ' ';
                     self.store_token_string();
                 }
                 continue;
@@ -74,6 +76,7 @@ impl<R> TokenReader<R> where R: BufRead {
                 // if we are at the start of a string literal
                 '\"' | '\'' => {
                     if !self.token_string.to_lowercase().ends_with("af") {
+                        quote_type = c;
                         in_quotes = true;
                         self.store_token_string();
                     }
