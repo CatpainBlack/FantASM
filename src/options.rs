@@ -29,7 +29,7 @@ pub struct Options {
 
 impl Options {
     pub fn parse() -> Result<Options, String> {
-        let description = format!("\nFantASM {} (Octarine) [{}]\n\u{000A9}2019 Captain Black\n", version!(), env!("BUILD_DATE"));
+        let description = format!("\nFantASM {} (Octarine) [{}]\n\u{000A9}2019-21 Captain Black\n", version!(), env!("BUILD_DATE"));
         let mut options = Options::default();
         {
             let mut parser = ArgumentParser::new();

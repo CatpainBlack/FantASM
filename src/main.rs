@@ -17,7 +17,7 @@ mod options;
 mod assembler;
 
 fn main() {
-    match _main() {
+    match run() {
         Ok(_) => exit(0),
         Err(e) => {
             red_ln!("Error - {}", e.message);
@@ -26,7 +26,7 @@ fn main() {
     }
 }
 
-fn _main() -> Result<(), Error> {
+fn run() -> Result<(), Error> {
     let options = Options::parse()?;
 
     let mut assembler = Assembler::new();

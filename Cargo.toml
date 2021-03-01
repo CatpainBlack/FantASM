@@ -1,8 +1,8 @@
 [package]
 build = "build.rs"
 name = "fantasm"
-version = "1.1.11"
-authors = ["Guy Black <captainblack@zx-spectrum.org.uk>"]
+version = "1.1.12"
+authors = ["Guy Black <captainblack@twistedraven.net>"]
 edition = "2018"
 
 [dependencies]

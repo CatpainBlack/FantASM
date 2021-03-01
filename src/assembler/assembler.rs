@@ -49,7 +49,7 @@ impl Assembler {
         }
     }
 
-    fn write_status(&self) {
+    fn output_warnings(&self) {
         if self.console_output {
             if self.num_warnings() > 0 {
                 cyan_ln!("Completed with {} warning(s)",self.num_warnings());
@@ -63,14 +63,14 @@ impl Assembler {
         if self.console_output { green_ln!("First pass .... "); }
 
         self.first_pass(file_name)?;
-        self.write_status();
+        self.output_warnings();
 
         self.warnings.clear();
 
         if self.console_output { green_ln!("Second pass ... "); }
 
         self.second_pass()?;
-        self.write_status();
+        self.output_warnings();
 
         self.context.export_labels(&self.labels_file)?;
 
@@ -367,24 +367,27 @@ impl Assembler {
                 match &tok {
                     Token::Directive(d) => self.process_directive(*d)?,
                     Token::OpCode(op) => self.handle_opcodes(op.clone())?,
-                    Token::ConstLabel(l) => {
-                        if self.is_struct(l) {
-                            self.emit_struct(l)?;
-                        } else if self.macros.macro_defined(l) {
-                            self.macros.begin_expand(&mut self.context, l, &mut self.tokens)?;
-                            while let Some(line) = self.macros.expand() {
-                                self.translate(&mut line.clone())?
-                            }
-                        } else {
-                            self.handle_label(l, self.context.next_label_global)?
-                        }
-                    }
+                    Token::ConstLabel(l) => self.process_label(l)?,
                     Token::Invalid => return Err(self.context.error(ErrorType::InvalidLabel)),
                     _ => {
                         return Err(self.context.error(ErrorType::SyntaxError));
                     }
                 }
             }
+        }
+        Ok(())
+    }
+
+    fn process_label(&mut self, l: &String) ->Result<(),Error>{
+        if self.is_struct(l) {
+            self.emit_struct(l)?;
+        } else if self.macros.macro_defined(l) {
+            self.macros.begin_expand(&mut self.context, l, &mut self.tokens)?;
+            while let Some(line) = self.macros.expand() {
+                self.translate(&mut line.clone())?
+            }
+        } else {
+            self.handle_label(l, self.context.next_label_global)?
         }
         Ok(())
     }
