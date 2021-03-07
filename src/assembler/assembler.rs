@@ -194,6 +194,7 @@ impl Assembler {
             OpCode::Djnz => self.jr(true),
             OpCode::Ei => self.emit_byte(0xFB),
             OpCode::Ex => self.ex(),
+            OpCode::Exa => self.emit_byte(0x08),
             OpCode::Exx => self.emit_byte(0xD9),
             OpCode::Halt => self.emit_byte(0x76),
             OpCode::Im => self.im(),
@@ -378,7 +379,7 @@ impl Assembler {
         Ok(())
     }
 
-    fn process_label(&mut self, l: &String) ->Result<(),Error>{
+    fn process_label(&mut self, l: &String) -> Result<(), Error> {
         if self.is_struct(l) {
             self.emit_struct(l)?;
         } else if self.macros.macro_defined(l) {

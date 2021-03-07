@@ -434,6 +434,7 @@ impl FromStr for OpCode {
             "djnz" => Ok(OpCode::Djnz),
             "ei" => Ok(OpCode::Ei),
             "ex" => Ok(OpCode::Ex),
+            "exa" => Ok(OpCode::Exa),
             "exx" => Ok(OpCode::Exx),
             "halt" => Ok(OpCode::Halt),
             "im" => Ok(OpCode::Im),

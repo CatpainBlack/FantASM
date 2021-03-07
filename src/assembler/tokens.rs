@@ -170,6 +170,7 @@ pub enum OpCode {
     Djnz,
     Ei,
     Ex,
+    Exa,
     Exx,
     Halt,
     Im,

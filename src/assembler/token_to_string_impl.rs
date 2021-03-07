@@ -22,6 +22,7 @@ impl ToString for OpCode {
             OpCode::Djnz => "djnz",
             OpCode::Ei => "ei",
             OpCode::Ex => "ex",
+            OpCode::Exa => "exa",
             OpCode::Exx => "exx",
             OpCode::Halt => "halt",
             OpCode::Im => "im",
