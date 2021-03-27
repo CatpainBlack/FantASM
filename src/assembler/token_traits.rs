@@ -73,6 +73,11 @@ impl FromStr for Cnd {
             "pe" => Ok(Cnd::PE),
             "p" => Ok(Cnd::P),
             "m" => Ok(Cnd::M),
+            // Pseudo-conditions, I can never remember which is which.
+            "gt" => Ok(Cnd::C),
+            "lte" => Ok(Cnd::NC),
+            "eq" => Ok(Cnd::Z),
+            "ne" => Ok(Cnd::Nz),
             _ => Err(())
         }
     }
